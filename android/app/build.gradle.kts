@@ -45,7 +45,7 @@ android {
         }
         release {
             // Production MSIGN deployment. Rebuild after changing.
-            buildConfigField("String", "BASE_URL", "\"https://msign.vercel.app\"")
+            buildConfigField("String", "BASE_URL", "\"https://msign-iota.vercel.app\"")
             isMinifyEnabled = false
             signingConfig = signingConfigs.getByName("release")
         }

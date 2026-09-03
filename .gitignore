@@ -49,3 +49,6 @@ android/local.properties
 android/*.jks
 android/keystore.properties
 dist/
+
+.vercel
+.env*
