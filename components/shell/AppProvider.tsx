@@ -30,7 +30,7 @@ export function AppProvider({ value, children }: { value: AppBootstrap; children
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+      <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <TooltipProvider>
           <AppContext.Provider value={contextValue}>
             <RealtimeBridge>{children}</RealtimeBridge>

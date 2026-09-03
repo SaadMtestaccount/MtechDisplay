@@ -1,13 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Beacon: ink tile, a signal-orange beacon radiating from a fixed point. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
     <path
-        android:fillColor="#6109b6"
+        android:fillColor="#161618"
         android:pathData="M14,4 h80 a10,10 0 0 1 10,10 v80 a10,10 0 0 1 -10,10 h-80 a10,10 0 0 1 -10,-10 v-80 a10,10 0 0 1 10,-10 z" />
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M24,80 L24,28 L38,28 L54,56 L70,28 L84,28 L84,80 L71,80 L71,50 L57,74 L51,74 L37,50 L37,80 Z" />
+        android:strokeColor="#F0411C"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:pathData="M36,60 A18,18 0 0 1 54,78" />
+    <path
+        android:strokeColor="#F0411C"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:pathData="M36,46 A32,32 0 0 1 68,78" />
+    <path
+        android:strokeColor="#F0411C"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:pathData="M36,32 A46,46 0 0 1 82,78" />
+    <path
+        android:fillColor="#F0411C"
+        android:pathData="M36,78 m-6,0 a6,6 0 1 0 12,0 a6,6 0 1 0 -12,0" />
 </vector>

@@ -26,8 +26,8 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-background/85 font-medium text-foreground backdrop-blur-sm',
-        size === 'sm' ? 'h-5 px-2 text-[11px]' : 'h-6 px-2.5 text-xs',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card/85 font-mono font-medium uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm',
+        size === 'sm' ? 'h-5 px-2 text-[10px]' : 'h-6 px-2.5 text-[11px]',
         className,
       )}
     >

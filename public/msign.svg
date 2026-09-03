@@ -1,13 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" role="img" aria-label="MSIGN">
-  <rect x="0" y="0" width="128" height="32" rx="8" fill="#6109b6"/>
-  <rect x="0" y="0" width="128" height="32" rx="8" fill="url(#msign-sheen)"/>
-  <defs>
-    <linearGradient id="msign-sheen" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.14"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
-    </linearGradient>
-  </defs>
-  <text x="64" y="21.5" text-anchor="middle" fill="#ffffff"
-    font-family="Inter, 'Segoe UI', system-ui, -apple-system, sans-serif"
-    font-size="16" font-weight="600" letter-spacing="3">MSIGN</text>
+  <rect x="0" y="0" width="128" height="32" rx="5" fill="#f0411c"/>
+  <g stroke="#ffffff" stroke-width="2.1" stroke-linecap="round" fill="none">
+    <path d="M13 17 A7 7 0 0 1 20 24"/>
+    <path d="M13 12 A12 12 0 0 1 25 24"/>
+  </g>
+  <circle cx="13" cy="24" r="2.6" fill="#ffffff"/>
+  <text x="35" y="21.5" fill="#ffffff"
+    font-family="Archivo, 'Segoe UI', system-ui, -apple-system, sans-serif"
+    font-size="15" font-weight="800" letter-spacing="1.5">MSIGN</text>
 </svg>

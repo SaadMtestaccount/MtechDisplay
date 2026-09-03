@@ -8,7 +8,7 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --font-mono: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
   --font-heading: var(--font-sans);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
@@ -39,9 +39,9 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-online: #22c55e;
-  --color-offline: #ef4444;
-  --color-warning: #f59e0b;
+  --color-online: #15803d;
+  --color-offline: #d0361b;
+  --color-warning: #c77a0a;
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -51,73 +51,78 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ============================================================
+   BEACON — a broadcast operator's console.
+   Paper grounds, ink type, one signal-orange accent, sharp corners.
+   Light is the default; a Beacon-dark variant powers the theme toggle.
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #09090b;
+  --background: #efede6;
+  --foreground: #18181b;
   --card: #ffffff;
-  --card-foreground: #09090b;
+  --card-foreground: #18181b;
   --popover: #ffffff;
-  --popover-foreground: #09090b;
-  --primary: #6109b6;
+  --popover-foreground: #18181b;
+  --primary: #f0411c;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #09090b;
-  --muted: #f4f4f5;
-  --muted-foreground: #71717a;
-  --accent: #f4f4f5;
-  --accent-foreground: #09090b;
-  --destructive: #dc2626;
-  --border: #e4e4e7;
-  --input: #e4e4e7;
-  --ring: #6109b6;
-  --chart-1: #6109b6;
-  --chart-2: #22c55e;
-  --chart-3: #f59e0b;
-  --chart-4: #71717a;
-  --chart-5: #a1a1aa;
-  --radius: 0.625rem;
-  --sidebar: #fafafa;
-  --sidebar-foreground: #09090b;
-  --sidebar-primary: #6109b6;
+  --secondary: #f1efe8;
+  --secondary-foreground: #18181b;
+  --muted: #f1efe8;
+  --muted-foreground: #6c6c74;
+  --accent: #eae7de;
+  --accent-foreground: #18181b;
+  --destructive: #d0361b;
+  --border: #e1dfd6;
+  --input: #e1dfd6;
+  --ring: #f0411c;
+  --chart-1: #f0411c;
+  --chart-2: #15803d;
+  --chart-3: #c77a0a;
+  --chart-4: #6c6c74;
+  --chart-5: #a6a29a;
+  --radius: 0.4rem;
+  --sidebar: #f6f4ee;
+  --sidebar-foreground: #18181b;
+  --sidebar-primary: #f0411c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #f4f4f5;
-  --sidebar-accent-foreground: #09090b;
-  --sidebar-border: #e4e4e7;
-  --sidebar-ring: #6109b6;
+  --sidebar-accent: #eae7de;
+  --sidebar-accent-foreground: #18181b;
+  --sidebar-border: #e1dfd6;
+  --sidebar-ring: #f0411c;
 }
 
 .dark {
-  --background: #0f0f10;
-  --foreground: #f4f4f5;
-  --card: #1a1a1c;
-  --card-foreground: #f4f4f5;
-  --popover: #1a1a1c;
-  --popover-foreground: #f4f4f5;
-  --primary: #6109b6;
+  --background: #141416;
+  --foreground: #f3f1ec;
+  --card: #1c1c1f;
+  --card-foreground: #f3f1ec;
+  --popover: #1c1c1f;
+  --popover-foreground: #f3f1ec;
+  --primary: #f0411c;
   --primary-foreground: #ffffff;
-  --secondary: #232327;
-  --secondary-foreground: #f4f4f5;
-  --muted: #1f1f23;
-  --muted-foreground: #a1a1aa;
-  --accent: #232327;
-  --accent-foreground: #f4f4f5;
-  --destructive: #ef4444;
-  --border: #2a2a2e;
-  --input: #2a2a2e;
-  --ring: #6109b6;
-  --chart-1: #8b3fd9;
-  --chart-2: #22c55e;
-  --chart-3: #f59e0b;
-  --chart-4: #a1a1aa;
-  --chart-5: #71717a;
-  --sidebar: #1a1a1c;
-  --sidebar-foreground: #f4f4f5;
-  --sidebar-primary: #6109b6;
+  --secondary: #26262a;
+  --secondary-foreground: #f3f1ec;
+  --muted: #222226;
+  --muted-foreground: #a2a09a;
+  --accent: #26262a;
+  --accent-foreground: #f3f1ec;
+  --destructive: #f0553a;
+  --border: #2c2c31;
+  --input: #2c2c31;
+  --ring: #f0411c;
+  --chart-1: #f0411c;
+  --chart-2: #34d399;
+  --chart-3: #e0a13a;
+  --chart-4: #a2a09a;
+  --chart-5: #6c6c74;
+  --sidebar: #1c1c1f;
+  --sidebar-foreground: #f3f1ec;
+  --sidebar-primary: #f0411c;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #232327;
-  --sidebar-accent-foreground: #f4f4f5;
-  --sidebar-border: #2a2a2e;
-  --sidebar-ring: #6109b6;
+  --sidebar-accent: #26262a;
+  --sidebar-accent-foreground: #f3f1ec;
+  --sidebar-border: #2c2c31;
+  --sidebar-ring: #f0411c;
 }
 
 @layer base {
@@ -130,15 +135,28 @@
   html {
     @apply font-sans;
   }
-  /* §2.4: headings are semibold, tight-tracked and tight-leaded everywhere. */
+  /* Beacon: headings are heavy Archivo, tight-tracked and tight-leaded. */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.04;
+  }
+}
+
+@layer components {
+  /* Beacon micro-label: the uppercase monospaced eyebrow used on headers,
+     status chips and data captions. Signals "operator console". */
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--muted-foreground);
   }
 }

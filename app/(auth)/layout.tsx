@@ -5,7 +5,7 @@ import { Toaster } from '@/components/ui/sonner'
 /** Auth pages: theme + toasts only — no navbar, no app providers (docs/CONTRACTS.md Appendix B). */
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       {children}
       <Toaster />
     </ThemeProvider>

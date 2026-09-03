@@ -45,8 +45,11 @@ export function LoginForm() {
 
   return (
     <main className="flex min-h-screen items-center justify-center px-6 py-12">
-      <div className="flex w-full max-w-sm flex-col items-center gap-6">
-        <img src="/msign.svg" alt="MSIGN" className="h-8 w-auto" />
+      <div className="flex w-full max-w-sm flex-col items-center gap-5">
+        <div className="flex flex-col items-center gap-3">
+          <img src="/msign.svg" alt="MSIGN" className="h-8 w-auto" />
+          <p className="eyebrow">Signage Console</p>
+        </div>
         <Card className="w-full">
           <CardHeader>
             <CardTitle>Sign in</CardTitle>
