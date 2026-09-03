@@ -9,6 +9,7 @@ import type {
   Manifest,
   PairingCodeResponse,
   PairingStatusResponse,
+  PlayerDeviceState,
 } from '@/types/api'
 
 const REQUEST_TIMEOUT_MS = 20_000
@@ -80,6 +81,11 @@ export function requestPairingCode(fingerprint: string): Promise<PairingCodeResp
 export function pollPairingStatus(code: string, fingerprint: string): Promise<PairingStatusResponse> {
   const query = `?fingerprint=${encodeURIComponent(fingerprint)}`
   return deviceFetch<PairingStatusResponse>(`/api/device/pairing-status/${encodeURIComponent(code)}${query}`)
+}
+
+/** Merchant flow: session-cookie authed; mints this device's token (returned once). */
+export function selfClaim(fingerprint: string): Promise<PlayerDeviceState> {
+  return deviceFetch<PlayerDeviceState>('/api/device/self-claim', { method: 'POST', json: { fingerprint } })
 }
 
 export function fetchManifest(token: string): Promise<Manifest> {

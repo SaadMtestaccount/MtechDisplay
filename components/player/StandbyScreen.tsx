@@ -3,10 +3,19 @@
 /**
  * components/player/StandbyScreen.tsx — org logo (or name) + clock, shown when the
  * active list is empty or nothing is playable (docs/CONTRACTS.md §9.7, §10).
+ * `noContent` (manifest has zero items) adds the contact-MTech line (addendum §13).
  */
 import { useNow } from '@/hooks/useNow'
 
-export function StandbyScreen({ orgName, logoUrl }: { orgName: string; logoUrl: string | null }) {
+export function StandbyScreen({
+  orgName,
+  logoUrl,
+  noContent = false,
+}: {
+  orgName: string
+  logoUrl: string | null
+  noContent?: boolean
+}) {
   const now = useNow(1000)
   const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
   const date = now.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })
@@ -22,6 +31,11 @@ export function StandbyScreen({ orgName, logoUrl }: { orgName: string; logoUrl: 
         <div className="text-8xl font-semibold leading-[1.05] tracking-[-0.02em] tabular-nums">{time}</div>
         <div className="mt-3 text-2xl text-white/50">{date}</div>
       </div>
+      {noContent ? (
+        <div className="max-w-3xl px-10 text-center text-2xl leading-relaxed text-white/70">
+          Please contact MTech with photos and videos of the digital menu.
+        </div>
+      ) : null}
     </div>
   )
 }

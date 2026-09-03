@@ -1184,3 +1184,43 @@ return <AppProvider value={{ user: { id: session.user.id, email: session.user.em
 `app/(auth)/layout.tsx` mounts `ThemeProvider` (same props) + `Toaster` only; `app/(auth)/login/page.tsx` = `<Suspense fallback={null}><LoginForm /></Suspense>`
 (§9.1 — `useSearchParams()` on a static page needs the boundary or `next build` fails). `app/layout.tsx`: `<html lang="en" suppressHydrationWarning className={inter.variable}>`,
 `<body className="min-h-screen bg-background text-foreground antialiased">`.
+
+---
+
+## 13. Addendum — Merchant TV accounts + self-claim (added 2026-09-03, additive)
+
+Merchants get an MTech-issued email/password that works ONLY on the TV player; the admin shell stays staff-only
+(`(admin)/layout.tsx` adds `if (!session.profile.is_super_admin) redirect('/player')` after the Appendix B session check).
+
+- **Schema (`0007_merchant.sql`)**: `screens.fingerprint text` (null for admin-claimed screens) + partial index
+  `(org_id, fingerprint) where fingerprint is not null`. Re-claiming with the same fingerprint reuses the screen row
+  (token rotates; the old token starts answering 401).
+- **`lib/merchants.ts`** (service role): `listMerchants(admin): MerchantView[]` (non-super-admin users holding a membership,
+  joined with their org name), `createMerchant(admin, {email, password, org_id}): MerchantView`
+  (`auth.admin.createUser({email, password, email_confirm: true})`, `email_exists`→409, membership upsert role `'member'`
+  on conflict `org_id,user_id`, rollback deletes the auth user). Deletion reuses `removeUser` via `DELETE /api/users/[id]`.
+- **`lib/validators/merchants.ts`**: `createMerchantSchema = { email: emailSchema, password: z.string().min(8).max(72), org_id: uuidSchema }`.
+- **`lib/screens/self-claim.ts`**: `selfClaimScreen(admin, userId, fingerprint): Promise<PlayerDeviceState>` — first membership
+  org by `created_at` (none → 403 "No organization assigned…"); fingerprint match → rotate `device_token_hash` + `paired_at`;
+  else create playlist (kind `'screen'`) + screen named `"{org.name} TV {n}"` (n = org screen count + 1) with
+  `fingerprint`/`paired_at` set, seed `playlist_items` from the org's non-expired content (oldest first, `item_type 'content'`,
+  null duration → defaults), `touchPlaylist` when ≥1 item seeded, `logEvent screen_paired {self_claimed: true, seeded_items}`,
+  `notifyOrgChanged('screens')`. Raw token returned exactly once (§0.13 rule).
+- **Routes**: `POST /api/device/self-claim` `{fingerprint}` → 201 `PlayerDeviceState` — public middleware prefix, enforces its
+  own `requireUser()` (session cookie). `GET /api/merchants` → `MerchantView[]`, `POST /api/merchants` → 201 `MerchantView`
+  (both `requireSuperAdmin()` + `createAdminClient()`).
+- **Types**: `types/api.ts` gains `MerchantView = { id, email, org_id, org_name, last_sign_in_at, created_at }`;
+  `ScreenRow`/`types/db.ts` screens Insert/Update gain `fingerprint`.
+- **Player**: `lib/player/device-api.ts` gains `selfClaim(fingerprint): Promise<PlayerDeviceState>`. `PairingScreen` props gain
+  `fingerprint: string | null` and `onClaimed(state: PlayerDeviceState)` plus a mode toggle ("Merchant? Sign in with email
+  instead") to `components/player/MerchantLogin.tsx` (`{ fingerprint, onClaimed, onBack }`: `signInWithPassword` →
+  `selfClaim` → `auth.signOut()` → `onClaimed`; shows "Continue as {email}" when a session already exists). `PlayerApp`'s
+  claim handler removes `msign.pending` before `save`. `StandbyScreen` gains `noContent?: boolean` and renders
+  **"Please contact MTech with photos and videos of the digital menu."**; `PlaybackEngine` passes
+  `noContent = manifest.items.length === 0` (standby with items merely unplayable right now keeps the plain logo/clock).
+- **Admin UI**: `/admin/users` renders `MerchantsSection` (list + remove via `DELETE /api/users/[id]` + `MerchantDialog`:
+  email, generated-or-typed password, org `Select` from `GET /api/orgs`). `queryKeys.merchants = { all: () => ['merchants'], list: () => ['merchants', 'list'] }`.
+- **Android shell (`android/`, not part of the Next build)**: kiosk WebView APK `com.mtech.msign` loading
+  `BuildConfig.BASE_URL + '/player'`; debug BASE_URL `http://10.0.2.2:3000` (cleartext allowed in the debug manifest only),
+  release BASE_URL = the production deployment. Fullscreen immersive, keep-screen-on, `mediaPlaybackRequiresUserGesture = false`,
+  back button consumed, boot receiver + LEANBACK_LAUNCHER. Signing: `android/msign-release.jks` via `android/keystore.properties`.

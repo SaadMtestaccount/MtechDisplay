@@ -10,6 +10,27 @@ Wherever this guide says `{APP_URL}`, use your deployment's public URL (the
 **Before you start:** the TV needs internet (Wi-Fi or Ethernet), and you need an MSIGN admin
 login on a computer or phone.
 
+## MSIGN TV app (APK) — the merchant path
+
+The easiest route for merchants: sideload the MSIGN APK (built from `android/`, see
+`android/README.md`) onto any Android TV, box, or stick — either send the file to the
+merchant or preload it on a stick you ship them.
+
+1. **Install the APK** (file manager → allow "Install unknown apps" → open the APK → Install).
+2. **Create the merchant's login** in MSIGN: **Admin → Users → Merchant accounts → Add
+   merchant** — type their email, keep or edit the generated password, pick their
+   organization, and hand them both.
+3. **The merchant opens MSIGN on the TV** and picks **"Merchant? Sign in with email
+   instead"**, then enters those credentials. The TV registers itself as a screen in their
+   organization (visible under **Screens** immediately) and starts playing.
+4. If the organization has no content yet, the TV shows *"Please contact MTech with photos
+   and videos of the digital menu."* — upload content and add it to the screen's playlist and
+   the TV updates live.
+
+The app keeps the screen awake, autoplays with sound, survives reboots (launch on boot where
+the device allows it), and needs no browser setup. The pairing-code flow below still works in
+the app too — the merchant login is just faster when MTech isn't on site.
+
 ## Amazon Fire TV Stick
 
 1. **Install the Silk Browser.** From the Fire TV home screen, search for "Silk"

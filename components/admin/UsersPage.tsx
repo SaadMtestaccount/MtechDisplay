@@ -5,6 +5,7 @@ import { UserPlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { InviteUserDialog } from '@/components/admin/InviteUserDialog'
+import { MerchantsSection } from '@/components/admin/MerchantsSection'
 import { UsersTable } from '@/components/admin/UsersTable'
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog'
 import { PageHeader } from '@/components/shell/PageHeader'
@@ -62,6 +63,8 @@ export function UsersPage() {
       ) : (
         <UsersTable users={usersQuery.data} currentUserId={user.id} onRemove={setRemoveTarget} />
       )}
+
+      <MerchantsSection />
 
       <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
 

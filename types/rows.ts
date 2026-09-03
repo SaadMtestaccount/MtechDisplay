@@ -130,6 +130,8 @@ export type ScreenRow = {
   playlist_id: string | null
   group_id: string | null
   device_token_hash: string | null
+  /** Device fingerprint that self-claimed this screen (0007); null for admin-claimed screens. */
+  fingerprint: string | null
   rotation: number
   last_seen_at: string | null
   last_ip: string | null

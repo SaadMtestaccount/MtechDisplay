@@ -176,6 +176,16 @@ export type UserView = {
   is_super_admin: boolean
 }
 
+/** Merchant TV account (non-staff user with an org membership). */
+export type MerchantView = {
+  id: string
+  email: string
+  org_id: string
+  org_name: string
+  last_sign_in_at: string | null
+  created_at: string
+}
+
 export type UsageRef = { id: string; name: string }
 export type UsageResponse = { screens: UsageRef[]; groups: UsageRef[] }
 

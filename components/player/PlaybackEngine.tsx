@@ -234,7 +234,13 @@ export function PlaybackEngine({
 
   return (
     <div className="absolute inset-0 overflow-hidden bg-black">
-      {standby ? <StandbyScreen orgName={manifest.org.name} logoUrl={manifest.org.logo_url} /> : null}
+      {standby ? (
+        <StandbyScreen
+          orgName={manifest.org.name}
+          logoUrl={manifest.org.logo_url}
+          noContent={manifest.items.length === 0}
+        />
+      ) : null}
       {layers.map((layer, idx) => {
         const item = layer.item
         const isActive = idx === activeIdx && !standby

@@ -10,6 +10,8 @@ import { getActiveOrg, listVisibleOrgs } from '@/lib/orgs'
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getSessionUser()
   if (!session) redirect('/login')
+  // Merchant accounts are TV-only (addendum §13): the admin shell is staff-only.
+  if (!session.profile.is_super_admin) redirect('/player')
 
   const orgs = await listVisibleOrgs(session.supabase)
   const org = await getActiveOrg(session.supabase)

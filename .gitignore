@@ -39,3 +39,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# android (TV APK)
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+# signing secrets — keep these files, never commit them
+android/*.jks
+android/keystore.properties
+dist/

@@ -146,6 +146,15 @@ export function PlayerApp() {
     currentItemRef.current = itemId
   }, [])
 
+  /** Merchant self-claim: drop any pending pairing code before adopting the device. */
+  const handleClaimed = useCallback(
+    (state: Parameters<typeof save>[0]) => {
+      remove(PENDING_KEY)
+      save(state)
+    },
+    [save],
+  )
+
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')
 
@@ -153,7 +162,14 @@ export function PlayerApp() {
     <PlayerErrorBoundary>
       <RotationRoot rotation={manifest?.screen.rotation ?? 0}>
         {!hydrated ? null : device === null ? (
-          <PairingScreen code={pairing.code} expiresAt={pairing.expiresAt} appUrl={appUrl} error={pairing.error} />
+          <PairingScreen
+            code={pairing.code}
+            expiresAt={pairing.expiresAt}
+            appUrl={appUrl}
+            error={pairing.error}
+            fingerprint={fingerprint}
+            onClaimed={handleClaimed}
+          />
         ) : manifest !== null ? (
           <>
             <PlaybackEngine
