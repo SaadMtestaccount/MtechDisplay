@@ -23,7 +23,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   if (isPublicPath(pathname)) {
     if (user && pathname === '/login') {
-      return withCookies(response, NextResponse.redirect(new URL('/screens', request.url)))
+      return withCookies(response, NextResponse.redirect(new URL('/tvs', request.url)))
     }
     return response
   }
@@ -41,7 +41,7 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
   }
 
   if (pathname === '/') {
-    return withCookies(response, NextResponse.redirect(new URL('/screens', request.url)))
+    return withCookies(response, NextResponse.redirect(new URL('/tvs', request.url)))
   }
 
   return response

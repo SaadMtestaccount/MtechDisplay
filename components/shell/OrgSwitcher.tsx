@@ -47,7 +47,7 @@ export function OrgSwitcher() {
           <ChevronsUpDownIcon className="size-3 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>Organizations</DropdownMenuLabel>
+          <DropdownMenuLabel>View store</DropdownMenuLabel>
           {orgs.map((o) => (
             <DropdownMenuItem key={o.id} onClick={() => void handleSelect(o.id)}>
               <span className="truncate">{o.name}</span>

@@ -88,6 +88,11 @@ export function selfClaim(fingerprint: string): Promise<PlayerDeviceState> {
   return deviceFetch<PlayerDeviceState>('/api/device/self-claim', { method: 'POST', json: { fingerprint } })
 }
 
+/** Enroll this TV into a screen by its login code (docs/CONTRACTS.md §15). */
+export function enroll(code: string, fingerprint: string): Promise<PlayerDeviceState> {
+  return deviceFetch<PlayerDeviceState>('/api/device/enroll', { method: 'POST', json: { code, fingerprint } })
+}
+
 export function fetchManifest(token: string): Promise<Manifest> {
   return deviceFetch<Manifest>('/api/device/manifest', { token })
 }

@@ -31,7 +31,7 @@ export function DeleteScreenDialog({
     onSuccess: (_ok, id) => {
       toast.success('Screen deleted')
       onOpenChange(false)
-      if (pathname === `/screens/${id}`) router.push('/screens')
+      if (pathname === `/screens/${id}`) router.push('/tvs')
       if (org) {
         queryClient.removeQueries({ queryKey: queryKeys.screens.detail(org.id, id) })
         void queryClient.invalidateQueries({ queryKey: queryKeys.screens.all(org.id) })

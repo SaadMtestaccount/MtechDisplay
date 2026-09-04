@@ -8,6 +8,6 @@ import { getSessionUser } from '@/lib/auth'
  */
 export default async function AdminStaffLayout({ children }: { children: ReactNode }) {
   const session = await getSessionUser()
-  if (!session?.profile.is_super_admin) redirect('/wall')
+  if (!session?.profile.is_super_admin) redirect('/tvs')
   return <>{children}</>
 }

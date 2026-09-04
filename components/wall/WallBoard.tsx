@@ -16,13 +16,17 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { PlusIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { EmptyState } from '@/components/shell/EmptyState'
 import { NoOrgState } from '@/components/shell/NoOrgState'
 import { PageHeader } from '@/components/shell/PageHeader'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { AddTvDialog } from '@/components/wall/AddTvDialog'
+import { ScreenCodeDialog } from '@/components/wall/ScreenCodeDialog'
 import { WallTile } from '@/components/wall/WallTile'
 import { WallTray } from '@/components/wall/WallTray'
 import { assignBodyFor, screenIdFromDrop, type WallPick } from '@/components/wall/wall-dnd'
@@ -42,6 +46,8 @@ export function WallBoard() {
   const { statuses } = useRealtimeScreens()
   const now = useNow(5000)
   const [drag, setDrag] = useState<WallPick | null>(null)
+  const [addOpen, setAddOpen] = useState(false)
+  const [codeTarget, setCodeTarget] = useState<ScreenView | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   const screensQuery = useQuery({
@@ -90,8 +96,13 @@ export function WallBoard() {
   return (
     <>
       <PageHeader
-        title="Wall"
-        description="Drag a menu, board or web page onto a TV to show it. It locks on — unlock the TV to change it."
+        title="TVs"
+        description="Every TV in your store. Drag a menu, image or web page onto one to show it — it locks on. Add a TV to get a code you type on the screen."
+        primary={
+          <Button size="sm" onClick={() => setAddOpen(true)}>
+            <PlusIcon /> Add TV
+          </Button>
+        }
       />
       <DndContext
         sensors={sensors}
@@ -114,7 +125,16 @@ export function WallBoard() {
             ) : screensQuery.isError ? (
               <p className="text-sm text-destructive">Could not load screens.</p>
             ) : screens.length === 0 ? (
-              <EmptyState title="No screens yet" description="Pair a TV, then drag a menu onto it here." />
+              <EmptyState
+                icon={<PlusIcon />}
+                title="No TVs yet"
+                description="Add a TV to get a code, type it on the screen, then drag a menu onto it here."
+                action={
+                  <Button size="sm" onClick={() => setAddOpen(true)}>
+                    <PlusIcon /> Add TV
+                  </Button>
+                }
+              />
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 {screens.map((s) => (
@@ -122,6 +142,7 @@ export function WallBoard() {
                     key={s.id}
                     screen={s}
                     onOpen={() => router.push(`/screens/${s.id}`)}
+                    onShowCode={() => setCodeTarget(s)}
                     onToggleLock={() => lock.mutate({ screenId: s.id, locked: !s.locked })}
                     onClear={() => assign.mutate({ screenId: s.id, body: { kind: 'clear' } })}
                   />
@@ -138,6 +159,14 @@ export function WallBoard() {
           ) : null}
         </DragOverlay>
       </DndContext>
+
+      <AddTvDialog open={addOpen} onOpenChange={setAddOpen} onCreated={(s) => setCodeTarget(s)} />
+      <ScreenCodeDialog
+        screen={codeTarget}
+        onOpenChange={(open) => {
+          if (!open) setCodeTarget(null)
+        }}
+      />
     </>
   )
 }

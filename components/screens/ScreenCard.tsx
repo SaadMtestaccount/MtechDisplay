@@ -71,10 +71,10 @@ export function ScreenCard({
       className="group flex cursor-pointer flex-col gap-2 rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
     >
       <TvFrame
-        thumbUrl={screen.current_item?.thumb_url ?? null}
+        thumbUrl={screen.current_item?.thumb_url ?? screen.preview_thumb_url}
         status={status}
         rotation={screen.rotation}
-        websiteUrl={screen.current_item?.website_url ?? null}
+        websiteUrl={screen.current_item?.website_url ?? screen.preview_website_url}
       />
       <div className="flex items-start justify-between gap-2 px-1">
         <div className="min-w-0">

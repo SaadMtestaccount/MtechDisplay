@@ -6,6 +6,7 @@ import type { OrgContext } from '@/lib/auth'
 import { broadcastToScreens, notifyOrgChanged } from '@/lib/broadcast'
 import { logEvent } from '@/lib/events'
 import { createPlaylist, deletePlaylist } from '@/lib/playlists'
+import { generateLoginCode } from '@/lib/screens/codes'
 import { getScreenView } from '@/lib/screens/views'
 import type { ClaimScreenInput, ScreenUpdateInput } from '@/lib/validators/screens'
 import { PAIRING_CODE_TTL_MS, type ScreenAction, type ScreenView } from '@/types/api'
@@ -48,6 +49,42 @@ export async function createScreenWithPlaylist(
     throw error
   }
   return data
+}
+
+/** Create a bare TV (unpaired) with a unique login code + its own playlist (docs/CONTRACTS.md §15). */
+export async function createScreen(ctx: OrgContext, name: string): Promise<ScreenView> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    try {
+      const screen = await createScreenWithPlaylist(ctx, name, { login_code: generateLoginCode() })
+      await notifyOrgChanged(ctx.org.id, 'screens', screen.id)
+      return getScreenView(ctx.supabase, ctx.org.id, screen.id)
+    } catch (e) {
+      if (isPgError(e) && e.code === '23505') continue // login_code collision, retry
+      throw e
+    }
+  }
+  throw new ApiError(500, 'Could not allocate a unique code')
+}
+
+/** New login code + revoke the currently-bound TV (that one screen logs out). */
+export async function regenerateScreenCode(ctx: OrgContext, admin: DbClient, id: string): Promise<ScreenView> {
+  await getScreenView(ctx.supabase, ctx.org.id, id) // 404 if not in org
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const code = generateLoginCode()
+    const { error } = await admin
+      .from('screens')
+      .update({ login_code: code, device_token_hash: null, paired_at: null })
+      .eq('id', id)
+      .eq('org_id', ctx.org.id)
+    if (!error) {
+      await broadcastToScreens([id], 'unpair')
+      await notifyOrgChanged(ctx.org.id, 'screens', id)
+      return getScreenView(ctx.supabase, ctx.org.id, id)
+    }
+    if (isPgError(error) && error.code === '23505') continue
+    throw error
+  }
+  throw new ApiError(500, 'Could not allocate a unique code')
 }
 
 export async function claimScreen(ctx: OrgContext, admin: DbClient, input: ClaimScreenInput): Promise<ScreenView> {

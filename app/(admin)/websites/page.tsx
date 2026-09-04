@@ -1,6 +1,12 @@
+import { ContentSubnav } from '@/components/content/ContentSubnav'
 import { WebsiteLibrary } from '@/components/websites/WebsiteLibrary'
 
-/** /websites — the page renders one client page component and nothing else (docs/CONTRACTS.md §2.2). */
+/** /websites — the "Web pages" tab of Content. */
 export default function WebsitesPage() {
-  return <WebsiteLibrary />
+  return (
+    <>
+      <ContentSubnav />
+      <WebsiteLibrary />
+    </>
+  )
 }

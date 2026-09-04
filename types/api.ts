@@ -143,6 +143,11 @@ export type ScreenView = Omit<Screen, 'device_token_hash'> & {
   menu_name: string | null
   effective_playlist_id: string | null
   current_item: CurrentItemView | null
+  /** thumbnail of what the screen is CONFIGURED to show (first board of its effective playlist),
+   *  independent of live playback — so tiles preview correctly even when no TV is reporting. */
+  preview_thumb_url: string | null
+  /** website url of the first configured item, when it is a web page (null otherwise) */
+  preview_website_url: string | null
 }
 
 export type PlaylistItemView = PlaylistItem & {

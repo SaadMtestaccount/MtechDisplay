@@ -14,6 +14,13 @@ export const fingerprintSchema = z.string().trim().min(8).max(200)
 export const pairingCodeRequestSchema = z.object({ fingerprint: fingerprintSchema })
 export type PairingCodeRequestInput = z.infer<typeof pairingCodeRequestSchema>
 
+/** POST /api/device/enroll — the TV operator types a screen's login code (may include a dash). */
+export const enrollRequestSchema = z.object({
+  code: z.string().trim().min(1).max(20),
+  fingerprint: fingerprintSchema,
+})
+export type EnrollRequestInput = z.infer<typeof enrollRequestSchema>
+
 /** `[code]` path segment of GET /api/device/pairing-status/[code] */
 export const pairingCodeParamSchema = pairingCodeSchema
 

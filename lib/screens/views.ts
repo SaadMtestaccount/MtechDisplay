@@ -3,7 +3,7 @@
  */
 import { ApiError } from '@/lib/api'
 import { createPlaylist, getPlaylistView } from '@/lib/playlists'
-import { asScreenSources, screenQuery, toScreenView, type ScreenSource } from '@/lib/screens/select'
+import { asScreenSources, attachScreenPreviews, screenQuery, toScreenView, type ScreenSource } from '@/lib/screens/select'
 import { escapeLike } from '@/lib/utils'
 import type { ScreenDetailView, ScreenListQuery, ScreenView } from '@/types/api'
 import type { DbClient } from '@/types/db'
@@ -39,13 +39,16 @@ export async function listScreens(supabase: DbClient, orgId: string, query: Scre
   if (error) throw error
   const now = new Date()
   const views = asScreenSources(data).map((row) => toScreenView(row, now))
+  await attachScreenPreviews(supabase, views)
   if (query.status === 'online') return views.filter((s) => s.online)
   if (query.status === 'offline') return views.filter((s) => !s.online)
   return views
 }
 
 export async function getScreenView(supabase: DbClient, orgId: string, id: string): Promise<ScreenView> {
-  return toScreenView(await fetchScreenSource(supabase, orgId, id))
+  const view = toScreenView(await fetchScreenSource(supabase, orgId, id))
+  await attachScreenPreviews(supabase, [view])
+  return view
 }
 
 /** Self-heals a screen with no playlist and no group by creating its own playlist. */
@@ -58,6 +61,7 @@ export async function getScreenDetail(supabase: DbClient, orgId: string, id: str
     source = await fetchScreenSource(supabase, orgId, id)
   }
   const view = toScreenView(source)
+  await attachScreenPreviews(supabase, [view])
   const playlist = view.effective_playlist_id ? await getPlaylistView(supabase, orgId, view.effective_playlist_id) : null
   const group =
     source.group_id !== null && source.screen_groups

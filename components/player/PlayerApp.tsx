@@ -14,7 +14,6 @@ import { useMediaCache } from '@/hooks/useMediaCache'
 import { usePlayerChannel } from '@/hooks/usePlayerChannel'
 import { usePlayerDevice } from '@/hooks/usePlayerDevice'
 import { usePlayerManifest } from '@/hooks/usePlayerManifest'
-import { usePlayerPairing } from '@/hooks/usePlayerPairing'
 import { DeviceApiError, fetchManifest } from '@/lib/player/device-api'
 import { deleteMediaCache } from '@/lib/player/media-cache'
 import { FINGERPRINT_KEY, MANIFEST_KEY, PENDING_KEY, newId, readJson, remove, writeJson } from '@/lib/player/player-storage'
@@ -22,8 +21,8 @@ import type { HeartbeatRequest } from '@/types/api'
 import { CursorHider } from '@/components/player/CursorHider'
 import { FullscreenPrompt } from '@/components/player/FullscreenPrompt'
 import { IdentifyOverlay } from '@/components/player/IdentifyOverlay'
+import { EnterCodeScreen } from '@/components/player/EnterCodeScreen'
 import { KeepAwake } from '@/components/player/KeepAwake'
-import { PairingScreen } from '@/components/player/PairingScreen'
 import { PlaybackEngine } from '@/components/player/PlaybackEngine'
 import { PlayerErrorBoundary } from '@/components/player/PlayerErrorBoundary'
 import { RotationRoot } from '@/components/player/RotationRoot'
@@ -136,18 +135,12 @@ export function PlayerApp() {
     onReconnect: () => void refetch(),
   })
 
-  const pairing = usePlayerPairing({
-    enabled: hydrated && device === null && fingerprint !== null,
-    fingerprint,
-    onPaired: save,
-  })
-
   const handleCurrentItem = useCallback((itemId: string | null) => {
     currentItemRef.current = itemId
   }, [])
 
-  /** Merchant self-claim: drop any pending pairing code before adopting the device. */
-  const handleClaimed = useCallback(
+  /** Adopt the device after enrolling by code; drop any stale pending pairing state. */
+  const handleEnrolled = useCallback(
     (state: Parameters<typeof save>[0]) => {
       remove(PENDING_KEY)
       save(state)
@@ -162,14 +155,7 @@ export function PlayerApp() {
     <PlayerErrorBoundary>
       <RotationRoot rotation={manifest?.screen.rotation ?? 0}>
         {!hydrated ? null : device === null ? (
-          <PairingScreen
-            code={pairing.code}
-            expiresAt={pairing.expiresAt}
-            appUrl={appUrl}
-            error={pairing.error}
-            fingerprint={fingerprint}
-            onClaimed={handleClaimed}
-          />
+          <EnterCodeScreen fingerprint={fingerprint} appUrl={appUrl} onEnrolled={handleEnrolled} />
         ) : manifest !== null ? (
           <>
             <PlaybackEngine

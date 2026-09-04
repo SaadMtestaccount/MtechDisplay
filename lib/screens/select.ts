@@ -62,5 +62,39 @@ export function toScreenView(row: ScreenSource, now: Date = new Date()): ScreenV
     // menu (top precedence) → group playlist → own playlist, matching getEffectivePlaylistId.
     effective_playlist_id: menu?.id ?? screen_groups?.playlist_id ?? screen.playlist_id,
     current_item: toCurrentItem(current_item),
+    // Filled by attachScreenPreviews (a batch query); null until then.
+    preview_thumb_url: null,
+    preview_website_url: null,
+  }
+}
+
+/**
+ * Fills preview_thumb_url / preview_website_url from the first board of each screen's EFFECTIVE
+ * playlist, so tiles show what a screen is set to display even when no live item is reported.
+ * One batched query for the whole list.
+ */
+export async function attachScreenPreviews(client: DbClient, views: ScreenView[]): Promise<void> {
+  const ids = Array.from(
+    new Set(views.map((v) => v.effective_playlist_id).filter((id): id is string => id !== null)),
+  )
+  if (ids.length === 0) return
+  const { data, error } = await client
+    .from('playlist_items')
+    .select('playlist_id, content(thumb_path), websites(url)')
+    .in('playlist_id', ids)
+    .order('position', { ascending: true })
+  if (error) throw error
+  const first = new Map<string, { thumb: string | null; url: string | null }>()
+  for (const item of data ?? []) {
+    if (first.has(item.playlist_id)) continue
+    first.set(item.playlist_id, {
+      thumb: item.content ? publicThumbUrl(item.content.thumb_path) : null,
+      url: item.websites?.url ?? null,
+    })
+  }
+  for (const view of views) {
+    const f = view.effective_playlist_id ? first.get(view.effective_playlist_id) : undefined
+    view.preview_thumb_url = f?.thumb ?? null
+    view.preview_website_url = f?.url ?? null
   }
 }

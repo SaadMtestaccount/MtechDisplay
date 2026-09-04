@@ -5,12 +5,15 @@
  */
 export { SCREEN_SELECT, toScreenView, type ScreenSource } from '@/lib/screens/select'
 export { assignScreen } from '@/lib/screens/assign'
+export { enrollScreen } from '@/lib/screens/enroll'
 export { getScreenDetail, getScreenView, listScreens } from '@/lib/screens/views'
 export {
   bumpAndSyncScreens,
   claimScreen,
+  createScreen,
   createScreenWithPlaylist,
   deleteScreen,
+  regenerateScreenCode,
   sendScreenAction,
   syncOrgScreens,
   updateScreen,

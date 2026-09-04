@@ -1,10 +1,11 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { MegaphoneIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
+import { KeyRoundIcon, MegaphoneIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { DeleteScreenDialog } from '@/components/screens/DeleteScreenDialog'
+import { ScreenCodeDialog } from '@/components/wall/ScreenCodeDialog'
 import { DeviceInfo } from '@/components/screens/DeviceInfo'
 import { GroupSelect } from '@/components/screens/GroupSelect'
 import { NowPlayingChip } from '@/components/screens/NowPlayingChip'
@@ -42,6 +43,7 @@ export function ScreenHeader({
   const [name, setName] = useState(screen.name)
   const cancelRef = useRef(false)
   const [deleteTarget, setDeleteTarget] = useState<ScreenView | null>(null)
+  const [codeOpen, setCodeOpen] = useState(false)
 
   useEffect(() => {
     if (!editing) setName(screen.name)
@@ -132,6 +134,10 @@ export function ScreenHeader({
           groups={groups}
           onChange={(group_id) => patch.mutate({ group_id })}
         />
+        <Button variant="outline" size="sm" onClick={() => setCodeOpen(true)}>
+          <KeyRoundIcon />
+          Show code
+        </Button>
         <Button
           variant="outline"
           size="sm"
@@ -167,6 +173,7 @@ export function ScreenHeader({
           if (!open) setDeleteTarget(null)
         }}
       />
+      <ScreenCodeDialog screen={codeOpen ? screen : null} onOpenChange={setCodeOpen} />
     </div>
   )
 }

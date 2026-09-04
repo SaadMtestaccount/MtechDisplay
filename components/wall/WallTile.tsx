@@ -5,40 +5,46 @@
  * status) plus a lock overlay and a kebab. A locked tile is not a drop target (unlock to change).
  */
 import { useDroppable } from '@dnd-kit/core'
-import { LockIcon } from 'lucide-react'
+import { KeyRoundIcon, LockIcon, SettingsIcon } from 'lucide-react'
 import { KebabMenu } from '@/components/shell/KebabMenu'
 import { TvFrame } from '@/components/screens/TvFrame'
 import { tileDropId } from '@/components/wall/wall-dnd'
 import { screenStatus } from '@/lib/status'
-import { cn } from '@/lib/utils'
+import { cn, formatLoginCode } from '@/lib/utils'
 import type { ScreenView } from '@/types/api'
 
 export function WallTile({
   screen,
   onOpen,
+  onShowCode,
   onToggleLock,
   onClear,
 }: {
   screen: ScreenView
   onOpen(): void
+  onShowCode(): void
   onToggleLock(): void
   onClear(): void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: tileDropId(screen.id), disabled: screen.locked })
   const status = screenStatus(screen)
-  const hasContent = screen.menu_name !== null || screen.current_item !== null
-  const showing = screen.menu_name
-    ? `Menu · ${screen.menu_name}`
-    : (screen.current_item?.name ?? 'Nothing assigned')
+  const configured = screen.preview_thumb_url !== null || screen.preview_website_url !== null
+  const hasContent = screen.menu_name !== null || screen.current_item !== null || configured
+  const showing =
+    status === 'unpaired'
+      ? `Not signed in · code ${formatLoginCode(screen.login_code)}`
+      : screen.menu_name
+        ? `Menu · ${screen.menu_name}`
+        : (screen.current_item?.name ?? (configured ? 'Ready to play' : 'Nothing assigned'))
 
   return (
     <div ref={setNodeRef} className="flex flex-col gap-2">
       <div className={cn('overflow-hidden rounded-lg', isOver && !screen.locked && 'ring-2 ring-primary ring-offset-2 ring-offset-background')}>
         <TvFrame
-          thumbUrl={screen.current_item?.thumb_url ?? null}
+          thumbUrl={screen.current_item?.thumb_url ?? screen.preview_thumb_url}
           status={status}
           rotation={screen.rotation}
-          websiteUrl={screen.current_item?.website_url ?? null}
+          websiteUrl={screen.current_item?.website_url ?? screen.preview_website_url}
         >
           {screen.locked ? (
             <div className="absolute inset-0 flex items-end justify-start bg-black/25 p-2">
@@ -58,11 +64,12 @@ export function WallTile({
         <KebabMenu
           label={`Actions for ${screen.name}`}
           items={[
-            { label: 'Open screen', onSelect: onOpen },
+            { label: 'Show code', icon: <KeyRoundIcon />, onSelect: onShowCode },
+            { label: 'Open settings', icon: <SettingsIcon />, onSelect: onOpen },
             screen.locked
-              ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock }
-              : { label: 'Lock', icon: <LockIcon />, onSelect: onToggleLock, disabled: !hasContent },
-            { label: 'Clear', destructive: true, disabled: screen.locked, separatorBefore: true, onSelect: onClear },
+              ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock, separatorBefore: true }
+              : { label: 'Lock', icon: <LockIcon />, onSelect: onToggleLock, disabled: !hasContent, separatorBefore: true },
+            { label: 'Clear', destructive: true, disabled: screen.locked, onSelect: onClear },
           ]}
         />
       </div>

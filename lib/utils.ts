@@ -78,6 +78,13 @@ export function fromDateString(value: string): Date {
   return parse(value, 'yyyy-MM-dd', new Date())
 }
 
+/** 'K7QP2M9X' → 'K7QP-2M9X' for display; '' for empty. */
+export function formatLoginCode(code: string | null | undefined): string {
+  if (!code) return ''
+  const raw = code.replace(/[^A-Za-z0-9]/g, '').toUpperCase()
+  return raw.length > 4 ? `${raw.slice(0, 4)}-${raw.slice(4)}` : raw
+}
+
 /** Google favicon service URL for the site's host; '' when the url does not parse. */
 export function faviconUrl(url: string): string {
   try {

@@ -35,6 +35,10 @@ export const claimScreenSchema = z.object({
 })
 export type ClaimScreenInput = z.infer<typeof claimScreenSchema>
 
+/** POST /api/screens — add a TV (a bare screen with its own login code). */
+export const createScreenSchema = z.object({ name: nameSchema })
+export type CreateScreenInput = z.infer<typeof createScreenSchema>
+
 /** PATCH /api/screens/[id] — rename / rotation / group / lock (at least one key). */
 export const screenUpdateSchema = z
   .object({

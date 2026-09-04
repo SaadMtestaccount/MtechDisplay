@@ -5,12 +5,9 @@ import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const TABS = [
-  { href: '/wall', label: 'Wall' },
-  { href: '/screens', label: 'Screens' },
-  { href: '/groups', label: 'Groups' },
-  { href: '/menus', label: 'Menus' },
-  { href: '/content', label: 'Content' },
-  { href: '/websites', label: 'Websites' },
+  { href: '/tvs', label: 'TVs', match: ['/tvs', '/screens', '/wall', '/groups'] },
+  { href: '/content', label: 'Content', match: ['/content', '/websites'] },
+  { href: '/menus', label: 'Menus', match: ['/menus'] },
 ] as const
 
 export function NavTabs() {
@@ -19,7 +16,7 @@ export function NavTabs() {
   return (
     <nav className="flex h-14 items-center">
       {TABS.map((tab) => {
-        const active = pathname.startsWith(tab.href)
+        const active = tab.match.some((m) => pathname.startsWith(m))
         return (
           <Link
             key={tab.href}

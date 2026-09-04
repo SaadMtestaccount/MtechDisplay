@@ -134,8 +134,10 @@ export type ScreenRow = {
   /** Wall lock: pins the assignment; reassignment refused until unlocked (0009). */
   locked: boolean
   device_token_hash: string | null
-  /** Device fingerprint that self-claimed this screen (0007); null for admin-claimed screens. */
+  /** Device fingerprint of the TV bound to this screen (0007); null when unpaired. */
   fingerprint: string | null
+  /** Persistent 8-char login code entered on a TV to enroll it as this screen (0010). */
+  login_code: string | null
   rotation: number
   last_seen_at: string | null
   last_ip: string | null
