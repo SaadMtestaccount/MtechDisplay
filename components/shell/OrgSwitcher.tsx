@@ -9,7 +9,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
@@ -47,7 +46,7 @@ export function OrgSwitcher() {
           <ChevronsUpDownIcon className="size-3 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel>View store</DropdownMenuLabel>
+          <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">View store</div>
           {orgs.map((o) => (
             <DropdownMenuItem key={o.id} onClick={() => void handleSelect(o.id)}>
               <span className="truncate">{o.name}</span>
