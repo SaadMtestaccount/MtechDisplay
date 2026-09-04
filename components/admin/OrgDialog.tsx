@@ -65,9 +65,9 @@ export function OrgDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>{isEdit ? 'Rename organization' : 'New organization'}</DialogTitle>
+          <DialogTitle>{isEdit ? 'Rename location' : 'New location'}</DialogTitle>
           {!isEdit ? (
-            <DialogDescription>Each organization is one merchant with its own content and screens.</DialogDescription>
+            <DialogDescription>Each location has its own TVs, menus and content.</DialogDescription>
           ) : null}
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -77,7 +77,7 @@ export function OrgDialog({
               id="org-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Sabra Pizza"
+              placeholder="e.g. Main Street"
               maxLength={120}
               autoFocus
               disabled={mutation.isPending}

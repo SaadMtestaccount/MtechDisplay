@@ -50,9 +50,9 @@ export function SettingsForm({ org }: { org: Organization }) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Organization</CardTitle>
+        <CardTitle>Location</CardTitle>
         <CardDescription>
-          The name appears in the admin and on players; the time zone drives every playlist schedule.
+          The name appears in the console and on players; the time zone drives every playlist schedule.
         </CardDescription>
       </CardHeader>
       <CardContent>

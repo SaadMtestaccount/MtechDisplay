@@ -191,13 +191,13 @@ export type UserView = {
   is_super_admin: boolean
 }
 
-/** Merchant / store login (non-staff user with an org membership). role 'member' = TV only, 'admin' = manager. */
+/** Merchant / store login (non-staff user). role 'member' = TV only, 'admin' = manager (multi-location). */
 export type MerchantView = {
   id: string
   email: string
-  org_id: string
-  org_name: string
   role: MembershipRole
+  /** the locations (organizations) this login can access */
+  locations: { id: string; name: string }[]
   last_sign_in_at: string | null
   created_at: string
 }

@@ -1,8 +1,8 @@
 /**
- * lib/merchants.ts — SERVER ONLY (service role). Merchant TV accounts (CONTRACTS addendum §13):
- * non-staff auth users with one org membership (role 'member'). MTech sets the password
- * directly; merchants sign in only on the TV player (the admin shell redirects them away).
- * Removal reuses lib/users.ts removeUser via DELETE /api/users/[id].
+ * lib/merchants.ts — SERVER ONLY (service role). Store logins (CONTRACTS addendum §13):
+ * non-staff auth users with one or more org (location) memberships. MTech sets the password
+ * directly; role 'member' = TV display only, role 'admin' = a manager who can use the console
+ * for their locations and switch between them. Removal reuses lib/users.ts removeUser.
  */
 import { ApiError } from '@/lib/api'
 import type { CreateMerchantInput } from '@/lib/validators/merchants'
@@ -11,16 +11,15 @@ import type { DbClient, MembershipRole } from '@/types/db'
 
 type MembershipWithOrg = {
   user_id: string
-  org_id: string
   role: MembershipRole
-  organizations: { name: string } | null
+  organizations: { id: string; name: string } | null
 }
 
-/** Non-super-admin users that hold at least one membership, with their org name. */
+/** Non-super-admin users that hold at least one membership, with all their locations. */
 export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
   const { data: memberships, error } = await admin
     .from('memberships')
-    .select('user_id, org_id, role, organizations(name)')
+    .select('user_id, role, organizations(id, name)')
     .order('created_at', { ascending: true })
   if (error) throw error
   const rows = (memberships ?? []) as MembershipWithOrg[]
@@ -38,34 +37,37 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
   if (usersError) throw usersError
   const byId = new Map(users.users.map((u) => [u.id, u] as const))
 
-  const views: MerchantView[] = []
+  const grouped = new Map<string, MerchantView>()
   for (const m of rows) {
     if (superAdmin.has(m.user_id)) continue
     const user = byId.get(m.user_id)
     if (!user) continue
-    if (views.some((v) => v.id === m.user_id)) continue // first membership wins in the list
-    views.push({
-      id: m.user_id,
-      email: user.email ?? '',
-      org_id: m.org_id,
-      org_name: m.organizations?.name ?? 'Unknown organization',
-      role: m.role,
-      last_sign_in_at: user.last_sign_in_at ?? null,
-      created_at: user.created_at,
-    })
+    let view = grouped.get(m.user_id)
+    if (!view) {
+      view = {
+        id: m.user_id,
+        email: user.email ?? '',
+        role: m.role,
+        locations: [],
+        last_sign_in_at: user.last_sign_in_at ?? null,
+        created_at: user.created_at,
+      }
+      grouped.set(m.user_id, view)
+    }
+    if (m.role === 'admin' || m.role === 'owner') view.role = 'admin'
+    if (m.organizations) view.locations.push({ id: m.organizations.id, name: m.organizations.name })
   }
-  return views.sort((a, b) => a.email.localeCompare(b.email))
+  return Array.from(grouped.values()).sort((a, b) => a.email.localeCompare(b.email))
 }
 
-/** Creates the auth user (password set, email confirmed) + a role 'member' membership. */
+/** Creates the auth user + a membership (with the chosen role) in each selected location. */
 export async function createMerchant(admin: DbClient, input: CreateMerchantInput): Promise<MerchantView> {
-  const { data: org, error: orgError } = await admin
+  const { data: orgs, error: orgsError } = await admin
     .from('organizations')
     .select('id, name')
-    .eq('id', input.org_id)
-    .maybeSingle()
-  if (orgError) throw orgError
-  if (!org) throw new ApiError(422, 'Unknown organization')
+    .in('id', input.org_ids)
+  if (orgsError) throw orgsError
+  if (!orgs || orgs.length !== input.org_ids.length) throw new ApiError(422, 'Unknown location')
 
   const { data, error } = await admin.auth.admin.createUser({
     email: input.email,
@@ -78,9 +80,8 @@ export async function createMerchant(admin: DbClient, input: CreateMerchantInput
   }
   const user = data.user
 
-  const { error: membershipError } = await admin
-    .from('memberships')
-    .upsert({ org_id: input.org_id, user_id: user.id, role: input.role }, { onConflict: 'org_id,user_id' })
+  const rows = input.org_ids.map((org_id) => ({ org_id, user_id: user.id, role: input.role }))
+  const { error: membershipError } = await admin.from('memberships').upsert(rows, { onConflict: 'org_id,user_id' })
   if (membershipError) {
     await admin.auth.admin.deleteUser(user.id).catch((e: unknown) => console.error('[merchants] cleanup', e))
     throw membershipError
@@ -89,9 +90,8 @@ export async function createMerchant(admin: DbClient, input: CreateMerchantInput
   return {
     id: user.id,
     email: user.email ?? input.email,
-    org_id: org.id,
-    org_name: org.name,
     role: input.role,
+    locations: orgs.map((o) => ({ id: o.id, name: o.name })),
     last_sign_in_at: null,
     created_at: user.created_at,
   }

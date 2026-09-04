@@ -43,11 +43,11 @@ export function OrgsPage() {
   return (
     <>
       <PageHeader
-        title="Organizations"
-        description="One organization per merchant — each with its own content, screens and settings."
+        title="Locations"
+        description="Each location is its own space — its own TVs, menus and content. Add one, then hand a manager access to it."
         primary={
           <Button variant="outline" size="sm" onClick={() => setCreateOpen(true)}>
-            <PlusIcon /> New organization
+            <PlusIcon /> New location
           </Button>
         }
       />
@@ -65,11 +65,11 @@ export function OrgsPage() {
       ) : orgsQuery.data.length === 0 ? (
         <EmptyState
           icon={<Building2Icon />}
-          title="No organizations yet"
-          description="Create the first organization to start adding content and screens."
+          title="No locations yet"
+          description="Create the first location to start adding TVs, menus and content."
           action={
             <Button onClick={() => setCreateOpen(true)}>
-              <PlusIcon /> New organization
+              <PlusIcon /> New location
             </Button>
           }
         />

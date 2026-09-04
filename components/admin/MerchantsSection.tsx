@@ -70,7 +70,7 @@ export function MerchantsSection() {
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-4">Email</TableHead>
-                <TableHead>Organization</TableHead>
+                <TableHead>Locations</TableHead>
                 <TableHead>Access</TableHead>
                 <TableHead>Last sign-in</TableHead>
                 <TableHead>Added</TableHead>
@@ -90,7 +90,13 @@ export function MerchantsSection() {
                 merchantsQuery.data.map((m) => (
                   <TableRow key={m.id}>
                     <TableCell className="pl-4 font-medium">{m.email}</TableCell>
-                    <TableCell className="text-muted-foreground">{m.org_name}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {m.locations.length === 0
+                        ? '—'
+                        : m.locations.length <= 2
+                          ? m.locations.map((l) => l.name).join(', ')
+                          : `${m.locations[0]?.name} +${m.locations.length - 1} more`}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">
                       {m.role === 'admin' ? 'Manager' : 'TV only'}
                     </TableCell>

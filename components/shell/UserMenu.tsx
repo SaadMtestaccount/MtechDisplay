@@ -70,7 +70,7 @@ export function UserMenu() {
               <UsersIcon /> Team
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/admin/orgs')}>
-              <Building2Icon /> Organizations
+              <Building2Icon /> Locations
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
               <SettingsIcon /> Settings

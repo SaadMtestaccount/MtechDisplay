@@ -46,7 +46,7 @@ export function OrgSwitcher() {
           <ChevronsUpDownIcon className="size-3 text-muted-foreground" />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">View store</div>
+          <div className="px-1.5 py-1 text-xs font-medium text-muted-foreground">Your locations</div>
           {orgs.map((o) => (
             <DropdownMenuItem key={o.id} onClick={() => void handleSelect(o.id)}>
               <span className="truncate">{o.name}</span>
@@ -58,7 +58,7 @@ export function OrgSwitcher() {
               {orgs.length > 0 ? <DropdownMenuSeparator /> : null}
               <DropdownMenuItem onClick={() => setCreateOpen(true)}>
                 <PlusIcon />
-                New organization
+                Add location
               </DropdownMenuItem>
             </>
           ) : null}

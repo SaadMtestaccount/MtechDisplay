@@ -21,7 +21,7 @@ export function SettingsPage() {
 
   return (
     <>
-      <PageHeader title="Settings" description={`Organization settings for ${org.name}.`} />
+      <PageHeader title="Settings" description={`Settings for ${org.name}.`} />
       <div className="flex max-w-2xl flex-col gap-6">
         {/* Keyed by org so switching orgs resets any in-progress edits. */}
         <SettingsForm key={`settings-${org.id}`} org={org} />

@@ -1,12 +1,12 @@
 'use client'
 
 /**
- * components/admin/MerchantDialog.tsx — create a merchant TV account (addendum §13):
- * MTech types the email + password (handed to the merchant directly, no invite email)
- * and picks the organization whose content the TV will play.
+ * components/admin/MerchantDialog.tsx — create a store login (addendum §13): MTech types the
+ * email + password, picks the location(s) it can access, and the access level. A Manager can be
+ * assigned to several locations and switches between them.
  */
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { RefreshCwIcon } from 'lucide-react'
+import { CheckIcon, RefreshCwIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
+import { cn } from '@/lib/utils'
 import type { MerchantView } from '@/types/api'
 import type { Organization } from '@/types/db'
 
@@ -33,14 +34,14 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [orgId, setOrgId] = useState<string | null>(null)
+  const [orgIds, setOrgIds] = useState<string[]>([])
   const [role, setRole] = useState<'member' | 'admin'>('member')
 
   useEffect(() => {
     if (open) {
       setEmail('')
       setPassword(generatePassword())
-      setOrgId(null)
+      setOrgIds([])
       setRole('member')
     }
   }, [open])
@@ -52,7 +53,7 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   })
 
   const mutation = useMutation({
-    mutationFn: (input: { email: string; password: string; org_id: string; role: 'member' | 'admin' }) =>
+    mutationFn: (input: { email: string; password: string; org_ids: string[]; role: 'member' | 'admin' }) =>
       apiFetch<MerchantView>('/api/merchants', { method: 'POST', json: input }),
     onSuccess: (merchant) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.merchants.all() })
@@ -62,12 +63,15 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
     onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
   })
 
-  const canSubmit = email.trim().length > 0 && password.length >= 8 && orgId !== null && !mutation.isPending
+  const toggleOrg = (id: string) =>
+    setOrgIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+
+  const canSubmit = email.trim().length > 0 && password.length >= 8 && orgIds.length > 0 && !mutation.isPending
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (!canSubmit || orgId === null) return
-    mutation.mutate({ email: email.trim(), password, org_id: orgId, role })
+    if (!canSubmit) return
+    mutation.mutate({ email: email.trim(), password, org_ids: orgIds, role })
   }
 
   return (
@@ -76,8 +80,8 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
         <DialogHeader>
           <DialogTitle>Add store login</DialogTitle>
           <DialogDescription>
-            Hand these credentials to the store. A TV login plays the organization&apos;s content on
-            the screen; a Manager login can also run the Screen Wall from a back-office computer.
+            Hand these credentials to the store. A TV login plays a location&apos;s content on the screen; a
+            Manager login can run the console for the location(s) you pick and switch between them.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -122,19 +126,30 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Label>Organization</Label>
-            <Select value={orgId ?? ''} onValueChange={(v) => setOrgId(String(v) || null)}>
-              <SelectTrigger aria-label="Organization">
-                <SelectValue placeholder="Pick the merchant's organization" />
-              </SelectTrigger>
-              <SelectContent>
-                {(orgsQuery.data ?? []).map((org) => (
-                  <SelectItem key={org.id} value={org.id}>
-                    {org.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Label>Locations{orgIds.length > 0 ? ` (${orgIds.length})` : ''}</Label>
+            <div className="flex max-h-44 flex-col gap-0.5 overflow-y-auto rounded-md border border-border p-1">
+              {(orgsQuery.data ?? []).length === 0 ? (
+                <p className="px-2 py-3 text-center text-xs text-muted-foreground">No locations yet.</p>
+              ) : (
+                (orgsQuery.data ?? []).map((org) => {
+                  const on = orgIds.includes(org.id)
+                  return (
+                    <button
+                      type="button"
+                      key={org.id}
+                      onClick={() => toggleOrg(org.id)}
+                      className={cn(
+                        'flex items-center justify-between rounded px-2 py-1.5 text-left text-sm',
+                        on ? 'bg-primary/10 font-medium' : 'hover:bg-muted',
+                      )}
+                    >
+                      <span className="truncate">{org.name}</span>
+                      {on ? <CheckIcon className="size-4 shrink-0 text-primary" /> : null}
+                    </button>
+                  )
+                })
+              )}
+            </div>
           </div>
           <div className="flex flex-col gap-2">
             <Label>Access</Label>
@@ -144,13 +159,13 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="member">TV display only</SelectItem>
-                <SelectItem value="admin">Manager — can use the Wall</SelectItem>
+                <SelectItem value="admin">Manager — can use the console</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
               {role === 'admin'
-                ? 'Signs in on a back-office computer to run the Screen Wall for this organization.'
-                : 'Signs in only on the TV; cannot open this console.'}
+                ? 'Signs in on a back-office computer to run the console and switch between its locations.'
+                : 'Signs in only on the TV; cannot open the console.'}
             </p>
           </div>
           <DialogFooter>
