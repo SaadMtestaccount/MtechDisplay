@@ -10,9 +10,9 @@ export function NoOrgState() {
   return (
     <EmptyState
       icon={<Building2Icon />}
-      title="No organization yet"
-      description="Create an organization to get started."
-      action={<Button render={<Link href="/admin/orgs" />}>Go to Organizations</Button>}
+      title="No locations yet"
+      description="Add your first merchant on the Team page — that creates their login and first location together."
+      action={<Button render={<Link href="/admin/users" />}>Go to Team</Button>}
     />
   )
 }

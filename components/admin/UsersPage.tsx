@@ -16,7 +16,7 @@ import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
 import type { OkResponse, UserView } from '@/types/api'
 
-/** /admin/users — MTech staff table + invite + remove (spec §15). */
+/** /admin/users — the Team page: merchants (stores) first, then MTech staff (spec §15). */
 export function UsersPage() {
   const { user } = useApp()
   const queryClient = useQueryClient()
@@ -41,30 +41,36 @@ export function UsersPage() {
   return (
     <>
       <PageHeader
-        title="Users"
-        description="MTech staff — everyone here is a super admin across all organizations."
-        primary={
-          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
-            <UserPlusIcon /> Invite user
-          </Button>
-        }
+        title="Team"
+        description="Merchants are the stores that use MSIGN. MTech staff are super admins across every store."
       />
 
-      {usersQuery.isPending ? (
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ) : usersQuery.isError ? (
-        <p className="text-sm text-destructive">
-          {usersQuery.error instanceof Error ? usersQuery.error.message : 'Could not load users.'}
-        </p>
-      ) : (
-        <UsersTable users={usersQuery.data} currentUserId={user.id} onRemove={setRemoveTarget} />
-      )}
-
       <MerchantsSection />
+
+      <section className="mt-10 flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-semibold">MTech staff</h2>
+            <p className="text-sm text-muted-foreground">Everyone here is a super admin across all stores.</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
+            <UserPlusIcon /> Invite staff
+          </Button>
+        </div>
+
+        {usersQuery.isPending ? (
+          <div className="flex flex-col gap-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : usersQuery.isError ? (
+          <p className="text-sm text-destructive">
+            {usersQuery.error instanceof Error ? usersQuery.error.message : 'Could not load staff.'}
+          </p>
+        ) : (
+          <UsersTable users={usersQuery.data} currentUserId={user.id} onRemove={setRemoveTarget} />
+        )}
+      </section>
 
       <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
 

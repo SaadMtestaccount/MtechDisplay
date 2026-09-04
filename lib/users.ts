@@ -36,6 +36,8 @@ export async function listUsers(admin: DbClient): Promise<UserView[]> {
   )
   return data.users
     .map((u) => toUserView(u, profiles.get(u.id)))
+    // MTech staff only — merchant/store logins belong to the Team page, not here.
+    .filter((v) => v.is_super_admin)
     .sort((a, b) => a.email.localeCompare(b.email))
 }
 

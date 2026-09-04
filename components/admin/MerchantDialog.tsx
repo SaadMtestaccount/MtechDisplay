@@ -1,12 +1,12 @@
 'use client'
 
 /**
- * components/admin/MerchantDialog.tsx — create a store login (addendum §13): MTech types the
- * email + password, picks the location(s) it can access, and the access level. A Manager can be
- * assigned to several locations and switches between them.
+ * components/admin/MerchantDialog.tsx — add a merchant (addendum §13). One step creates the
+ * store's login AND its first location together: MTech types the email + password, names the
+ * location, and picks the access level. More locations are added later from the merchant's row.
  */
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CheckIcon, RefreshCwIcon } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { RefreshCwIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -18,9 +18,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
-import { cn } from '@/lib/utils'
 import type { MerchantView } from '@/types/api'
-import type { Organization } from '@/types/db'
 
 const PASSWORD_ALPHABET = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
 
@@ -34,59 +32,65 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   const queryClient = useQueryClient()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [orgIds, setOrgIds] = useState<string[]>([])
+  const [locationName, setLocationName] = useState('')
   const [role, setRole] = useState<'member' | 'admin'>('member')
 
   useEffect(() => {
     if (open) {
       setEmail('')
       setPassword(generatePassword())
-      setOrgIds([])
+      setLocationName('')
       setRole('member')
     }
   }, [open])
 
-  const orgsQuery = useQuery({
-    queryKey: queryKeys.orgs.list(),
-    queryFn: () => apiFetch<Organization[]>('/api/orgs'),
-    enabled: open,
-  })
-
   const mutation = useMutation({
-    mutationFn: (input: { email: string; password: string; org_ids: string[]; role: 'member' | 'admin' }) =>
+    mutationFn: (input: { email: string; password: string; location_name: string; role: 'member' | 'admin' }) =>
       apiFetch<MerchantView>('/api/merchants', { method: 'POST', json: input }),
     onSuccess: (merchant) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.merchants.all() })
-      toast.success(`${merchant.role === 'admin' ? 'Manager' : 'TV'} login created for ${merchant.email}`)
+      void queryClient.invalidateQueries({ queryKey: queryKeys.orgs.all() })
+      toast.success(`Login created for ${merchant.email}`)
       onOpenChange(false)
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
   })
 
-  const toggleOrg = (id: string) =>
-    setOrgIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
-
-  const canSubmit = email.trim().length > 0 && password.length >= 8 && orgIds.length > 0 && !mutation.isPending
+  const canSubmit =
+    email.trim().length > 0 && password.length >= 8 && locationName.trim().length > 0 && !mutation.isPending
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit) return
-    mutation.mutate({ email: email.trim(), password, org_ids: orgIds, role })
+    mutation.mutate({ email: email.trim(), password, location_name: locationName.trim(), role })
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add store login</DialogTitle>
+          <DialogTitle>Add merchant</DialogTitle>
           <DialogDescription>
-            Hand these credentials to the store. A TV login plays a location&apos;s content on the screen; a
-            Manager login can run the console for the location(s) you pick and switch between them.
+            Creates the store&apos;s login and its first location together. Hand the email and password to the
+            store — a TV login plays that location&apos;s content; a Manager login can also open the console.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label htmlFor="merchant-email">Email</Label>
+            <Label htmlFor="merchant-location">Location name</Label>
+            <Input
+              id="merchant-location"
+              value={locationName}
+              onChange={(e) => setLocationName(e.target.value)}
+              placeholder="Downtown Store"
+              autoComplete="off"
+              autoFocus
+              required
+              disabled={mutation.isPending}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="merchant-email">Login email</Label>
             <Input
               id="merchant-email"
               type="email"
@@ -94,7 +98,6 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
               onChange={(e) => setEmail(e.target.value)}
               placeholder="owner@merchant.com"
               autoComplete="off"
-              autoFocus
               required
               disabled={mutation.isPending}
             />
@@ -126,32 +129,6 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <Label>Locations{orgIds.length > 0 ? ` (${orgIds.length})` : ''}</Label>
-            <div className="flex max-h-44 flex-col gap-0.5 overflow-y-auto rounded-md border border-border p-1">
-              {(orgsQuery.data ?? []).length === 0 ? (
-                <p className="px-2 py-3 text-center text-xs text-muted-foreground">No locations yet.</p>
-              ) : (
-                (orgsQuery.data ?? []).map((org) => {
-                  const on = orgIds.includes(org.id)
-                  return (
-                    <button
-                      type="button"
-                      key={org.id}
-                      onClick={() => toggleOrg(org.id)}
-                      className={cn(
-                        'flex items-center justify-between rounded px-2 py-1.5 text-left text-sm',
-                        on ? 'bg-primary/10 font-medium' : 'hover:bg-muted',
-                      )}
-                    >
-                      <span className="truncate">{org.name}</span>
-                      {on ? <CheckIcon className="size-4 shrink-0 text-primary" /> : null}
-                    </button>
-                  )
-                })
-              )}
-            </div>
-          </div>
-          <div className="flex flex-col gap-2">
             <Label>Access</Label>
             <Select value={role} onValueChange={(v) => setRole(String(v) === 'admin' ? 'admin' : 'member')}>
               <SelectTrigger aria-label="Access level">
@@ -171,7 +148,7 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           <DialogFooter>
             <DialogClose render={<Button variant="outline" type="button" />}>Cancel</DialogClose>
             <Button type="submit" disabled={!canSubmit}>
-              {mutation.isPending ? 'Creating…' : 'Create account'}
+              {mutation.isPending ? 'Creating…' : 'Create merchant'}
             </Button>
           </DialogFooter>
         </form>

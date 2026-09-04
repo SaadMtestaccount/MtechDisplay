@@ -2,9 +2,9 @@
 
 /**
  * components/shell/UserMenu.tsx — the profile menu: your account, theme, log out, and (staff)
- * Team / Organizations / Settings. Replaces the separate Admin menu, theme toggle and avatar.
+ * Team / Settings. Replaces the separate Admin menu, theme toggle and avatar.
  */
-import { Building2Icon, LogOutIcon, MoonIcon, SettingsIcon, SunIcon, UserIcon, UsersIcon } from 'lucide-react'
+import { LogOutIcon, MoonIcon, SettingsIcon, SunIcon, UserIcon, UsersIcon } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -68,9 +68,6 @@ export function UserMenu() {
           <>
             <DropdownMenuItem onClick={() => router.push('/admin/users')}>
               <UsersIcon /> Team
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push('/admin/orgs')}>
-              <Building2Icon /> Locations
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
               <SettingsIcon /> Settings
