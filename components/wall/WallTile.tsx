@@ -5,7 +5,7 @@
  * status) plus a lock overlay and a kebab. A locked tile is not a drop target (unlock to change).
  */
 import { useDroppable } from '@dnd-kit/core'
-import { KeyRoundIcon, LockIcon, SettingsIcon } from 'lucide-react'
+import { KeyRoundIcon, LockIcon, MaximizeIcon, SettingsIcon } from 'lucide-react'
 import { KebabMenu } from '@/components/shell/KebabMenu'
 import { TvFrame } from '@/components/screens/TvFrame'
 import { tileDropId } from '@/components/wall/wall-dnd'
@@ -65,6 +65,11 @@ export function WallTile({
           label={`Actions for ${screen.name}`}
           items={[
             { label: 'Show code', icon: <KeyRoundIcon />, onSelect: onShowCode },
+            {
+              label: 'Open full screen',
+              icon: <MaximizeIcon />,
+              onSelect: () => window.open(`/player?code=${screen.login_code ?? ''}`, '_blank', 'noopener'),
+            },
             { label: 'Open settings', icon: <SettingsIcon />, onSelect: onOpen },
             screen.locked
               ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock, separatorBefore: true }

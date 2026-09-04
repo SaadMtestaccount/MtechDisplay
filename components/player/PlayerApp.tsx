@@ -8,13 +8,13 @@
  * wipes msign.device/manifest/pending and the media cache and returns to pairing;
  * msign.fingerprint is created once and never wiped.
  */
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useHeartbeat } from '@/hooks/useHeartbeat'
 import { useMediaCache } from '@/hooks/useMediaCache'
 import { usePlayerChannel } from '@/hooks/usePlayerChannel'
 import { usePlayerDevice } from '@/hooks/usePlayerDevice'
 import { usePlayerManifest } from '@/hooks/usePlayerManifest'
-import { DeviceApiError, fetchManifest } from '@/lib/player/device-api'
+import { DeviceApiError, enroll, fetchManifest } from '@/lib/player/device-api'
 import { deleteMediaCache } from '@/lib/player/media-cache'
 import { FINGERPRINT_KEY, MANIFEST_KEY, PENDING_KEY, newId, readJson, remove, writeJson } from '@/lib/player/player-storage'
 import type { HeartbeatRequest } from '@/types/api'
@@ -147,6 +147,20 @@ export function PlayerApp() {
     },
     [save],
   )
+
+  // Browser-driven monitor: /player?code=XXXX auto-enrolls this tab as that screen (per-tab storage).
+  const urlCode = useMemo(
+    () => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('code')),
+    [],
+  )
+  const urlEnrolledRef = useRef(false)
+  useEffect(() => {
+    if (!hydrated || device !== null || !fingerprint || !urlCode || urlEnrolledRef.current) return
+    urlEnrolledRef.current = true
+    enroll(urlCode, fingerprint)
+      .then(handleEnrolled)
+      .catch((e) => console.warn('[player] code-link enroll failed', e))
+  }, [hydrated, device, fingerprint, urlCode, handleEnrolled])
 
   const appUrl =
     process.env.NEXT_PUBLIC_APP_URL || (typeof window !== 'undefined' ? window.location.origin : '')

@@ -8,10 +8,25 @@ export const MANIFEST_KEY = 'msign.manifest'
 export const FINGERPRINT_KEY = 'msign.fingerprint'
 export const PENDING_KEY = 'msign.pending'
 
-export function readJson<T>(key: string): T | null {
+/**
+ * A TV opened with `/player?code=XXXX` (a browser-driven monitor from the portal) uses per-tab
+ * sessionStorage, so several such tabs on one computer are independent screens instead of fighting
+ * over one origin's localStorage. A normal TV (no ?code) uses persistent localStorage.
+ */
+function playerStore(): Storage | null {
   try {
     if (typeof window === 'undefined') return null
-    const raw = window.localStorage.getItem(key)
+    return window.location.search.includes('code=') ? window.sessionStorage : window.localStorage
+  } catch {
+    return null
+  }
+}
+
+export function readJson<T>(key: string): T | null {
+  try {
+    const store = playerStore()
+    if (!store) return null
+    const raw = store.getItem(key)
     if (raw === null) return null
     return JSON.parse(raw) as T
   } catch {
@@ -21,17 +36,19 @@ export function readJson<T>(key: string): T | null {
 
 export function writeJson(key: string, value: unknown): void {
   try {
-    if (typeof window === 'undefined') return
-    window.localStorage.setItem(key, JSON.stringify(value))
+    const store = playerStore()
+    if (!store) return
+    store.setItem(key, JSON.stringify(value))
   } catch (e) {
-    console.warn('[player] localStorage write failed', key, e)
+    console.warn('[player] storage write failed', key, e)
   }
 }
 
 export function remove(key: string): void {
   try {
-    if (typeof window === 'undefined') return
-    window.localStorage.removeItem(key)
+    const store = playerStore()
+    if (!store) return
+    store.removeItem(key)
   } catch {
     // ignore
   }

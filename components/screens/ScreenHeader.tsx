@@ -1,7 +1,7 @@
 'use client'
 
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { KeyRoundIcon, MegaphoneIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
+import { KeyRoundIcon, MaximizeIcon, MegaphoneIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { DeleteScreenDialog } from '@/components/screens/DeleteScreenDialog'
@@ -137,6 +137,14 @@ export function ScreenHeader({
         <Button variant="outline" size="sm" onClick={() => setCodeOpen(true)}>
           <KeyRoundIcon />
           Show code
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.open(`/player?code=${screen.login_code ?? ''}`, '_blank', 'noopener')}
+        >
+          <MaximizeIcon />
+          Full screen
         </Button>
         <Button
           variant="outline"

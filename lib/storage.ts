@@ -54,7 +54,9 @@ export function logoPath(orgId: string, ext: string): string {
 }
 
 function supabaseUrl(): string {
-  return (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/\/+$/, '')
+  // Strip a stray BOM / whitespace that can sneak into the env value (e.g. when set through a
+  // shell pipe) — a leading U+FEFF makes `<img src>` an invalid URL and breaks every thumbnail.
+  return (process.env.NEXT_PUBLIC_SUPABASE_URL ?? '').replace(/^﻿/, '').trim().replace(/\/+$/, '')
 }
 
 export function publicUrl(bucket: BucketName, key: string): string {
