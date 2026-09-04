@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
+import { cn } from '@/lib/utils'
 import type { MerchantView, OkResponse } from '@/types/api'
 
 const NO_COPY = '__none__'
@@ -101,12 +102,19 @@ export function MerchantManageDialog({
         <div className="flex flex-col gap-6">
           <section className="flex flex-col gap-2">
             <Label>Locations</Label>
-            <div className="flex flex-col gap-1 rounded-md border border-border p-1">
+            <div className="flex flex-col gap-2 rounded-md border border-border p-2">
               {locations.length === 0 ? (
                 <p className="px-2 py-3 text-center text-xs text-muted-foreground">No locations yet.</p>
               ) : (
-                locations.map((l) => (
-                  <div key={l.id} className="flex items-center gap-2 rounded px-2 py-1.5 text-sm">
+                locations.map((l, i) => (
+                  <div
+                    key={l.id}
+                    className={cn(
+                      'flex items-center gap-2 rounded px-2 py-1.5 text-sm',
+                      // Extra locations sit indented under the first, so it reads as one merchant's stores.
+                      i > 0 && 'ml-4 border-l border-border pl-3',
+                    )}
+                  >
                     <MapPinIcon className="size-4 shrink-0 text-muted-foreground" />
                     <span className="truncate">{l.name}</span>
                   </div>
