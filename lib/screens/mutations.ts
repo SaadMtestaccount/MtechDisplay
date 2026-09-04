@@ -112,10 +112,11 @@ export async function updateScreen(
     if (!group) throw new ApiError(422, 'Unknown group')
   }
 
-  const patch: { name?: string; rotation?: number; group_id?: string | null } = {}
+  const patch: { name?: string; rotation?: number; group_id?: string | null; locked?: boolean } = {}
   if (input.name !== undefined) patch.name = input.name
   if (input.rotation !== undefined) patch.rotation = input.rotation
   if (input.group_id !== undefined) patch.group_id = input.group_id
+  if (input.locked !== undefined) patch.locked = input.locked
 
   const { error } = await ctx.supabase.from('screens').update(patch).eq('id', id).eq('org_id', ctx.org.id)
   if (error) throw error

@@ -35,15 +35,25 @@ export const claimScreenSchema = z.object({
 })
 export type ClaimScreenInput = z.infer<typeof claimScreenSchema>
 
-/** PATCH /api/screens/[id] — rename / rotation / group (at least one key). */
+/** PATCH /api/screens/[id] — rename / rotation / group / lock (at least one key). */
 export const screenUpdateSchema = z
   .object({
     name: nameSchema.optional(),
     rotation: z.literal(ROTATIONS).optional(),
     group_id: uuidSchema.nullable().optional(),
+    locked: z.boolean().optional(),
   })
   .refine(hasAtLeastOneKey, { message: 'Nothing to update' })
 export type ScreenUpdateInput = z.infer<typeof screenUpdateSchema>
+
+/** POST /api/screens/[id]/assign — put a menu / board / web page on a screen, or clear it. */
+export const assignScreenSchema = z.discriminatedUnion('kind', [
+  z.object({ kind: z.literal('menu'), menu_id: uuidSchema }),
+  z.object({ kind: z.literal('content'), content_id: uuidSchema }),
+  z.object({ kind: z.literal('website'), website_id: uuidSchema }),
+  z.object({ kind: z.literal('clear') }),
+])
+export type AssignScreenInput = z.infer<typeof assignScreenSchema>
 
 /** POST /api/screens/[id]/actions */
 export const screenActionSchema = z.object({ action: z.enum(SCREEN_ACTIONS) })

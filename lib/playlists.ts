@@ -15,11 +15,12 @@ export const PLAYLIST_ITEM_SELECT = '*, content(*), websites(*)' as const
 
 export type PlaylistItemSource = PlaylistItem & { content: Content | null; websites: Website | null }
 
-/** group.playlist when grouped, else the screen's own playlist. */
+/** assigned menu (top precedence) → group playlist when grouped → the screen's own playlist. */
 export async function getEffectivePlaylistId(
   client: DbClient,
-  screen: Pick<Screen, 'group_id' | 'playlist_id'>,
+  screen: Pick<Screen, 'menu_id' | 'group_id' | 'playlist_id'>,
 ): Promise<string | null> {
+  if (screen.menu_id !== null) return screen.menu_id
   if (screen.group_id !== null) {
     const { data, error } = await client
       .from('screen_groups')

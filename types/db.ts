@@ -81,12 +81,14 @@ export type Database = {
       /** playlist_id is UNIQUE among non-null values (a screen playlist belongs to one screen) — reverse embed yields an object. */
       screens: Table<
         ScreenRow,
-        | 'id' | 'playlist_id' | 'group_id' | 'device_token_hash' | 'fingerprint' | 'rotation' | 'last_seen_at'
-        | 'last_ip' | 'user_agent' | 'resolution' | 'current_item_id' | 'playlist_version' | 'paired_at' | 'created_at',
+        | 'id' | 'playlist_id' | 'group_id' | 'menu_id' | 'locked' | 'device_token_hash' | 'fingerprint' | 'rotation'
+        | 'last_seen_at' | 'last_ip' | 'user_agent' | 'resolution' | 'current_item_id' | 'playlist_version'
+        | 'paired_at' | 'created_at',
         [
           FK<'screens_org_id_fkey', 'org_id', 'organizations'>,
           FK<'screens_playlist_id_fkey', 'playlist_id', 'playlists', true>,
           FK<'screens_group_id_fkey', 'group_id', 'screen_groups'>,
+          FK<'screens_menu_id_fkey', 'menu_id', 'playlists'>,
           FK<'screens_current_item_id_fkey', 'current_item_id', 'playlist_items'>,
         ]
       >

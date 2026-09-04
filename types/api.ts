@@ -7,7 +7,7 @@
  */
 import type { ZodIssue } from 'zod'
 import type {
-  Content, ContentType, Folder, Organization, Playlist, PlaylistItem, PlaylistItemType,
+  Content, ContentType, Folder, MembershipRole, Organization, Playlist, PlaylistItem, PlaylistItemType,
   PlaylistKind, Profile, Screen, ScreenGroup, TransitionType, Website,
 } from './db'
 
@@ -139,6 +139,8 @@ export type ScreenView = Omit<Screen, 'device_token_hash'> & {
   paired: boolean
   online: boolean
   group_name: string | null
+  /** name of the assigned menu (screens.menu_id), null when none is assigned */
+  menu_name: string | null
   effective_playlist_id: string | null
   current_item: CurrentItemView | null
 }
@@ -154,6 +156,14 @@ export type PlaylistItemView = PlaylistItem & {
   expired: boolean
 }
 export type PlaylistView = Playlist & { items: PlaylistItemView[] }
+
+/** A reusable menu (kind='menu' playlist) as shown in the Menus library and the wall tray. */
+export type MenuView = Playlist & {
+  item_count: number
+  screen_count: number
+  /** cover thumb = first board's thumbnail; null when the first item is a web page or the menu is empty */
+  thumb_url: string | null
+}
 
 export type ScreenDetailView = ScreenView & {
   /** the EFFECTIVE playlist (group playlist when grouped) */
@@ -176,12 +186,13 @@ export type UserView = {
   is_super_admin: boolean
 }
 
-/** Merchant TV account (non-staff user with an org membership). */
+/** Merchant / store login (non-staff user with an org membership). role 'member' = TV only, 'admin' = manager. */
 export type MerchantView = {
   id: string
   email: string
   org_id: string
   org_name: string
+  role: MembershipRole
   last_sign_in_at: string | null
   created_at: string
 }
@@ -202,7 +213,14 @@ export type UploadSignResponse = {
 
 /** What the (admin) layout loads server-side and hands to AppProvider. */
 export type AppUser = { id: string; email: string }
-export type AppBootstrap = { user: AppUser; profile: Profile; org: Organization | null; orgs: Organization[] }
+export type AppBootstrap = {
+  user: AppUser
+  profile: Profile
+  org: Organization | null
+  orgs: Organization[]
+  /** membership role in the active org; null for a super admin who is not a member. Store managers = 'admin'/'owner'. */
+  role: MembershipRole | null
+}
 
 export type CronTickResponse = {
   screens_checked: number

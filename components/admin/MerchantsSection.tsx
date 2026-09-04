@@ -71,6 +71,7 @@ export function MerchantsSection() {
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-4">Email</TableHead>
                 <TableHead>Organization</TableHead>
+                <TableHead>Access</TableHead>
                 <TableHead>Last sign-in</TableHead>
                 <TableHead>Added</TableHead>
                 <TableHead className="w-12 pr-4 text-right">
@@ -81,8 +82,8 @@ export function MerchantsSection() {
             <TableBody>
               {merchantsQuery.data.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
-                    No merchant accounts yet. Add one and hand the credentials to the merchant.
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
+                    No store logins yet. Add one and hand the credentials to the store.
                   </TableCell>
                 </TableRow>
               ) : (
@@ -90,6 +91,9 @@ export function MerchantsSection() {
                   <TableRow key={m.id}>
                     <TableCell className="pl-4 font-medium">{m.email}</TableCell>
                     <TableCell className="text-muted-foreground">{m.org_name}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {m.role === 'admin' ? 'Manager' : 'TV only'}
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{relativeTime(m.last_sign_in_at)}</TableCell>
                     <TableCell className="text-muted-foreground">{relativeTime(m.created_at)}</TableCell>
                     <TableCell className="pr-4 text-right">

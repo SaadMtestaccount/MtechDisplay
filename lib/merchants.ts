@@ -7,15 +7,20 @@
 import { ApiError } from '@/lib/api'
 import type { CreateMerchantInput } from '@/lib/validators/merchants'
 import type { MerchantView } from '@/types/api'
-import type { DbClient } from '@/types/db'
+import type { DbClient, MembershipRole } from '@/types/db'
 
-type MembershipWithOrg = { user_id: string; org_id: string; organizations: { name: string } | null }
+type MembershipWithOrg = {
+  user_id: string
+  org_id: string
+  role: MembershipRole
+  organizations: { name: string } | null
+}
 
 /** Non-super-admin users that hold at least one membership, with their org name. */
 export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
   const { data: memberships, error } = await admin
     .from('memberships')
-    .select('user_id, org_id, organizations(name)')
+    .select('user_id, org_id, role, organizations(name)')
     .order('created_at', { ascending: true })
   if (error) throw error
   const rows = (memberships ?? []) as MembershipWithOrg[]
@@ -44,6 +49,7 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
       email: user.email ?? '',
       org_id: m.org_id,
       org_name: m.organizations?.name ?? 'Unknown organization',
+      role: m.role,
       last_sign_in_at: user.last_sign_in_at ?? null,
       created_at: user.created_at,
     })
@@ -74,7 +80,7 @@ export async function createMerchant(admin: DbClient, input: CreateMerchantInput
 
   const { error: membershipError } = await admin
     .from('memberships')
-    .upsert({ org_id: input.org_id, user_id: user.id, role: 'member' }, { onConflict: 'org_id,user_id' })
+    .upsert({ org_id: input.org_id, user_id: user.id, role: input.role }, { onConflict: 'org_id,user_id' })
   if (membershipError) {
     await admin.auth.admin.deleteUser(user.id).catch((e: unknown) => console.error('[merchants] cleanup', e))
     throw membershipError
@@ -85,6 +91,7 @@ export async function createMerchant(admin: DbClient, input: CreateMerchantInput
     email: user.email ?? input.email,
     org_id: org.id,
     org_name: org.name,
+    role: input.role,
     last_sign_in_at: null,
     created_at: user.created_at,
   }

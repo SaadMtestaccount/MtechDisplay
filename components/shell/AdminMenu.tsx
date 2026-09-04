@@ -11,10 +11,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useApp } from '@/hooks/useApp'
 import { createBrowserClient } from '@/lib/supabase/client'
 
 export function AdminMenu() {
   const router = useRouter()
+  const { profile } = useApp()
 
   const handleLogout = async () => {
     const { error } = await createBrowserClient().auth.signOut()
@@ -28,23 +30,27 @@ export function AdminMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger render={<Button variant="ghost" size="sm" />}>
-        Admin
+        {profile.is_super_admin ? 'Admin' : 'Account'}
         <ChevronDownIcon className="size-3.5 text-muted-foreground" />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">
-        <DropdownMenuItem onClick={() => router.push('/admin/users')}>
-          <UsersIcon />
-          Users
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/admin/orgs')}>
-          <Building2Icon />
-          Organizations
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
-          <SettingsIcon />
-          Settings
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {profile.is_super_admin ? (
+          <>
+            <DropdownMenuItem onClick={() => router.push('/admin/users')}>
+              <UsersIcon />
+              Users
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/admin/orgs')}>
+              <Building2Icon />
+              Organizations
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
+              <SettingsIcon />
+              Settings
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <DropdownMenuItem onClick={() => void handleLogout()}>
           <LogOutIcon />
           Log out

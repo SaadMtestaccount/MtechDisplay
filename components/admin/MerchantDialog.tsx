@@ -34,12 +34,14 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [orgId, setOrgId] = useState<string | null>(null)
+  const [role, setRole] = useState<'member' | 'admin'>('member')
 
   useEffect(() => {
     if (open) {
       setEmail('')
       setPassword(generatePassword())
       setOrgId(null)
+      setRole('member')
     }
   }, [open])
 
@@ -50,11 +52,11 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   })
 
   const mutation = useMutation({
-    mutationFn: (input: { email: string; password: string; org_id: string }) =>
+    mutationFn: (input: { email: string; password: string; org_id: string; role: 'member' | 'admin' }) =>
       apiFetch<MerchantView>('/api/merchants', { method: 'POST', json: input }),
     onSuccess: (merchant) => {
       void queryClient.invalidateQueries({ queryKey: queryKeys.merchants.all() })
-      toast.success(`Merchant account created for ${merchant.email}`)
+      toast.success(`${merchant.role === 'admin' ? 'Manager' : 'TV'} login created for ${merchant.email}`)
       onOpenChange(false)
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
@@ -65,17 +67,17 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (!canSubmit || orgId === null) return
-    mutation.mutate({ email: email.trim(), password, org_id: orgId })
+    mutation.mutate({ email: email.trim(), password, org_id: orgId, role })
   }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add merchant</DialogTitle>
+          <DialogTitle>Add store login</DialogTitle>
           <DialogDescription>
-            Hand these credentials to the merchant — they sign in on their TV and it starts playing
-            their organization&apos;s content. Merchants cannot access this console.
+            Hand these credentials to the store. A TV login plays the organization&apos;s content on
+            the screen; a Manager login can also run the Screen Wall from a back-office computer.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -133,6 +135,23 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
                 ))}
               </SelectContent>
             </Select>
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label>Access</Label>
+            <Select value={role} onValueChange={(v) => setRole(String(v) === 'admin' ? 'admin' : 'member')}>
+              <SelectTrigger aria-label="Access level">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="member">TV display only</SelectItem>
+                <SelectItem value="admin">Manager — can use the Wall</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-muted-foreground">
+              {role === 'admin'
+                ? 'Signs in on a back-office computer to run the Screen Wall for this organization.'
+                : 'Signs in only on the TV; cannot open this console.'}
+            </p>
           </div>
           <DialogFooter>
             <DialogClose render={<Button variant="outline" type="button" />}>Cancel</DialogClose>

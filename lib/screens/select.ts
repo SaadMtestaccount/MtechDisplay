@@ -8,10 +8,11 @@ import type { CurrentItemView, ScreenView } from '@/types/api'
 import type { Content, DbClient, PlaylistItem, Screen, Website } from '@/types/db'
 
 export const SCREEN_SELECT =
-  '*, screen_groups(name, playlist_id), current_item:playlist_items!screens_current_item_id_fkey(*, content(*), websites(*))' as const
+  '*, screen_groups(name, playlist_id), menu:playlists!screens_menu_id_fkey(id, name), current_item:playlist_items!screens_current_item_id_fkey(*, content(*), websites(*))' as const
 
 export type ScreenSource = Screen & {
   screen_groups: { name: string; playlist_id: string } | null
+  menu: { id: string; name: string } | null
   current_item: (PlaylistItem & { content: Content | null; websites: Website | null }) | null
 }
 
@@ -51,13 +52,15 @@ function toCurrentItem(item: ScreenSource['current_item']): CurrentItemView | nu
 }
 
 export function toScreenView(row: ScreenSource, now: Date = new Date()): ScreenView {
-  const { device_token_hash, screen_groups, current_item, ...screen } = row
+  const { device_token_hash, screen_groups, menu, current_item, ...screen } = row
   return {
     ...screen,
     paired: device_token_hash !== null,
     online: isOnline(screen.last_seen_at, now),
     group_name: screen_groups?.name ?? null,
-    effective_playlist_id: screen_groups?.playlist_id ?? screen.playlist_id,
+    menu_name: menu?.name ?? null,
+    // menu (top precedence) → group playlist → own playlist, matching getEffectivePlaylistId.
+    effective_playlist_id: menu?.id ?? screen_groups?.playlist_id ?? screen.playlist_id,
     current_item: toCurrentItem(current_item),
   }
 }

@@ -1224,3 +1224,38 @@ Merchants get an MTech-issued email/password that works ONLY on the TV player; t
   `BuildConfig.BASE_URL + '/player'`; debug BASE_URL `http://10.0.2.2:3000` (cleartext allowed in the debug manifest only),
   release BASE_URL = the production deployment. Fullscreen immersive, keep-screen-on, `mediaPlaybackRequiresUserGesture = false`,
   back button consumed, boot receiver + LEANBACK_LAUNCHER. Signing: `android/msign-release.jks` via `android/keystore.properties`.
+
+---
+
+## 14. Addendum — Menus + Screen Wall + store managers (added 2026-09-03, additive)
+
+A back-office "Wall" where a menu / board / web page is dragged onto a TV to show it and pin it.
+
+- **Schema (`0008_menu_kind.sql`, `0009_menus.sql`)**: `playlist_kind` gains `'menu'` (own migration — enum values
+  can't be used in the tx that adds them). `screens.menu_id uuid → playlists(id) on delete set null` + `screens.locked
+  boolean not null default false`. New triggers `screens_menu_same_org` (reuses generic `assert_same_org('playlists','menu_id')`)
+  and `screens_menu_kind` (`assert_screen_menu_kind` — menu_id must be a kind='menu' playlist; the existing kind guard is
+  hardcoded to playlist_id). `bump_playlist_version` extended: a screen with `menu_id` reacts only to its menu; menu_id null
+  rows keep the previous group/own-playlist behavior exactly.
+- **Menus = kind='menu' playlists** (reuse playlists + playlist_items). `lib/menus.ts`: `listMenus(supabase, orgId): MenuView[]`
+  (board count, screen count, cover thumb), `getMenu(supabase, orgId, id): PlaylistView` (404 unless kind='menu'),
+  `createMenu(ctx, name)`, `renameMenu(ctx, id, name)`, `deleteMenu(ctx, admin, id)` (screens fall back via FK + re-synced).
+  Boards are edited through the EXISTING `PUT /api/playlists/[id]/items` + `PlaylistEditor` (kind-agnostic).
+- **Content resolution precedence** (the two chokepoints, both updated): `getEffectivePlaylistId` and `toScreenView`'s
+  `effective_playlist_id` → `menu_id ?? group_playlist ?? playlist_id`. `ScreenView` gains `menu_name`; `menu_id`/`locked`
+  ride through from `ScreenRow`.
+- **Assignment (`lib/screens/assign.ts`, `POST /api/screens/[id]/assign`)**: `{kind:'menu', menu_id}` → set `menu_id` (reference);
+  `{kind:'content'|'website', ...}` → the screen's OWN playlist = [that item], detached from menu+group; `{kind:'clear'}` →
+  empty own playlist, detached, unlocked. A successful non-clear assign sets `locked=true`; a locked screen → **409**. Lock/unlock
+  via `PATCH /api/screens/[id] { locked }` (`screenUpdateSchema`/`updateScreen` extended). `assignScreenSchema` = discriminated
+  union on `kind`.
+- **Routes**: `GET|POST /api/menus`, `GET|PATCH|DELETE /api/menus/[id]`, `POST /api/screens/[id]/assign` — all `requireOrgContext()`
+  (org-scoped; a store manager with role admin can write). Types: `MenuView = Playlist & { item_count, screen_count, thumb_url }`.
+- **UI**: `/wall` (`components/wall/*`: `WallBoard` one DndContext, `WallTray` draggable Menus/Boards/Web tabs, `WallTile`
+  droppable `TvFrame` + lock overlay + kebab; drop → `/assign`, disabled droppable when locked). `/menus` + `/menus/[id]`
+  (`components/menus/*`: library cards → `PlaylistEditor`). `NavTabs` adds Wall + Menus. `queryKeys.menus`.
+- **Store managers (§ "Both")**: membership role `'admin'` = store manager (org-scoped write via RLS `can_write_org`, no policy
+  change); `'member'` stays TV-only. `AppBootstrap.role` surfaces it (loaded by `getMembershipRole` in `(admin)/layout.tsx`).
+  The outer `(admin)/layout` admits super admins + role admin/owner (else → `/player`); `(admin)/admin/layout.tsx` keeps
+  Users/Orgs/Settings to super admins (else → `/wall`). `AdminMenu`/`OrgSwitcher` hide staff-only items for non-super-admins.
+  `createMerchant`/`MerchantDialog` gain an access level (TV only / Manager).

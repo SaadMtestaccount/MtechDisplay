@@ -5,7 +5,7 @@ import { z } from 'zod'
 import type { PlaylistListQuery } from '@/types/api'
 import { uuidSchema } from '@/lib/validators/common'
 
-export const playlistKindSchema = z.enum(['screen', 'group'] as const)
+export const playlistKindSchema = z.enum(['screen', 'group', 'menu'] as const)
 export const playlistItemTypeSchema = z.enum(['content', 'website'] as const)
 export const transitionSchema = z.enum(['none', 'fade'] as const)
 

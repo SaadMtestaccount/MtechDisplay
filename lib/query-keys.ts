@@ -38,6 +38,11 @@ export const queryKeys = {
     all: (orgId: string) => ['playlists', orgId] as const,
     detail: (orgId: string, id: string) => ['playlists', orgId, 'detail', id] as const,
   },
+  menus: {
+    all: (orgId: string) => ['menus', orgId] as const,
+    list: (orgId: string) => ['menus', orgId, 'list'] as const,
+    detail: (orgId: string, id: string) => ['menus', orgId, 'detail', id] as const,
+  },
   orgs: {
     all: () => ['orgs'] as const,
     list: () => ['orgs', 'list'] as const,

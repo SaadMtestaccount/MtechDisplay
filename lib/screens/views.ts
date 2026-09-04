@@ -51,7 +51,7 @@ export async function getScreenView(supabase: DbClient, orgId: string, id: strin
 /** Self-heals a screen with no playlist and no group by creating its own playlist. */
 export async function getScreenDetail(supabase: DbClient, orgId: string, id: string): Promise<ScreenDetailView> {
   let source = await fetchScreenSource(supabase, orgId, id)
-  if (source.playlist_id === null && source.group_id === null) {
+  if (source.playlist_id === null && source.group_id === null && source.menu_id === null) {
     const playlist = await createPlaylist(supabase, orgId, source.name, 'screen')
     const { error } = await supabase.from('screens').update({ playlist_id: playlist.id }).eq('id', id)
     if (error) throw error

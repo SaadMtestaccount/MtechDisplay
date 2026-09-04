@@ -10,7 +10,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 // ---------------------------------------------------------------------------
 export type MembershipRole = 'owner' | 'admin' | 'member'
 export type ContentType = 'image' | 'video'
-export type PlaylistKind = 'screen' | 'group'
+export type PlaylistKind = 'screen' | 'group' | 'menu'
 export type PlaylistItemType = 'content' | 'website'
 export type TransitionType = 'none' | 'fade'
 
@@ -129,6 +129,10 @@ export type ScreenRow = {
   name: string
   playlist_id: string | null
   group_id: string | null
+  /** Assigned reusable menu (kind='menu' playlist); overrides group_id and playlist_id (0009). */
+  menu_id: string | null
+  /** Wall lock: pins the assignment; reassignment refused until unlocked (0009). */
+  locked: boolean
   device_token_hash: string | null
   /** Device fingerprint that self-claimed this screen (0007); null for admin-claimed screens. */
   fingerprint: string | null
