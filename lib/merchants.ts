@@ -9,8 +9,16 @@ import { randomUUID } from 'node:crypto'
 import { ApiError } from '@/lib/api'
 import { slugify } from '@/lib/utils'
 import type { AddLocationInput, CreateMerchantInput } from '@/lib/validators/merchants'
-import type { MerchantView } from '@/types/api'
+import type { MerchantView, SubscriptionTier } from '@/types/api'
+import { SUBSCRIPTION_TIERS } from '@/types/api'
 import type { DbClient, MembershipRole } from '@/types/db'
+
+/** Coerce a stored tier string to a known tier, defaulting to the first. */
+function toTier(value: string | null | undefined): SubscriptionTier {
+  return (SUBSCRIPTION_TIERS as readonly string[]).includes(value ?? '')
+    ? (value as SubscriptionTier)
+    : SUBSCRIPTION_TIERS[0]
+}
 
 type MembershipWithOrg = {
   user_id: string
@@ -51,10 +59,11 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
   const ids = Array.from(new Set(rows.map((m) => m.user_id)))
   const { data: profiles, error: profilesError } = await admin
     .from('profiles')
-    .select('id, is_super_admin')
+    .select('id, is_super_admin, subscription_tier')
     .in('id', ids)
   if (profilesError) throw profilesError
   const superAdmin = new Set((profiles ?? []).filter((p) => p.is_super_admin).map((p) => p.id))
+  const tierById = new Map((profiles ?? []).map((p) => [p.id, toTier(p.subscription_tier)] as const))
 
   const { data: users, error: usersError } = await admin.auth.admin.listUsers({ perPage: 1000 })
   if (usersError) throw usersError
@@ -72,6 +81,7 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
         email: user.email ?? '',
         role: m.role,
         locations: [],
+        subscription_tier: tierById.get(m.user_id) ?? SUBSCRIPTION_TIERS[0],
         last_sign_in_at: user.last_sign_in_at ?? null,
         created_at: user.created_at,
       }
@@ -116,6 +126,7 @@ export async function createMerchant(admin: DbClient, input: CreateMerchantInput
     email: user.email ?? input.email,
     role: input.role,
     locations: [location],
+    subscription_tier: SUBSCRIPTION_TIERS[0],
     last_sign_in_at: null,
     created_at: user.created_at,
   }
@@ -148,6 +159,14 @@ export async function addMerchantLocation(admin: DbClient, userId: string, input
 
 export async function setMerchantPassword(admin: DbClient, userId: string, password: string): Promise<void> {
   const { error } = await admin.auth.admin.updateUserById(userId, { password })
+  if (error) throw error
+}
+
+/** Set a merchant's (dummy) subscription tier on their profile. */
+export async function setMerchantSubscription(admin: DbClient, userId: string, tier: SubscriptionTier): Promise<void> {
+  const { data: profile } = await admin.from('profiles').select('is_super_admin').eq('id', userId).maybeSingle()
+  if (profile?.is_super_admin) throw new ApiError(422, 'That is an MTech staff account, not a merchant')
+  const { error } = await admin.from('profiles').update({ subscription_tier: tier }).eq('id', userId)
   if (error) throw error
 }
 

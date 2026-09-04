@@ -43,7 +43,7 @@ export type Database = {
   public: {
     Tables: {
       organizations: Table<OrganizationRow, 'id' | 'logo_url' | 'timezone' | 'created_at', []>
-      profiles: Table<ProfileRow, 'full_name' | 'avatar_url' | 'is_super_admin' | 'created_at', []>
+      profiles: Table<ProfileRow, 'full_name' | 'avatar_url' | 'is_super_admin' | 'subscription_tier' | 'created_at', []>
       memberships: Table<
         MembershipRow,
         'id' | 'role' | 'created_at',

@@ -15,12 +15,14 @@ import { ConfirmDialog } from '@/components/shell/ConfirmDialog'
 import { KebabMenu } from '@/components/shell/KebabMenu'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
 import { relativeTime } from '@/lib/utils'
-import type { MerchantView, OkResponse } from '@/types/api'
+import { SUBSCRIPTION_LABELS, SUBSCRIPTION_TIERS } from '@/types/api'
+import type { MerchantView, OkResponse, SubscriptionTier } from '@/types/api'
 
 function locationsLabel(m: MerchantView): string {
   if (m.locations.length === 0) return '—'
@@ -49,6 +51,24 @@ export function MerchantsSection() {
       setRemoveTarget(null)
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
+  })
+
+  const subscriptionMutation = useMutation({
+    mutationFn: ({ id, tier }: { id: string; tier: SubscriptionTier }) =>
+      apiFetch<OkResponse>(`/api/merchants/${id}/subscription`, { method: 'POST', json: { tier } }),
+    onMutate: async ({ id, tier }) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.merchants.list() })
+      const prev = queryClient.getQueryData<MerchantView[]>(queryKeys.merchants.list())
+      queryClient.setQueryData<MerchantView[]>(queryKeys.merchants.list(), (old) =>
+        (old ?? []).map((m) => (m.id === id ? { ...m, subscription_tier: tier } : m)),
+      )
+      return { prev }
+    },
+    onError: (e, _vars, ctx) => {
+      if (ctx?.prev) queryClient.setQueryData(queryKeys.merchants.list(), ctx.prev)
+      toast.error(e instanceof Error ? e.message : 'Something went wrong')
+    },
+    onSuccess: () => toast.success('Subscription updated'),
   })
 
   const filtered = useMemo(() => {
@@ -102,6 +122,7 @@ export function MerchantsSection() {
                 <TableHead className="pl-4">Email</TableHead>
                 <TableHead>Locations</TableHead>
                 <TableHead>Access</TableHead>
+                <TableHead>Subscription</TableHead>
                 <TableHead>Last sign-in</TableHead>
                 <TableHead className="w-12 pr-4 text-right">
                   <span className="sr-only">Actions</span>
@@ -111,7 +132,7 @@ export function MerchantsSection() {
             <TableBody>
               {filtered.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
+                  <TableCell colSpan={6} className="py-8 text-center text-muted-foreground">
                     {merchantsQuery.data.length === 0
                       ? 'No merchants yet. Add one and hand the credentials to the store.'
                       : 'No merchants match your search.'}
@@ -134,6 +155,27 @@ export function MerchantsSection() {
                     <TableCell className="pl-4 font-medium">{m.email}</TableCell>
                     <TableCell className="text-muted-foreground">{locationsLabel(m)}</TableCell>
                     <TableCell className="text-muted-foreground">{m.role === 'admin' ? 'Manager' : 'TV only'}</TableCell>
+                    <TableCell onClick={(e) => e.stopPropagation()}>
+                      <Select
+                        value={m.subscription_tier}
+                        onValueChange={(v) => {
+                          if (v && v !== m.subscription_tier) {
+                            subscriptionMutation.mutate({ id: m.id, tier: v as SubscriptionTier })
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="h-8 w-[7.5rem]" aria-label={`Subscription for ${m.email}`}>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {SUBSCRIPTION_TIERS.map((t) => (
+                            <SelectItem key={t} value={t}>
+                              {SUBSCRIPTION_LABELS[t]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
                     <TableCell className="text-muted-foreground">{relativeTime(m.last_sign_in_at)}</TableCell>
                     <TableCell className="pr-4 text-right" onClick={(e) => e.stopPropagation()}>
                       <KebabMenu

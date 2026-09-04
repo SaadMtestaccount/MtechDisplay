@@ -191,6 +191,15 @@ export type UserView = {
   is_super_admin: boolean
 }
 
+/** Dummy subscription tiers (no billing behavior yet); the super admin sets one per merchant. */
+export const SUBSCRIPTION_TIERS = ['starter', 'pro', 'enterprise'] as const
+export type SubscriptionTier = (typeof SUBSCRIPTION_TIERS)[number]
+export const SUBSCRIPTION_LABELS: Record<SubscriptionTier, string> = {
+  starter: 'Starter',
+  pro: 'Pro',
+  enterprise: 'Enterprise',
+}
+
 /** Merchant / store login (non-staff user). role 'member' = TV only, 'admin' = manager (multi-location). */
 export type MerchantView = {
   id: string
@@ -198,6 +207,7 @@ export type MerchantView = {
   role: MembershipRole
   /** the locations (organizations) this login can access */
   locations: { id: string; name: string }[]
+  subscription_tier: SubscriptionTier
   last_sign_in_at: string | null
   created_at: string
 }

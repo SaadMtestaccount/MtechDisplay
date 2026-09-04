@@ -43,6 +43,8 @@ export type ProfileRow = {
   full_name: string | null
   avatar_url: string | null
   is_super_admin: boolean
+  /** dummy per-merchant subscription label; set by the super admin (types/api SubscriptionTier). */
+  subscription_tier: string
   created_at: string
 }
 
