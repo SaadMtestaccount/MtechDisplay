@@ -1306,11 +1306,14 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
 
 ## 17. Addendum — Touch exit hotspot, click-to-watch tiles, wall delete (added 2026-09-08, additive)
 
-- **Player**: `ExitFullscreenHotspot()` — an invisible 64 px square fixed at the top-left of the PHYSICAL screen (rendered
-  by `PlayerApp` outside `RotationRoot`, so orientation/rotation don't move it). Five consecutive taps within 3 s toggle
-  fullscreen. A manual exit calls `setAutoFullscreenSuppressed(true)` (`lib/player/fullscreen.ts`, module state) so
-  `FullscreenPrompt` stops re-requesting fullscreen on the next tap; five more taps re-enter and clear the flag; a reload
-  resets it. Bottom-right stays free for `Watermark`.
+- **Player**: `ExitFullscreenHotspot()` — five consecutive taps/clicks within 3 s inside the top-left 96 px of the PHYSICAL
+  screen toggle fullscreen (rendered by `PlayerApp` outside `RotationRoot`, so orientation/rotation don't move it). Taps are
+  counted by a window-level `pointerdown` CAPTURE listener on `clientX/clientY` (nothing layered over the corner can hide
+  them); an invisible 96 px square only stops a web-page iframe from swallowing the events. Feedback: a translucent ripple
+  (`@keyframes tap-dot`, globals.css) where each registered tap landed + a five-dot progress row at top-left that clears
+  when the window lapses. A manual exit calls `setAutoFullscreenSuppressed(true)` (`lib/player/fullscreen.ts`, module
+  state) so `FullscreenPrompt` stops re-requesting fullscreen on the next tap; five more taps re-enter and clear the flag;
+  a reload resets it. Bottom-right stays free for `Watermark`.
 - **Wall**: clicking a `WallTile`'s TV frame opens `/player?code=<login_code>` in a new tab (identical to the kebab's
   "Open full screen"; a screen without a code falls back to `onOpen`). `WallTile` gains `onDelete(): void`; the kebab ends
   with "Delete screen" (destructive, separator) and `WallBoard` renders `DeleteScreenDialog` for it. "Clear" is no longer

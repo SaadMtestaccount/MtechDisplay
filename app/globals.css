@@ -166,6 +166,18 @@
   }
 }
 
+/* Player: the ripple shown where a registered corner tap landed (ExitFullscreenHotspot). */
+@keyframes tap-dot {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.8);
+  }
+}
+
 @layer components {
   /* Micro-label: the small uppercase caption used on headers, table heads and data captions. */
   .eyebrow {
