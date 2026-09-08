@@ -212,7 +212,8 @@ table, use the Supabase Dashboard → Table Editor.
    and a name → confirm. The player leaves the pairing screen within ~3 seconds and the new
    card shows **Online** with its "Last seen" line ticking.
 9. **Live control.** With the player visible, edit its playlist — the change reaches the TV
-   within seconds. Card kebab → **Rotation** → 90° → the player rotates. **Identify** → the
+   within seconds. Card kebab → **Orientation & rotation** → Rotation 90° → the player rotates
+   (Orientation **Portrait** instead draws an upright 9:16 stage for vertical menus). **Identify** → the
    screen's name overlays on the TV for 10 s. **Reload player** → the player page reloads.
 10. **Offline resilience.** Cut the player's network for ~2 minutes (toggle Wi-Fi, or
     DevTools → Network → Offline) → it keeps looping its cached image and video, skips
