@@ -4,7 +4,8 @@
  *   sign (POST /api/uploads/sign) → extract meta + thumbnail (lib/thumbs, best effort) →
  *   upload media (≤ 6 MB: raw XHR PUT to the signed URL — NEVER uploadToSignedUrl, it has no
  *   progress and no abort; > 6 MB: tus-js-client against /storage/v1/upload/resumable) →
- *   upload thumb via the browser Supabase client → POST /api/content.
+ *   upload thumb to ITS signed URL (server-signed like the media, so it never depends on the
+ *   user's storage policies) → POST /api/content.
  * A retry re-signs (new content id) — the hook simply calls startFileUpload again.
  */
 import { Upload as TusUpload } from 'tus-js-client'
@@ -189,9 +190,13 @@ async function runPipeline(
   handlers.onPhase('finalizing')
   let thumbPath: string | null = null
   if (meta.thumb) {
+    // Signed by the API (§16): works for store managers too, who have no thumbs-bucket policy.
     const { error } = await createBrowserClient()
       .storage.from(BUCKETS.thumbs)
-      .upload(sign.thumb_path, meta.thumb, { contentType: 'image/jpeg', upsert: true })
+      .uploadToSignedUrl(sign.thumb_path, sign.thumb_token, meta.thumb, {
+        contentType: 'image/jpeg',
+        upsert: true,
+      })
     if (error) console.warn('[upload] thumbnail upload failed for', file.name, error.message)
     else thumbPath = sign.thumb_path
   }

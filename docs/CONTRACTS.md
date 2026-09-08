@@ -1284,3 +1284,20 @@ already portrait. Distinct from `rotation`, which stays for how a TV is physical
   `'rotation'`, menu label "Orientation & rotation") now saves `{ orientation, rotation }` together. `TvFrame` gains
   `orientation?: string` and previews a portrait screen as a centered 9:16 stage on the 16:9 frame; `ScreenCard` and
   `WallTile` pass it. `RotationSelect`'s 0° label reads "0° (not rotated)" so it no longer collides with Landscape.
+
+---
+
+## 16. Addendum — Server-signed thumbnail uploads (added 2026-09-08, fix)
+
+**Bug**: `0005_storage.sql` only grants super admins write access to the `thumbs` bucket, but the browser uploaded each
+thumbnail with the user's own session. A store manager's (role `admin`) thumbnail upload was therefore rejected by RLS,
+`thumb_path` was saved as `null`, and every card / tile / manifest item showed the placeholder icon. Media itself was fine
+(server-signed URL).
+
+- `UploadSignResponse` gains `thumb_signed_url: string` and `thumb_token: string`. `signUpload` creates signed upload
+  URLs for the media object AND the thumbnail (`thumbs` bucket, `upsert: true`) in parallel.
+- `lib/upload-client.ts` uploads the thumbnail with `storage.from('thumbs').uploadToSignedUrl(thumb_path, thumb_token, blob)`
+  — no storage policy involved, so it works for every console user. Storage policies are unchanged.
+- Existing image rows with `thumb_path = null` were backfilled once from the originals (server-side resize matching
+  `lib/thumbs.ts`: max width 640, aspect kept, JPEG q0.82, black behind transparency). No runtime self-healing exists — a
+  null `thumb_path` still renders the placeholder icon.

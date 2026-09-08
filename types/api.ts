@@ -226,6 +226,9 @@ export type UploadSignResponse = {
   thumb_path: string
   signed_url: string
   token: string
+  /** Signed upload URL + token for the thumbnail (thumbs bucket) — server-signed like the media (§16). */
+  thumb_signed_url: string
+  thumb_token: string
   resumable: boolean
   upload_url: string
 }

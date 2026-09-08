@@ -11,9 +11,11 @@ import { BUCKETS, extensionForMime, mediaPath, resumableUploadUrl, thumbPath } f
 import type { UploadSignInput } from '@/lib/validators/uploads'
 
 /**
- * Mints a content id, derives the storage/thumb keys and returns a signed upload URL
- * (`upsert: true` so a retried XHR PUT does not 409). `resumable` tells the client to use
- * TUS (> 6 MB) instead of a single signed PUT.
+ * Mints a content id, derives the storage/thumb keys and returns signed upload URLs for BOTH
+ * the media object and its thumbnail (`upsert: true` so a retried PUT does not 409). The
+ * thumbnail is signed too so the upload works for every console user — store managers have no
+ * storage policy on the thumbs bucket, and a policy-rejected thumb used to leave the card with
+ * a placeholder icon (§16). `resumable` tells the client to use TUS (> 6 MB) for the media.
  */
 export async function signUpload(
   ctx: OrgContext,
@@ -26,21 +28,28 @@ export async function signUpload(
 
   const contentId = crypto.randomUUID()
   const storagePath = mediaPath(ctx.org.id, contentId, ext)
+  const thumbKey = thumbPath(ctx.org.id, contentId)
 
-  const { data, error } = await admin.storage
-    .from(BUCKETS.media)
-    .createSignedUploadUrl(storagePath, { upsert: true })
-  if (error || !data) {
-    throw new ApiError(500, `Could not create an upload URL: ${error?.message ?? 'unknown error'}`)
+  const [media, thumb] = await Promise.all([
+    admin.storage.from(BUCKETS.media).createSignedUploadUrl(storagePath, { upsert: true }),
+    admin.storage.from(BUCKETS.thumbs).createSignedUploadUrl(thumbKey, { upsert: true }),
+  ])
+  if (media.error || !media.data) {
+    throw new ApiError(500, `Could not create an upload URL: ${media.error?.message ?? 'unknown error'}`)
+  }
+  if (thumb.error || !thumb.data) {
+    throw new ApiError(500, `Could not create a thumbnail upload URL: ${thumb.error?.message ?? 'unknown error'}`)
   }
 
   return {
     content_id: contentId,
     bucket: 'media',
     storage_path: storagePath,
-    thumb_path: thumbPath(ctx.org.id, contentId),
-    signed_url: data.signedUrl,
-    token: data.token,
+    thumb_path: thumbKey,
+    signed_url: media.data.signedUrl,
+    token: media.data.token,
+    thumb_signed_url: thumb.data.signedUrl,
+    thumb_token: thumb.data.token,
     resumable: input.size_bytes > RESUMABLE_THRESHOLD_BYTES,
     upload_url: resumableUploadUrl(),
   }
