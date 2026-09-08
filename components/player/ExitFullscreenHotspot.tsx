@@ -3,13 +3,14 @@
 /**
  * components/player/ExitFullscreenHotspot.tsx — five consecutive taps/clicks in the top-left
  * corner of the PHYSICAL screen exit fullscreen: the way out on a touch screen with no keyboard
- * (docs/CONTRACTS.md §17). Taps are counted from a window-level capture listener by
- * coordinates, so nothing layered over the corner can hide them; the invisible square only
- * keeps a web-page iframe from swallowing the pointer events. Each registered tap shows a
- * ripple where it landed plus a five-dot progress row in the corner. Exiting blocks
- * FullscreenPrompt's tap-to-enter for REENTER_DELAY_MS (otherwise the next tap would undo it);
- * after that a single tap re-enters as normal. Rendered outside RotationRoot so
- * orientation/rotation don't move it.
+ * (docs/CONTRACTS.md §17). Only active WHILE fullscreen — outside it nothing is counted or drawn,
+ * and any partial count is dropped the moment fullscreen ends (Esc, browser UI, or this). Taps
+ * are counted from a window-level capture listener by coordinates, so nothing layered over the
+ * corner can hide them; the invisible square only keeps a web-page iframe from swallowing the
+ * pointer events. Each registered tap shows a ripple where it landed plus a five-dot progress
+ * row in the corner. Exiting blocks FullscreenPrompt's tap-to-enter for REENTER_DELAY_MS
+ * (otherwise the next tap would undo it); after that a single tap re-enters as normal.
+ * Rendered outside RotationRoot so orientation/rotation don't move it.
  */
 import { useEffect, useRef, useState } from 'react'
 import { suppressAutoFullscreenFor } from '@/lib/player/fullscreen'
@@ -23,18 +24,6 @@ const RIPPLE_MS = 900
 
 type Ripple = { id: number; x: number; y: number }
 
-function onFifthTap(): void {
-  if (document.fullscreenElement) {
-    suppressAutoFullscreenFor(REENTER_DELAY_MS)
-    void document.exitFullscreen().catch(() => {})
-    return
-  }
-  // Not fullscreen (e.g. still inside the re-enter delay): five taps re-enter right away.
-  suppressAutoFullscreenFor(0)
-  const root = document.documentElement
-  if (typeof root.requestFullscreen === 'function') void root.requestFullscreen().catch(() => {})
-}
-
 export function ExitFullscreenHotspot() {
   const taps = useRef<number[]>([])
   const nextId = useRef(0)
@@ -43,7 +32,14 @@ export function ExitFullscreenHotspot() {
   const [lastTap, setLastTap] = useState(0)
 
   useEffect(() => {
+    const reset = () => {
+      taps.current = []
+      setCount(0)
+      setRipples([])
+    }
+
     const onPointerDown = (e: PointerEvent) => {
+      if (!document.fullscreenElement) return
       if (e.pointerType === 'mouse' && e.button !== 0) return
       if (e.clientX > ZONE_PX || e.clientY > ZONE_PX) return
       const now = Date.now()
@@ -54,17 +50,27 @@ export function ExitFullscreenHotspot() {
       setTimeout(() => setRipples((r) => r.filter((x) => x.id !== id)), RIPPLE_MS)
 
       if (recent.length >= TAPS_TO_EXIT) {
-        taps.current = []
-        setCount(0)
-        onFifthTap()
+        reset()
+        suppressAutoFullscreenFor(REENTER_DELAY_MS)
+        void document.exitFullscreen().catch(() => {})
         return
       }
       taps.current = recent
       setCount(recent.length)
       setLastTap(now)
     }
+
+    // Leaving fullscreen by any route drops a partial count so no dots linger on the page.
+    const onFullscreenChange = () => {
+      if (!document.fullscreenElement) reset()
+    }
+
     window.addEventListener('pointerdown', onPointerDown, { capture: true })
-    return () => window.removeEventListener('pointerdown', onPointerDown, { capture: true })
+    document.addEventListener('fullscreenchange', onFullscreenChange)
+    return () => {
+      window.removeEventListener('pointerdown', onPointerDown, { capture: true })
+      document.removeEventListener('fullscreenchange', onFullscreenChange)
+    }
   }, [])
 
   // The progress row clears once the 5 s tap window lapses without reaching five.

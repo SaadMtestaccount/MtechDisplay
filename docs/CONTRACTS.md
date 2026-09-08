@@ -1311,10 +1311,13 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
   counted by a window-level `pointerdown` CAPTURE listener on `clientX/clientY` (nothing layered over the corner can hide
   them); an invisible 96 px square only stops a web-page iframe from swallowing the events. Feedback: a high-contrast
   ripple (`@keyframes tap-dot`, globals.css; white with a dark halo so it reads on any content) where each registered tap
-  landed + a five-dot progress pill at top-left that clears when the window lapses. A manual exit calls
+  landed + a five-dot progress pill at top-left that clears when the window lapses. The hotspot is active ONLY while
+  `document.fullscreenElement` is set: outside fullscreen nothing is counted or drawn, and a `fullscreenchange` to
+  non-fullscreen (Esc, browser UI, the hotspot) drops any partial count. A manual exit calls
   `suppressAutoFullscreenFor(5000)` (`lib/player/fullscreen.ts`, module state) so `FullscreenPrompt`'s tap-to-enter is
-  blocked for 5 s; after that a SINGLE tap re-enters as normal. Five corner taps while not fullscreen re-enter immediately
-  (clears the block). A reload resets everything. Bottom-right stays free for `Watermark`.
+  blocked for 5 s; after that a SINGLE tap re-enters as normal. A reload resets everything. Bottom-right stays free for
+  `Watermark`. `ContextMenuBlocker()` (also rendered by `PlayerApp`) cancels `contextmenu` (right-click / long-press)
+  while fullscreen only.
 - **Wall**: clicking a `WallTile`'s TV frame opens `/player?code=<login_code>` in a new tab (identical to the kebab's
   "Open full screen"; a screen without a code falls back to `onOpen`). `WallTile` gains `onDelete(): void`; the kebab ends
   with "Delete screen" (destructive, separator) and `WallBoard` renders `DeleteScreenDialog` for it. "Clear" is no longer

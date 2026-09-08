@@ -18,6 +18,7 @@ import { DeviceApiError, enroll, fetchManifest } from '@/lib/player/device-api'
 import { deleteMediaCache } from '@/lib/player/media-cache'
 import { FINGERPRINT_KEY, MANIFEST_KEY, PENDING_KEY, newId, readJson, remove, writeJson } from '@/lib/player/player-storage'
 import type { HeartbeatRequest } from '@/types/api'
+import { ContextMenuBlocker } from '@/components/player/ContextMenuBlocker'
 import { CursorHider } from '@/components/player/CursorHider'
 import { FullscreenPrompt } from '@/components/player/FullscreenPrompt'
 import { IdentifyOverlay } from '@/components/player/IdentifyOverlay'
@@ -192,6 +193,7 @@ export function PlayerApp() {
       <CursorHider />
       <FullscreenPrompt />
       <ExitFullscreenHotspot />
+      <ContextMenuBlocker />
       <KeepAwake />
     </PlayerErrorBoundary>
   )
