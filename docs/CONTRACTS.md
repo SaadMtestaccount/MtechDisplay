@@ -1329,9 +1329,11 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
   the two columns (ride into `ScreenView`).
 - **`PATCH /api/screens/[id]`**: `screenUpdateSchema.watermark?: { x, y } | null`. `updateScreen` refuses it with **403**
   unless `ctx.profile.is_super_admin`; a change calls `bumpAndSyncScreens` (the TV redraws).
-- **Player**: `Watermark({ position })` renders the "Powered by MTech" pill (replaces the logo chip); `WatermarkBadge` +
-  `watermarkStyle()` are shared with the admin preview. Sizes use `cqmin` — `RotationRoot`'s surface and portrait stage
-  declare `container-type: size`. `lib/player/platform.ts` `isAndroidWebView()` (UA `; wv)`): `ExitFullscreenHotspot`
+- **Player**: `Watermark({ position })` renders the "Powered by MTech" pill (replaces the logo chip); `WatermarkBadge({
+  position, className?, ref? })` is shared with the admin preview. Size + corner offsets live in globals.css `.mtech-badge`
+  (`[data-corner]` when unpositioned): `cqmin` against the stage — `RotationRoot`'s surface and portrait stage declare
+  `container-type: size` — inside `@supports (font-size: 1cqmin)`, with a `vmin` fallback for Android WebViews that lack
+  container units (otherwise the badge rendered unstyled at the top-left). `lib/player/platform.ts` `isAndroidWebView()` (UA `; wv)`): `ExitFullscreenHotspot`
   never listens inside the Android app.
 - **Admin**: `WatermarkPositionDialog({ screen, onOpenChange })` — full-screen preview (stage matches the TV's orientation,
   `container-type: size`, background = the TV's preview thumb) where the badge is dragged (grab offset kept) or placed by

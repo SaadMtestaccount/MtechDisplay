@@ -179,6 +179,28 @@
 }
 
 @layer components {
+  /* "Powered by MTech" badge (player + admin preview). Sizes follow the stage through container
+     units; Android WebViews too old for cq units (many TV sticks) fall back to viewport units so
+     the badge still renders as a small pill in the corner instead of an unstyled block. */
+  .mtech-badge {
+    font-size: 1.9vmin;
+    padding: 0.9vmin 1.8vmin;
+  }
+  .mtech-badge[data-corner] {
+    right: 2.5vmin;
+    bottom: 2.5vmin;
+  }
+  @supports (font-size: 1cqmin) {
+    .mtech-badge {
+      font-size: 1.9cqmin;
+      padding: 0.9cqmin 1.8cqmin;
+    }
+    .mtech-badge[data-corner] {
+      right: 2.5cqmin;
+      bottom: 2.5cqmin;
+    }
+  }
+
   /* Micro-label: the small uppercase caption used on headers, table heads and data captions. */
   .eyebrow {
     font-family: var(--font-sans);

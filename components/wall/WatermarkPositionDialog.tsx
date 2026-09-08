@@ -10,7 +10,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import { toast } from 'sonner'
-import { WatermarkBadge, watermarkStyle } from '@/components/player/Watermark'
+import { WatermarkBadge } from '@/components/player/Watermark'
 import { Button } from '@/components/ui/button'
 import { useApp } from '@/hooks/useApp'
 import { apiFetch } from '@/lib/api-client'
@@ -168,7 +168,7 @@ export function WatermarkPositionDialog({
           )}
           <WatermarkBadge
             ref={badgeRef}
-            style={watermarkStyle(pos)}
+            position={pos}
             className="pointer-events-auto cursor-grab ring-2 ring-primary active:cursor-grabbing"
           />
         </div>
