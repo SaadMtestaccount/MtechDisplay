@@ -165,6 +165,7 @@ export function MerchantsSection() {
                     </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Select
+                        items={SUBSCRIPTION_LABELS}
                         value={m.subscription_tier}
                         onValueChange={(v) => {
                           if (v && v !== m.subscription_tier) {

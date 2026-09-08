@@ -30,6 +30,7 @@ import { AddTvDialog } from '@/components/wall/AddTvDialog'
 import { ScreenCodeDialog } from '@/components/wall/ScreenCodeDialog'
 import { WallTile } from '@/components/wall/WallTile'
 import { WallTray } from '@/components/wall/WallTray'
+import { WatermarkPositionDialog } from '@/components/wall/WatermarkPositionDialog'
 import { assignBodyFor, screenIdFromDrop, type WallPick } from '@/components/wall/wall-dnd'
 import { useApp } from '@/hooks/useApp'
 import { useNow } from '@/hooks/useNow'
@@ -41,7 +42,7 @@ import type { AssignScreenInput } from '@/lib/validators/screens'
 import type { ScreenView } from '@/types/api'
 
 export function WallBoard() {
-  const { org } = useApp()
+  const { org, profile } = useApp()
   const router = useRouter()
   const queryClient = useQueryClient()
   const { statuses } = useRealtimeScreens()
@@ -50,6 +51,7 @@ export function WallBoard() {
   const [addOpen, setAddOpen] = useState(false)
   const [codeTarget, setCodeTarget] = useState<ScreenView | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<ScreenView | null>(null)
+  const [watermarkTarget, setWatermarkTarget] = useState<ScreenView | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   const screensQuery = useQuery({
@@ -148,6 +150,7 @@ export function WallBoard() {
                     onToggleLock={() => lock.mutate({ screenId: s.id, locked: !s.locked })}
                     onClear={() => assign.mutate({ screenId: s.id, body: { kind: 'clear' } })}
                     onDelete={() => setDeleteTarget(s)}
+                    onPositionWatermark={profile.is_super_admin ? () => setWatermarkTarget(s) : undefined}
                   />
                 ))}
               </div>
@@ -174,6 +177,12 @@ export function WallBoard() {
         screen={deleteTarget}
         onOpenChange={(open) => {
           if (!open) setDeleteTarget(null)
+        }}
+      />
+      <WatermarkPositionDialog
+        screen={watermarkTarget}
+        onOpenChange={(open) => {
+          if (!open) setWatermarkTarget(null)
         }}
       />
     </>

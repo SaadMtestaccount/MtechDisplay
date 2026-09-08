@@ -123,7 +123,11 @@ export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenCh
           </div>
           <div className="flex flex-col gap-2">
             <Label>Access</Label>
-            <Select value={role} onValueChange={(v) => setRole(String(v) === 'admin' ? 'admin' : 'member')}>
+            <Select
+              items={{ member: 'TV display only', admin: 'Manager — can use the console' }}
+              value={role}
+              onValueChange={(v) => setRole(String(v) === 'admin' ? 'admin' : 'member')}
+            >
               <SelectTrigger aria-label="Access level">
                 <SelectValue />
               </SelectTrigger>

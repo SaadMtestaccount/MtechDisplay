@@ -48,7 +48,11 @@ export function ListToolbar({
 
   return (
     <div className="flex flex-wrap items-center gap-2">
-      <Select value={sort.value} onValueChange={(v) => sort.onChange(String(v))}>
+      <Select
+        items={Object.fromEntries(sort.options.map((o) => [o.value, o.label] as const))}
+        value={sort.value}
+        onValueChange={(v) => sort.onChange(String(v))}
+      >
         <SelectTrigger size="sm" aria-label="Sort">
           <ArrowUpDownIcon className="size-3.5 text-muted-foreground" />
           <SelectValue />

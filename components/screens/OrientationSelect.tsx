@@ -24,6 +24,7 @@ export function OrientationSelect({
   const Icon = current === 'portrait' ? RectangleVerticalIcon : RectangleHorizontalIcon
   return (
     <Select
+      items={LABELS}
       value={current}
       onValueChange={(v) => {
         const next = String(v)

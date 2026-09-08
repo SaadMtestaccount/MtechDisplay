@@ -5,6 +5,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { isRotation } from '@/lib/utils'
 import { ROTATIONS, type Rotation } from '@/types/api'
 
+const label = (rotation: Rotation): string => (rotation === 0 ? '0° (not rotated)' : `${rotation}°`)
+// Base UI's Select.Value shows the raw value unless the root knows the labels.
+const ITEMS: Record<string, string> = Object.fromEntries(ROTATIONS.map((r) => [String(r), label(r)]))
+
 /** 0/90/180/270 select; values travel as strings (base-nova Select) and parse back via isRotation. */
 export function RotationSelect({
   value,
@@ -17,6 +21,7 @@ export function RotationSelect({
 }) {
   return (
     <Select
+      items={ITEMS}
       value={String(value)}
       onValueChange={(v) => {
         const parsed = Number(String(v))
@@ -31,7 +36,7 @@ export function RotationSelect({
       <SelectContent>
         {ROTATIONS.map((rotation) => (
           <SelectItem key={rotation} value={String(rotation)}>
-            {rotation === 0 ? '0° (not rotated)' : `${rotation}°`}
+            {label(rotation)}
           </SelectItem>
         ))}
       </SelectContent>

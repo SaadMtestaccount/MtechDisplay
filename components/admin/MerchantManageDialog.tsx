@@ -100,6 +100,11 @@ export function MerchantManageDialog({
 
   const locations = view?.locations ?? []
   const employees = view?.employees ?? []
+  // Labels for the copy-from select (Base UI's Select.Value shows raw values without them).
+  const copyItems: Record<string, string> = {
+    [NO_COPY]: 'Start empty',
+    ...Object.fromEntries(locations.map((l) => [l.id, l.name] as const)),
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -141,7 +146,7 @@ export function MerchantManageDialog({
                   {locations.length > 0 ? (
                     <div className="flex flex-col gap-1.5">
                       <Label className="text-xs text-muted-foreground">Copy content &amp; menus from</Label>
-                      <Select value={copyFrom} onValueChange={(v) => setCopyFrom(v ?? NO_COPY)}>
+                      <Select items={copyItems} value={copyFrom} onValueChange={(v) => setCopyFrom(v ?? NO_COPY)}>
                         <SelectTrigger aria-label="Copy content from location">
                           <SelectValue />
                         </SelectTrigger>

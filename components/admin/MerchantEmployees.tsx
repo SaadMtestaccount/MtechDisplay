@@ -24,6 +24,9 @@ import type { EmployeeView, MerchantView, OkResponse } from '@/types/api'
 
 type Role = 'member' | 'admin'
 const toRole = (v: unknown): Role => (String(v) === 'admin' ? 'admin' : 'member')
+// Base UI's Select.Value shows the raw value unless the root knows the labels.
+const ROLE_SHORT: Record<Role, string> = { member: 'TV only', admin: 'Manager' }
+const ROLE_LONG: Record<Role, string> = { member: 'TV display only', admin: 'Manager — can use the console' }
 
 function LocationToggles({
   merchant,
@@ -150,6 +153,7 @@ export function MerchantEmployees({ merchant, onUpdated }: { merchant: MerchantV
                 </div>
               </div>
               <Select
+                items={ROLE_SHORT}
                 value={e.role === 'admin' ? 'admin' : 'member'}
                 onValueChange={(v) => {
                   const next = toRole(v)
@@ -161,8 +165,8 @@ export function MerchantEmployees({ merchant, onUpdated }: { merchant: MerchantV
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">TV only</SelectItem>
-                  <SelectItem value="admin">Manager</SelectItem>
+                  <SelectItem value="member">{ROLE_SHORT.member}</SelectItem>
+                  <SelectItem value="admin">{ROLE_SHORT.admin}</SelectItem>
                 </SelectContent>
               </Select>
               <KebabMenu
@@ -246,13 +250,13 @@ export function MerchantEmployees({ merchant, onUpdated }: { merchant: MerchantV
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Access</Label>
-              <Select value={role} onValueChange={(v) => setRole(toRole(v))}>
+              <Select items={ROLE_LONG} value={role} onValueChange={(v) => setRole(toRole(v))}>
                 <SelectTrigger aria-label="Access level">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="member">TV display only</SelectItem>
-                  <SelectItem value="admin">Manager — can use the console</SelectItem>
+                  <SelectItem value="member">{ROLE_LONG.member}</SelectItem>
+                  <SelectItem value="admin">{ROLE_LONG.admin}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
