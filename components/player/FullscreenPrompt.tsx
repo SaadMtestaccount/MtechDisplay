@@ -5,7 +5,7 @@
  * is not fullscreen (docs/CONTRACTS.md §9.7). Browsers only honor the request inside a
  * user gesture, so this is the whole "prompt"; kiosk-mode browsers are already
  * fullscreen and never trigger it. Failures are silent (no error UI on the TV).
- * Stays quiet after a manual exit through ExitFullscreenHotspot (§17).
+ * Stays quiet for a few seconds after a manual exit through ExitFullscreenHotspot (§17).
  */
 import { useEffect } from 'react'
 import { isAutoFullscreenSuppressed } from '@/lib/player/fullscreen'

@@ -2,32 +2,35 @@
 
 /**
  * components/player/ExitFullscreenHotspot.tsx — five consecutive taps/clicks in the top-left
- * corner of the PHYSICAL screen toggle fullscreen: the way out on a touch screen with no
- * keyboard (docs/CONTRACTS.md §17). Taps are counted from a window-level capture listener by
+ * corner of the PHYSICAL screen exit fullscreen: the way out on a touch screen with no keyboard
+ * (docs/CONTRACTS.md §17). Taps are counted from a window-level capture listener by
  * coordinates, so nothing layered over the corner can hide them; the invisible square only
  * keeps a web-page iframe from swallowing the pointer events. Each registered tap shows a
- * translucent ripple where it landed plus a five-dot progress row in the corner. Exiting also
- * suppresses FullscreenPrompt's auto re-entry (otherwise the next tap would undo it); five
- * more taps re-enter. Rendered outside RotationRoot so orientation/rotation don't move it.
+ * ripple where it landed plus a five-dot progress row in the corner. Exiting blocks
+ * FullscreenPrompt's tap-to-enter for REENTER_DELAY_MS (otherwise the next tap would undo it);
+ * after that a single tap re-enters as normal. Rendered outside RotationRoot so
+ * orientation/rotation don't move it.
  */
 import { useEffect, useRef, useState } from 'react'
-import { setAutoFullscreenSuppressed } from '@/lib/player/fullscreen'
+import { suppressAutoFullscreenFor } from '@/lib/player/fullscreen'
 import { cn } from '@/lib/utils'
 
-const TAPS_TO_TOGGLE = 5
+const TAPS_TO_EXIT = 5
 const TAP_WINDOW_MS = 5000
+const REENTER_DELAY_MS = 5000
 const ZONE_PX = 96
-const RIPPLE_MS = 700
+const RIPPLE_MS = 900
 
 type Ripple = { id: number; x: number; y: number }
 
-function toggleFullscreen(): void {
+function onFifthTap(): void {
   if (document.fullscreenElement) {
-    setAutoFullscreenSuppressed(true)
+    suppressAutoFullscreenFor(REENTER_DELAY_MS)
     void document.exitFullscreen().catch(() => {})
     return
   }
-  setAutoFullscreenSuppressed(false)
+  // Not fullscreen (e.g. still inside the re-enter delay): five taps re-enter right away.
+  suppressAutoFullscreenFor(0)
   const root = document.documentElement
   if (typeof root.requestFullscreen === 'function') void root.requestFullscreen().catch(() => {})
 }
@@ -50,10 +53,10 @@ export function ExitFullscreenHotspot() {
       setRipples((r) => [...r, { id, x: e.clientX, y: e.clientY }])
       setTimeout(() => setRipples((r) => r.filter((x) => x.id !== id)), RIPPLE_MS)
 
-      if (recent.length >= TAPS_TO_TOGGLE) {
+      if (recent.length >= TAPS_TO_EXIT) {
         taps.current = []
         setCount(0)
-        toggleFullscreen()
+        onFifthTap()
         return
       }
       taps.current = recent
@@ -82,13 +85,16 @@ export function ExitFullscreenHotspot() {
         style={{ width: ZONE_PX, height: ZONE_PX, touchAction: 'manipulation' }}
       />
       {count > 0 ? (
-        <div aria-hidden className="pointer-events-none fixed top-3 left-3 z-[9999] flex gap-1.5">
-          {Array.from({ length: TAPS_TO_TOGGLE }).map((_, i) => (
+        <div
+          aria-hidden
+          className="pointer-events-none fixed top-3 left-3 z-[9999] flex items-center gap-2 rounded-full bg-black/60 px-3 py-2 ring-1 ring-white/40"
+        >
+          {Array.from({ length: TAPS_TO_EXIT }).map((_, i) => (
             <span
               key={i}
               className={cn(
-                'size-2 rounded-full border border-white/60',
-                i < count ? 'bg-white/80' : 'bg-white/10',
+                'size-3.5 rounded-full border-2 border-white',
+                i < count ? 'bg-white' : 'bg-transparent',
               )}
             />
           ))}
@@ -98,7 +104,7 @@ export function ExitFullscreenHotspot() {
         <span
           key={r.id}
           aria-hidden
-          className="pointer-events-none fixed z-[9999] size-7 rounded-full bg-white/40 ring-2 ring-white/60 animate-[tap-dot_700ms_ease-out_forwards]"
+          className="pointer-events-none fixed z-[9999] size-12 rounded-full border-4 border-white bg-white/60 shadow-[0_0_0_3px_rgba(0,0,0,0.5)] animate-[tap-dot_900ms_ease-out_forwards]"
           style={{ left: r.x, top: r.y }}
         />
       ))}
