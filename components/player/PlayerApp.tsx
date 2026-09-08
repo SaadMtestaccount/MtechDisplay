@@ -22,6 +22,7 @@ import { CursorHider } from '@/components/player/CursorHider'
 import { FullscreenPrompt } from '@/components/player/FullscreenPrompt'
 import { IdentifyOverlay } from '@/components/player/IdentifyOverlay'
 import { EnterCodeScreen } from '@/components/player/EnterCodeScreen'
+import { ExitFullscreenHotspot } from '@/components/player/ExitFullscreenHotspot'
 import { KeepAwake } from '@/components/player/KeepAwake'
 import { PlaybackEngine } from '@/components/player/PlaybackEngine'
 import { PlayerErrorBoundary } from '@/components/player/PlayerErrorBoundary'
@@ -190,6 +191,7 @@ export function PlayerApp() {
       </RotationRoot>
       <CursorHider />
       <FullscreenPrompt />
+      <ExitFullscreenHotspot />
       <KeepAwake />
     </PlayerErrorBoundary>
   )

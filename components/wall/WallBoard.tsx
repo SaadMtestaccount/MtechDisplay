@@ -23,6 +23,7 @@ import { toast } from 'sonner'
 import { EmptyState } from '@/components/shell/EmptyState'
 import { NoOrgState } from '@/components/shell/NoOrgState'
 import { PageHeader } from '@/components/shell/PageHeader'
+import { DeleteScreenDialog } from '@/components/screens/DeleteScreenDialog'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { AddTvDialog } from '@/components/wall/AddTvDialog'
@@ -48,6 +49,7 @@ export function WallBoard() {
   const [drag, setDrag] = useState<WallPick | null>(null)
   const [addOpen, setAddOpen] = useState(false)
   const [codeTarget, setCodeTarget] = useState<ScreenView | null>(null)
+  const [deleteTarget, setDeleteTarget] = useState<ScreenView | null>(null)
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   const screensQuery = useQuery({
@@ -97,7 +99,7 @@ export function WallBoard() {
     <>
       <PageHeader
         title="TVs"
-        description="Every TV in your store. Drag a menu, image or web page onto one to show it — it locks on. Add a TV to get a code you type on the screen."
+        description="Every TV in your store. Click a TV to watch it full screen. Drag a menu, image or web page onto one to show it — it locks on. Add a TV to get a code you type on the screen."
         primary={
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <PlusIcon /> Add TV
@@ -145,6 +147,7 @@ export function WallBoard() {
                     onShowCode={() => setCodeTarget(s)}
                     onToggleLock={() => lock.mutate({ screenId: s.id, locked: !s.locked })}
                     onClear={() => assign.mutate({ screenId: s.id, body: { kind: 'clear' } })}
+                    onDelete={() => setDeleteTarget(s)}
                   />
                 ))}
               </div>
@@ -165,6 +168,12 @@ export function WallBoard() {
         screen={codeTarget}
         onOpenChange={(open) => {
           if (!open) setCodeTarget(null)
+        }}
+      />
+      <DeleteScreenDialog
+        screen={deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null)
         }}
       />
     </>

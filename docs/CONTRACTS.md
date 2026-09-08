@@ -1301,3 +1301,17 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
 - Existing image rows with `thumb_path = null` were backfilled once from the originals (server-side resize matching
   `lib/thumbs.ts`: max width 640, aspect kept, JPEG q0.82, black behind transparency). No runtime self-healing exists — a
   null `thumb_path` still renders the placeholder icon.
+
+---
+
+## 17. Addendum — Touch exit hotspot, click-to-watch tiles, wall delete (added 2026-09-08, additive)
+
+- **Player**: `ExitFullscreenHotspot()` — an invisible 64 px square fixed at the top-left of the PHYSICAL screen (rendered
+  by `PlayerApp` outside `RotationRoot`, so orientation/rotation don't move it). Five consecutive taps within 3 s toggle
+  fullscreen. A manual exit calls `setAutoFullscreenSuppressed(true)` (`lib/player/fullscreen.ts`, module state) so
+  `FullscreenPrompt` stops re-requesting fullscreen on the next tap; five more taps re-enter and clear the flag; a reload
+  resets it. Bottom-right stays free for `Watermark`.
+- **Wall**: clicking a `WallTile`'s TV frame opens `/player?code=<login_code>` in a new tab (identical to the kebab's
+  "Open full screen"; a screen without a code falls back to `onOpen`). `WallTile` gains `onDelete(): void`; the kebab ends
+  with "Delete screen" (destructive, separator) and `WallBoard` renders `DeleteScreenDialog` for it. "Clear" is no longer
+  styled destructive — it empties the TV; deleting removes the screen.
