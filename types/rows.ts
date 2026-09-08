@@ -141,6 +141,8 @@ export type ScreenRow = {
   /** Persistent 8-char login code entered on a TV to enroll it as this screen (0010). */
   login_code: string | null
   rotation: number
+  /** 'landscape' | 'portrait' — portrait = upright 9:16 player stage (0012). Narrow with isOrientation. */
+  orientation: string
   last_seen_at: string | null
   last_ip: string | null
   user_agent: string | null

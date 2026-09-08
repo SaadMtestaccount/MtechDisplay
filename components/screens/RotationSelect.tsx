@@ -31,7 +31,7 @@ export function RotationSelect({
       <SelectContent>
         {ROTATIONS.map((rotation) => (
           <SelectItem key={rotation} value={String(rotation)}>
-            {rotation === 0 ? '0° (Landscape)' : `${rotation}°`}
+            {rotation === 0 ? '0° (not rotated)' : `${rotation}°`}
           </SelectItem>
         ))}
       </SelectContent>

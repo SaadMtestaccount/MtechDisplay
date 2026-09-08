@@ -5,8 +5,10 @@
 import { ApiError } from '@/lib/api'
 import { getEffectivePlaylistId } from '@/lib/playlists'
 import { DEVICE_SIGNED_URL_TTL_SECONDS, createMediaSignedUrls, publicThumbUrl } from '@/lib/storage'
-import { isRotation } from '@/lib/utils'
-import { DEFAULT_ITEM_DURATION_SECONDS, type Manifest, type ManifestItem, type Rotation } from '@/types/api'
+import { isOrientation, isRotation } from '@/lib/utils'
+import {
+  DEFAULT_ITEM_DURATION_SECONDS, type Manifest, type ManifestItem, type Orientation, type Rotation,
+} from '@/types/api'
 import type { Content, DbClient, PlaylistItem, Screen, Website } from '@/types/db'
 
 type ItemSource = PlaylistItem & { content: Content | null; websites: Website | null }
@@ -104,9 +106,10 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
   const urls = await createMediaSignedUrls(admin, mediaKeys, DEVICE_SIGNED_URL_TTL_SECONDS)
 
   const rotation: Rotation = isRotation(screen.rotation) ? screen.rotation : 0
+  const orientation: Orientation = isOrientation(screen.orientation) ? screen.orientation : 'landscape'
 
   return {
-    screen: { id: screen.id, name: screen.name, rotation, timezone: org.timezone },
+    screen: { id: screen.id, name: screen.name, rotation, orientation, timezone: org.timezone },
     org: { name: org.name, logo_url: org.logo_url },
     playlist_version: screen.playlist_version,
     generated_at: now.toISOString(),

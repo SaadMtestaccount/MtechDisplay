@@ -1,7 +1,7 @@
 import { clsx, type ClassValue } from 'clsx'
 import { twMerge } from 'tailwind-merge'
 import { format, formatDistanceStrict, parse } from 'date-fns'
-import { ROTATIONS, type Rotation } from '@/types/api'
+import { ORIENTATIONS, ROTATIONS, type Orientation, type Rotation } from '@/types/api'
 
 export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs))
@@ -49,6 +49,10 @@ export function initials(nameOrEmail: string): string {
 
 export function isRotation(n: number): n is Rotation {
   return (ROTATIONS as readonly number[]).includes(n)
+}
+
+export function isOrientation(s: string): s is Orientation {
+  return (ORIENTATIONS as readonly string[]).includes(s)
 }
 
 /** lowercase, a-z0-9 and '-', trimmed, max 60. */

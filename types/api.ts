@@ -54,6 +54,10 @@ export type ScreenPresence = (typeof SCREEN_PRESENCE)[number]
 export const ROTATIONS = [0, 90, 180, 270] as const
 export type Rotation = (typeof ROTATIONS)[number]
 
+/** Player canvas layout: 'portrait' = an upright 9:16 stage centered in the viewport (0012). */
+export const ORIENTATIONS = ['landscape', 'portrait'] as const
+export type Orientation = (typeof ORIENTATIONS)[number]
+
 /** Website refresh interval options: Never / 1m / 5m / 15m / 1h (numeric — `z.literal(REFRESH_OPTIONS)`). */
 export const REFRESH_OPTIONS = [0, 60, 300, 900, 3600] as const
 export type RefreshSeconds = (typeof REFRESH_OPTIONS)[number]
@@ -301,7 +305,7 @@ export type ManifestItem = {
 }
 
 export type Manifest = {
-  screen: { id: string; name: string; rotation: Rotation; timezone: string }
+  screen: { id: string; name: string; rotation: Rotation; orientation: Orientation; timezone: string }
   org: { name: string; logo_url: string | null }
   playlist_version: number
   generated_at: string

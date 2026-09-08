@@ -43,7 +43,7 @@ export function ScreenCard({
   const items: KebabItem[] = [
     { label: 'Open playlist', icon: <ListVideoIcon />, onSelect: () => onAction('open') },
     { label: 'Rename', icon: <PencilIcon />, onSelect: () => onAction('rename') },
-    { label: 'Rotation', icon: <RotateCwIcon />, onSelect: () => onAction('rotation') },
+    { label: 'Orientation & rotation', icon: <RotateCwIcon />, onSelect: () => onAction('rotation') },
     { label: 'Identify', icon: <MegaphoneIcon />, onSelect: () => onAction('identify'), disabled: unpaired },
     { label: 'Reload player', icon: <RefreshCwIcon />, onSelect: () => onAction('reload'), disabled: unpaired },
     { label: 'Move to group', icon: <FolderInputIcon />, onSelect: () => onAction('group') },
@@ -74,6 +74,7 @@ export function ScreenCard({
         thumbUrl={screen.current_item?.thumb_url ?? screen.preview_thumb_url}
         status={status}
         rotation={screen.rotation}
+        orientation={screen.orientation}
         websiteUrl={screen.current_item?.website_url ?? screen.preview_website_url}
       />
       <div className="flex items-start justify-between gap-2 px-1">

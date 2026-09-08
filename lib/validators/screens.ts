@@ -3,7 +3,7 @@
  */
 import { z } from 'zod'
 import {
-  PAIRING_CODE_ALPHABET, PAIRING_CODE_LENGTH, ROTATIONS, SCREEN_ACTIONS, SCREEN_SORTS, SCREEN_STATUSES,
+  ORIENTATIONS, PAIRING_CODE_ALPHABET, PAIRING_CODE_LENGTH, ROTATIONS, SCREEN_ACTIONS, SCREEN_SORTS, SCREEN_STATUSES,
   type ScreenListQuery,
 } from '@/types/api'
 import {
@@ -39,11 +39,12 @@ export type ClaimScreenInput = z.infer<typeof claimScreenSchema>
 export const createScreenSchema = z.object({ name: nameSchema })
 export type CreateScreenInput = z.infer<typeof createScreenSchema>
 
-/** PATCH /api/screens/[id] — rename / rotation / group / lock (at least one key). */
+/** PATCH /api/screens/[id] — rename / rotation / orientation / group / lock (at least one key). */
 export const screenUpdateSchema = z
   .object({
     name: nameSchema.optional(),
     rotation: z.literal(ROTATIONS).optional(),
+    orientation: z.enum(ORIENTATIONS).optional(),
     group_id: uuidSchema.nullable().optional(),
     locked: z.boolean().optional(),
   })

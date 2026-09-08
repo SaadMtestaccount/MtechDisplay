@@ -9,6 +9,7 @@ import { ScreenCodeDialog } from '@/components/wall/ScreenCodeDialog'
 import { DeviceInfo } from '@/components/screens/DeviceInfo'
 import { GroupSelect } from '@/components/screens/GroupSelect'
 import { NowPlayingChip } from '@/components/screens/NowPlayingChip'
+import { OrientationSelect } from '@/components/screens/OrientationSelect'
 import { RotationSelect } from '@/components/screens/RotationSelect'
 import { KebabMenu } from '@/components/shell/KebabMenu'
 import { StatusPill } from '@/components/shell/StatusPill'
@@ -56,6 +57,7 @@ export function ScreenHeader({
       if (org) void queryClient.invalidateQueries({ queryKey: queryKeys.screens.all(org.id) })
       if (input.name !== undefined) toast.success('Screen renamed')
       else if (input.rotation !== undefined) toast.success('Rotation updated')
+      else if (input.orientation !== undefined) toast.success('Orientation updated')
       else if (input.group_id !== undefined) toast.success(input.group_id ? 'Moved to group' : 'Removed from group')
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
@@ -124,6 +126,11 @@ export function ScreenHeader({
         <NowPlayingChip item={screen.current_item} online={screen.online} />
       </div>
       <div className="flex flex-wrap items-center gap-2">
+        <OrientationSelect
+          value={screen.orientation}
+          onChange={(orientation) => patch.mutate({ orientation })}
+          disabled={patch.isPending}
+        />
         <RotationSelect
           value={screen.rotation}
           onChange={(rotation) => patch.mutate({ rotation })}

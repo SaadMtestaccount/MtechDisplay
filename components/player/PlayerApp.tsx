@@ -26,6 +26,7 @@ import { KeepAwake } from '@/components/player/KeepAwake'
 import { PlaybackEngine } from '@/components/player/PlaybackEngine'
 import { PlayerErrorBoundary } from '@/components/player/PlayerErrorBoundary'
 import { RotationRoot } from '@/components/player/RotationRoot'
+import { Watermark } from '@/components/player/Watermark'
 
 const IDENTIFY_MS = 10_000
 
@@ -167,7 +168,10 @@ export function PlayerApp() {
 
   return (
     <PlayerErrorBoundary>
-      <RotationRoot rotation={manifest?.screen.rotation ?? 0}>
+      <RotationRoot
+        rotation={manifest?.screen.rotation ?? 0}
+        orientation={manifest?.screen.orientation ?? 'landscape'}
+      >
         {!hydrated ? null : device === null ? (
           <EnterCodeScreen fingerprint={fingerprint} appUrl={appUrl} onEnrolled={handleEnrolled} />
         ) : manifest !== null ? (
@@ -179,6 +183,7 @@ export function PlayerApp() {
               timeZone={manifest.screen.timezone}
               onCurrentItem={handleCurrentItem}
             />
+            <Watermark />
             <IdentifyOverlay name={manifest.screen.name} visible={identifyVisible} />
           </>
         ) : null}

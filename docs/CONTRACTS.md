@@ -1259,3 +1259,28 @@ A back-office "Wall" where a menu / board / web page is dragged onto a TV to sho
   The outer `(admin)/layout` admits super admins + role admin/owner (else → `/player`); `(admin)/admin/layout.tsx` keeps
   Users/Orgs/Settings to super admins (else → `/wall`). `AdminMenu`/`OrgSwitcher` hide staff-only items for non-super-admins.
   `createMerchant`/`MerchantDialog` gain an access level (TV only / Manager).
+
+---
+
+## 15. Addendum — Portrait orientation + player watermark (added 2026-09-08, additive)
+
+Vertical ("portrait") screens: a tall menu shows upright in a landscape browser window and fills a display that is
+already portrait. Distinct from `rotation`, which stays for how a TV is physically mounted.
+
+- **Schema (`0012_orientation.sql`)**: `screens.orientation text not null default 'landscape'`, check
+  `in ('landscape','portrait')`. `ScreenRow.orientation: string` rides through `SCREEN_SELECT` (`*`) into `ScreenView`.
+- **Types**: `ORIENTATIONS = ['landscape','portrait'] as const` / `Orientation` (types/api.ts);
+  `isOrientation(s: string): s is Orientation` (lib/utils). `Manifest.screen` gains `orientation: Orientation`
+  (`buildManifest` narrows via `isOrientation`, fallback `'landscape'`).
+- **`PATCH /api/screens/[id]`**: `screenUpdateSchema` gains `orientation?: z.enum(ORIENTATIONS)`; `updateScreen` writes it
+  and, when it changes, calls `bumpAndSyncScreens` (same rule as rotation — the player must redraw).
+- **Player**: `RotationRoot({ rotation, orientation? = 'landscape', children })` — in portrait the children render inside an
+  upright 9:16 stage contain-fitted and centered on the (possibly rotated) surface, sized with pure CSS `min()` because the
+  surface is exactly 100vw×100vh (or swapped for 90/270). Children still lay out with `absolute inset-0`, now against the
+  stage. `Watermark()` — the MTech Distributors mark (`public/mtech-logo.png`, opaque white ground → shown on a small white
+  chip) pinned bottom-right inside the stage; `PlayerApp` renders it whenever a manifest is playing (not on the code screen).
+- **Admin UI**: `OrientationSelect({ value: string; onChange(v: Orientation): void; disabled? })` sits next to
+  `RotationSelect` in `ScreenHeader` (PATCH `{ orientation }`, toast "Orientation updated"). `RotationDialog` (card action
+  `'rotation'`, menu label "Orientation & rotation") now saves `{ orientation, rotation }` together. `TvFrame` gains
+  `orientation?: string` and previews a portrait screen as a centered 9:16 stage on the 16:9 frame; `ScreenCard` and
+  `WallTile` pass it. `RotationSelect`'s 0° label reads "0° (not rotated)" so it no longer collides with Landscape.

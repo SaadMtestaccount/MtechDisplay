@@ -149,18 +149,27 @@ export async function updateScreen(
     if (!group) throw new ApiError(422, 'Unknown group')
   }
 
-  const patch: { name?: string; rotation?: number; group_id?: string | null; locked?: boolean } = {}
+  const patch: {
+    name?: string
+    rotation?: number
+    orientation?: string
+    group_id?: string | null
+    locked?: boolean
+  } = {}
   if (input.name !== undefined) patch.name = input.name
   if (input.rotation !== undefined) patch.rotation = input.rotation
+  if (input.orientation !== undefined) patch.orientation = input.orientation
   if (input.group_id !== undefined) patch.group_id = input.group_id
   if (input.locked !== undefined) patch.locked = input.locked
 
   const { error } = await ctx.supabase.from('screens').update(patch).eq('id', id).eq('org_id', ctx.org.id)
   if (error) throw error
 
+  // Anything the player draws differently → bump + sync so the TV refetches its manifest.
   const rotationChanged = patch.rotation !== undefined && patch.rotation !== current.rotation
+  const orientationChanged = patch.orientation !== undefined && patch.orientation !== current.orientation
   const groupChanged = patch.group_id !== undefined && patch.group_id !== current.group_id
-  if (rotationChanged || groupChanged) await bumpAndSyncScreens(admin, [id])
+  if (rotationChanged || orientationChanged || groupChanged) await bumpAndSyncScreens(admin, [id])
 
   await notifyOrgChanged(ctx.org.id, 'screens', id)
   return getScreenView(ctx.supabase, ctx.org.id, id)

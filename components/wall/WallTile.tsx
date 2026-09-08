@@ -44,6 +44,7 @@ export function WallTile({
           thumbUrl={screen.current_item?.thumb_url ?? screen.preview_thumb_url}
           status={status}
           rotation={screen.rotation}
+          orientation={screen.orientation}
           websiteUrl={screen.current_item?.website_url ?? screen.preview_website_url}
         >
           {screen.locked ? (
