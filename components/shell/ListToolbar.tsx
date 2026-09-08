@@ -82,7 +82,7 @@ export function ListToolbar({
           onChange={(e) => setText(e.target.value)}
           placeholder="Search…"
           aria-label="Search"
-          className="h-8 w-48 pl-8 md:w-56"
+          className="h-8 w-48 rounded-full pl-8 md:w-56"
         />
       </div>
     </div>

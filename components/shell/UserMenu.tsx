@@ -50,7 +50,7 @@ export function UserMenu() {
         }
       >
         <Avatar>
-          <AvatarFallback className="bg-primary/15 text-xs font-semibold text-primary">
+          <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
             {initials(profile.full_name ?? user.email)}
           </AvatarFallback>
         </Avatar>

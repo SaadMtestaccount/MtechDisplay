@@ -1,9 +1,10 @@
 import type { Metadata } from 'next'
-import { Archivo, IBM_Plex_Mono } from 'next/font/google'
+import { IBM_Plex_Mono, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 
-// Beacon: Archivo carries display + body; IBM Plex Mono carries codes, labels and data.
-const archivo = Archivo({
+// Plus Jakarta Sans carries display + body (same family as the MTech console); IBM Plex Mono
+// carries pairing codes and generated passwords.
+const jakarta = Plus_Jakarta_Sans({
   variable: '--font-sans',
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
@@ -26,7 +27,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning className={`${archivo.variable} ${plexMono.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`${jakarta.variable} ${plexMono.variable}`}>
       <body className="min-h-screen bg-background text-foreground antialiased">{children}</body>
     </html>
   )

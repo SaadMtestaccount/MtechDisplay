@@ -7,6 +7,13 @@ const LABELS: Record<ScreenPresence, string> = {
   unpaired: 'Not paired',
 }
 
+// Opaque pastel fills (not alpha tints): the pill also sits on top of TV thumbnails.
+const STYLES: Record<ScreenPresence, string> = {
+  online: 'bg-online-soft text-online',
+  offline: 'bg-offline-soft text-offline',
+  unpaired: 'bg-muted text-muted-foreground',
+}
+
 const DOTS: Record<ScreenPresence, string> = {
   online: 'bg-online',
   offline: 'bg-offline',
@@ -26,8 +33,9 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border bg-card/85 font-mono font-medium uppercase tracking-[0.12em] text-muted-foreground backdrop-blur-sm',
-        size === 'sm' ? 'h-5 px-2 text-[10px]' : 'h-6 px-2.5 text-[11px]',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full font-medium',
+        STYLES[status],
+        size === 'sm' ? 'h-5 px-2 text-[11px]' : 'h-6 px-2.5 text-xs',
         className,
       )}
     >

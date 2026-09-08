@@ -100,7 +100,7 @@ export function MerchantsSection() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by email or location…"
-          className="pl-9"
+          className="rounded-full pl-9"
           aria-label="Search merchants"
         />
       </div>
@@ -115,7 +115,7 @@ export function MerchantsSection() {
           {merchantsQuery.error instanceof Error ? merchantsQuery.error.message : 'Could not load merchants.'}
         </p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-border bg-card">
+        <div className="overflow-hidden rounded-xl border border-border bg-card shadow-xs">
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent">

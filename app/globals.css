@@ -39,9 +39,14 @@
   --color-popover: var(--popover);
   --color-card-foreground: var(--card-foreground);
   --color-card: var(--card);
-  --color-online: #15803d;
-  --color-offline: #d0361b;
-  --color-warning: #c77a0a;
+  /* Status colours: `-soft` is the opaque pastel fill behind status text/badges. Opaque on
+     purpose — StatusPill overlays TV thumbnails, where an alpha tint would disappear. */
+  --color-online: var(--online);
+  --color-online-soft: var(--online-soft);
+  --color-offline: var(--offline);
+  --color-offline-soft: var(--offline-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -52,77 +57,90 @@
 }
 
 /* ============================================================
-   BEACON — a broadcast operator's console.
-   Paper grounds, ink type, one signal-orange accent, sharp corners.
-   Light is the default; a Beacon-dark variant powers the theme toggle.
+   MTECH — matches the MTech Distributors console.
+   Cool light-gray ground, white cards, one indigo accent, soft
+   corners, pastel status badges. Light is the default; a matching
+   slate-dark variant powers the theme toggle.
    ============================================================ */
 :root {
-  --background: #efede6;
-  --foreground: #18181b;
+  --background: #f5f6fa;
+  --foreground: #111827;
   --card: #ffffff;
-  --card-foreground: #18181b;
+  --card-foreground: #111827;
   --popover: #ffffff;
-  --popover-foreground: #18181b;
-  --primary: #f0411c;
+  --popover-foreground: #111827;
+  --primary: #5b57e8;
   --primary-foreground: #ffffff;
-  --secondary: #f1efe8;
-  --secondary-foreground: #18181b;
-  --muted: #f1efe8;
-  --muted-foreground: #6c6c74;
-  --accent: #eae7de;
-  --accent-foreground: #18181b;
-  --destructive: #d0361b;
-  --border: #e1dfd6;
-  --input: #e1dfd6;
-  --ring: #f0411c;
-  --chart-1: #f0411c;
-  --chart-2: #15803d;
-  --chart-3: #c77a0a;
-  --chart-4: #6c6c74;
-  --chart-5: #a6a29a;
-  --radius: 0.4rem;
-  --sidebar: #f6f4ee;
-  --sidebar-foreground: #18181b;
-  --sidebar-primary: #f0411c;
+  --secondary: #eef0f6;
+  --secondary-foreground: #111827;
+  --muted: #f1f3f8;
+  --muted-foreground: #6b7280;
+  --accent: #eeeffc;
+  --accent-foreground: #111827;
+  --destructive: #e5484d;
+  --border: #e5e7ef;
+  --input: #e5e7ef;
+  --ring: #5b57e8;
+  --chart-1: #5b57e8;
+  --chart-2: #16a34a;
+  --chart-3: #d97706;
+  --chart-4: #6b7280;
+  --chart-5: #c7cad6;
+  --radius: 0.75rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #111827;
+  --sidebar-primary: #5b57e8;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #eae7de;
-  --sidebar-accent-foreground: #18181b;
-  --sidebar-border: #e1dfd6;
-  --sidebar-ring: #f0411c;
+  --sidebar-accent: #eeeffc;
+  --sidebar-accent-foreground: #3b38b4;
+  --sidebar-border: #e5e7ef;
+  --sidebar-ring: #5b57e8;
+  --online: #16a34a;
+  --online-soft: #dcfce7;
+  --offline: #e5484d;
+  --offline-soft: #fee2e2;
+  --warning: #d97706;
+  --warning-soft: #fef3c7;
 }
 
 .dark {
-  --background: #141416;
-  --foreground: #f3f1ec;
-  --card: #1c1c1f;
-  --card-foreground: #f3f1ec;
-  --popover: #1c1c1f;
-  --popover-foreground: #f3f1ec;
-  --primary: #f0411c;
+  --background: #0f1117;
+  --foreground: #e6e8ef;
+  --card: #161922;
+  --card-foreground: #e6e8ef;
+  --popover: #161922;
+  --popover-foreground: #e6e8ef;
+  --primary: #7b78f2;
   --primary-foreground: #ffffff;
-  --secondary: #26262a;
-  --secondary-foreground: #f3f1ec;
-  --muted: #222226;
-  --muted-foreground: #a2a09a;
-  --accent: #26262a;
-  --accent-foreground: #f3f1ec;
-  --destructive: #f0553a;
-  --border: #2c2c31;
-  --input: #2c2c31;
-  --ring: #f0411c;
-  --chart-1: #f0411c;
-  --chart-2: #34d399;
-  --chart-3: #e0a13a;
-  --chart-4: #a2a09a;
-  --chart-5: #6c6c74;
-  --sidebar: #1c1c1f;
-  --sidebar-foreground: #f3f1ec;
-  --sidebar-primary: #f0411c;
+  --secondary: #1f2330;
+  --secondary-foreground: #e6e8ef;
+  --muted: #1b1f2a;
+  --muted-foreground: #9aa0b2;
+  --accent: #22243d;
+  --accent-foreground: #e6e8ef;
+  --destructive: #f26d72;
+  --border: #262a36;
+  --input: #262a36;
+  --ring: #7b78f2;
+  --chart-1: #7b78f2;
+  --chart-2: #4ade80;
+  --chart-3: #fbbf24;
+  --chart-4: #9aa0b2;
+  --chart-5: #4b5063;
+  --sidebar: #161922;
+  --sidebar-foreground: #e6e8ef;
+  --sidebar-primary: #7b78f2;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #26262a;
-  --sidebar-accent-foreground: #f3f1ec;
-  --sidebar-border: #2c2c31;
-  --sidebar-ring: #f0411c;
+  --sidebar-accent: #22243d;
+  --sidebar-accent-foreground: #c7c5ff;
+  --sidebar-border: #262a36;
+  --sidebar-ring: #7b78f2;
+  --online: #4ade80;
+  --online-soft: #14532d;
+  --offline: #f87171;
+  --offline-soft: #4c1d1d;
+  --warning: #fbbf24;
+  --warning-soft: #452c0b;
 }
 
 @layer base {
@@ -135,7 +153,7 @@
   html {
     @apply font-sans;
   }
-  /* Beacon: headings are heavy Archivo, tight-tracked and tight-leaded. */
+  /* Headings: bold geometric sans, gently tightened. */
   h1,
   h2,
   h3,
@@ -143,20 +161,20 @@
   h5,
   h6 {
     font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.04;
+    letter-spacing: -0.015em;
+    line-height: 1.2;
   }
 }
 
 @layer components {
-  /* Beacon micro-label: the uppercase monospaced eyebrow used on headers,
-     status chips and data captions. Signals "operator console". */
+  /* Micro-label: the small uppercase caption used on headers, table heads and data captions. */
   .eyebrow {
-    font-family: var(--font-mono);
+    font-family: var(--font-sans);
     font-size: 0.6875rem;
     line-height: 1;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.08em;
     color: var(--muted-foreground);
   }
 }

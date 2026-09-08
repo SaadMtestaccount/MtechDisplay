@@ -1,11 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 32" role="img" aria-label="MSIGN">
-  <rect x="0" y="0" width="128" height="32" rx="5" fill="#f0411c"/>
+  <rect x="0" y="0" width="128" height="32" rx="7" fill="#5b57e8"/>
   <g stroke="#ffffff" stroke-width="2.1" stroke-linecap="round" fill="none">
     <path d="M13 17 A7 7 0 0 1 20 24"/>
     <path d="M13 12 A12 12 0 0 1 25 24"/>
   </g>
   <circle cx="13" cy="24" r="2.6" fill="#ffffff"/>
   <text x="35" y="21.5" fill="#ffffff"
-    font-family="Archivo, 'Segoe UI', system-ui, -apple-system, sans-serif"
+    font-family="'Plus Jakarta Sans', 'Segoe UI', system-ui, -apple-system, sans-serif"
     font-size="15" font-weight="800" letter-spacing="1.5">MSIGN</text>
 </svg>

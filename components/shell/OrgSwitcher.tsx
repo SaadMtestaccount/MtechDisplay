@@ -14,7 +14,6 @@ import {
 import { useApp } from '@/hooks/useApp'
 import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
-import { cn } from '@/lib/utils'
 import type { MerchantView } from '@/types/api'
 import type { Organization } from '@/types/db'
 
