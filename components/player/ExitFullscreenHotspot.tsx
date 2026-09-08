@@ -15,7 +15,7 @@ import { setAutoFullscreenSuppressed } from '@/lib/player/fullscreen'
 import { cn } from '@/lib/utils'
 
 const TAPS_TO_TOGGLE = 5
-const TAP_WINDOW_MS = 3000
+const TAP_WINDOW_MS = 5000
 const ZONE_PX = 96
 const RIPPLE_MS = 700
 
@@ -64,7 +64,7 @@ export function ExitFullscreenHotspot() {
     return () => window.removeEventListener('pointerdown', onPointerDown, { capture: true })
   }, [])
 
-  // The progress row clears once the tap window lapses without reaching five.
+  // The progress row clears once the 5 s tap window lapses without reaching five.
   useEffect(() => {
     if (lastTap === 0) return
     const t = setTimeout(() => {

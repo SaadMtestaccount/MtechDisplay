@@ -1306,7 +1306,7 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
 
 ## 17. Addendum — Touch exit hotspot, click-to-watch tiles, wall delete (added 2026-09-08, additive)
 
-- **Player**: `ExitFullscreenHotspot()` — five consecutive taps/clicks within 3 s inside the top-left 96 px of the PHYSICAL
+- **Player**: `ExitFullscreenHotspot()` — five consecutive taps/clicks within 5 s inside the top-left 96 px of the PHYSICAL
   screen toggle fullscreen (rendered by `PlayerApp` outside `RotationRoot`, so orientation/rotation don't move it). Taps are
   counted by a window-level `pointerdown` CAPTURE listener on `clientX/clientY` (nothing layered over the corner can hide
   them); an invisible 96 px square only stops a web-page iframe from swallowing the events. Feedback: a translucent ripple
