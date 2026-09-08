@@ -1,27 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Beacon TV banner: ink field, signal-orange beacon. -->
+<!-- MSIGN TV banner: indigo field (matches public/msign.svg), white beacon. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="320dp"
     android:height="180dp"
     android:viewportWidth="320"
     android:viewportHeight="180">
-    <path android:fillColor="#161618" android:pathData="M0,0 h320 v180 h-320 z" />
+    <path android:fillColor="#5B57E8" android:pathData="M0,0 h320 v180 h-320 z" />
     <path
-        android:strokeColor="#F0411C"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="8"
         android:strokeLineCap="round"
         android:pathData="M120,110 A20,20 0 0 1 140,130" />
     <path
-        android:strokeColor="#F0411C"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="8"
         android:strokeLineCap="round"
         android:pathData="M120,94 A36,36 0 0 1 156,130" />
     <path
-        android:strokeColor="#F0411C"
+        android:strokeColor="#FFFFFF"
         android:strokeWidth="8"
         android:strokeLineCap="round"
         android:pathData="M120,78 A52,52 0 0 1 172,130" />
     <path
-        android:fillColor="#F0411C"
+        android:fillColor="#FFFFFF"
         android:pathData="M120,130 m-7,0 a7,7 0 1 0 14,0 a7,7 0 1 0 -14,0" />
 </vector>

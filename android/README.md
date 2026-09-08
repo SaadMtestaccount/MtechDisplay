@@ -32,9 +32,13 @@ same key. Neither belongs in version control if this folder ever gets one.
 1. Copy the APK to a USB drive (or a file-manager download link).
 2. On the device: Settings → Security → allow "Install unknown apps" for the file manager.
 3. Open the APK from the file manager → Install → open MSIGN.
-4. The TV shows the MSIGN screen. The merchant picks "Merchant? Sign in with email instead"
-   and enters the credentials MTech issued (Admin → Users → Merchant accounts → Add merchant).
-5. It starts playing the org's content immediately; if the org has no content yet it shows
-   "Please contact MTech with photos and videos of the digital menu."
+4. The TV shows an "Enter code" screen. On the MSIGN site, **TVs → Add TV** (or **Show code** on
+   an existing TV) gives an 8-character code; type it on the TV.
+5. It starts playing that TV's content immediately; if nothing is assigned yet it shows the
+   store logo and clock (or "Please contact MTech with photos and videos of the digital menu."
+   when the location has no content at all).
+
+Version history: 1.0 (2026-09-03) first release · 1.1 (2026-09-08) indigo launcher icon /
+TV banner matching the redesigned console. The web player itself updates without a new APK.
 
 Emulator install: `adb install -r app\build\outputs\apk\debug\app-debug.apk`.
