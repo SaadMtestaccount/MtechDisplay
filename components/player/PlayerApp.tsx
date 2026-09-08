@@ -185,7 +185,7 @@ export function PlayerApp() {
               timeZone={manifest.screen.timezone}
               onCurrentItem={handleCurrentItem}
             />
-            <Watermark />
+            <Watermark position={manifest.screen.watermark} />
             <IdentifyOverlay name={manifest.screen.name} visible={identifyVisible} />
           </>
         ) : null}

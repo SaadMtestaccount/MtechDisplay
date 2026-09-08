@@ -43,7 +43,11 @@ export type Database = {
   public: {
     Tables: {
       organizations: Table<OrganizationRow, 'id' | 'logo_url' | 'timezone' | 'created_at', []>
-      profiles: Table<ProfileRow, 'full_name' | 'avatar_url' | 'is_super_admin' | 'subscription_tier' | 'created_at', []>
+      profiles: Table<
+        ProfileRow,
+        'full_name' | 'avatar_url' | 'is_super_admin' | 'subscription_tier' | 'employer_id' | 'created_at',
+        []
+      >
       memberships: Table<
         MembershipRow,
         'id' | 'role' | 'created_at',
@@ -82,8 +86,8 @@ export type Database = {
       screens: Table<
         ScreenRow,
         | 'id' | 'playlist_id' | 'group_id' | 'menu_id' | 'locked' | 'device_token_hash' | 'fingerprint' | 'login_code'
-        | 'rotation' | 'orientation' | 'last_seen_at' | 'last_ip' | 'user_agent' | 'resolution' | 'current_item_id'
-        | 'playlist_version' | 'paired_at' | 'created_at',
+        | 'rotation' | 'orientation' | 'watermark_x' | 'watermark_y' | 'last_seen_at' | 'last_ip' | 'user_agent'
+        | 'resolution' | 'current_item_id' | 'playlist_version' | 'paired_at' | 'created_at',
         [
           FK<'screens_org_id_fkey', 'org_id', 'organizations'>,
           FK<'screens_playlist_id_fkey', 'playlist_id', 'playlists', true>,

@@ -107,9 +107,13 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
 
   const rotation: Rotation = isRotation(screen.rotation) ? screen.rotation : 0
   const orientation: Orientation = isOrientation(screen.orientation) ? screen.orientation : 'landscape'
+  const watermark =
+    screen.watermark_x !== null && screen.watermark_y !== null
+      ? { x: screen.watermark_x, y: screen.watermark_y }
+      : null
 
   return {
-    screen: { id: screen.id, name: screen.name, rotation, orientation, timezone: org.timezone },
+    screen: { id: screen.id, name: screen.name, rotation, orientation, watermark, timezone: org.timezone },
     org: { name: org.name, logo_url: org.logo_url },
     playlist_version: screen.playlist_version,
     generated_at: now.toISOString(),

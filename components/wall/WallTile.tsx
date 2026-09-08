@@ -6,8 +6,8 @@
  * kebab (code, full screen, settings, lock, clear, delete). A locked tile is not a drop target.
  */
 import { useDroppable } from '@dnd-kit/core'
-import { KeyRoundIcon, LockIcon, MaximizeIcon, SettingsIcon, Trash2Icon } from 'lucide-react'
-import { KebabMenu } from '@/components/shell/KebabMenu'
+import { KeyRoundIcon, LockIcon, MaximizeIcon, MoveIcon, SettingsIcon, Trash2Icon } from 'lucide-react'
+import { KebabMenu, type KebabItem } from '@/components/shell/KebabMenu'
 import { TvFrame } from '@/components/screens/TvFrame'
 import { tileDropId } from '@/components/wall/wall-dnd'
 import { screenStatus } from '@/lib/status'
@@ -21,6 +21,7 @@ export function WallTile({
   onToggleLock,
   onClear,
   onDelete,
+  onPositionWatermark,
 }: {
   screen: ScreenView
   onOpen(): void
@@ -28,6 +29,8 @@ export function WallTile({
   onToggleLock(): void
   onClear(): void
   onDelete(): void
+  /** MTech staff only: opens the "Powered by MTech" positioning preview (§18). */
+  onPositionWatermark?: () => void
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: tileDropId(screen.id), disabled: screen.locked })
   const status = screenStatus(screen)
@@ -48,6 +51,20 @@ export function WallTile({
     }
     window.open(`/player?code=${screen.login_code}`, '_blank', 'noopener')
   }
+
+  const menuItems: KebabItem[] = [
+    { label: 'Show code', icon: <KeyRoundIcon />, onSelect: onShowCode },
+    { label: 'Open full screen', icon: <MaximizeIcon />, onSelect: openFullScreen },
+    { label: 'Open settings', icon: <SettingsIcon />, onSelect: onOpen },
+    ...(onPositionWatermark
+      ? [{ label: 'Position watermark', icon: <MoveIcon />, onSelect: onPositionWatermark }]
+      : []),
+    screen.locked
+      ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock, separatorBefore: true }
+      : { label: 'Lock', icon: <LockIcon />, onSelect: onToggleLock, disabled: !hasContent, separatorBefore: true },
+    { label: 'Clear', disabled: screen.locked, onSelect: onClear },
+    { label: 'Delete screen', icon: <Trash2Icon />, destructive: true, separatorBefore: true, onSelect: onDelete },
+  ]
 
   return (
     <div ref={setNodeRef} className="flex flex-col gap-2">
@@ -90,19 +107,7 @@ export function WallTile({
           <div className="truncate text-sm font-medium">{screen.name}</div>
           <div className="truncate text-xs text-muted-foreground">{showing}</div>
         </div>
-        <KebabMenu
-          label={`Actions for ${screen.name}`}
-          items={[
-            { label: 'Show code', icon: <KeyRoundIcon />, onSelect: onShowCode },
-            { label: 'Open full screen', icon: <MaximizeIcon />, onSelect: openFullScreen },
-            { label: 'Open settings', icon: <SettingsIcon />, onSelect: onOpen },
-            screen.locked
-              ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock, separatorBefore: true }
-              : { label: 'Lock', icon: <LockIcon />, onSelect: onToggleLock, disabled: !hasContent, separatorBefore: true },
-            { label: 'Clear', disabled: screen.locked, onSelect: onClear },
-            { label: 'Delete screen', icon: <Trash2Icon />, destructive: true, separatorBefore: true, onSelect: onDelete },
-          ]}
-        />
+        <KebabMenu label={`Actions for ${screen.name}`} items={menuItems} />
       </div>
     </div>
   )

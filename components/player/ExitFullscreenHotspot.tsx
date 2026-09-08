@@ -10,10 +10,12 @@
  * pointer events. Each registered tap shows a ripple where it landed plus a five-dot progress
  * row in the corner. Exiting blocks FullscreenPrompt's tap-to-enter for REENTER_DELAY_MS
  * (otherwise the next tap would undo it); after that a single tap re-enters as normal.
- * Rendered outside RotationRoot so orientation/rotation don't move it.
+ * Rendered outside RotationRoot so orientation/rotation don't move it. Disabled inside the
+ * Android app (lib/player/platform.ts) — it runs in immersive mode, not browser fullscreen.
  */
 import { useEffect, useRef, useState } from 'react'
 import { suppressAutoFullscreenFor } from '@/lib/player/fullscreen'
+import { isAndroidWebView } from '@/lib/player/platform'
 import { cn } from '@/lib/utils'
 
 const TAPS_TO_EXIT = 5
@@ -32,6 +34,9 @@ export function ExitFullscreenHotspot() {
   const [lastTap, setLastTap] = useState(0)
 
   useEffect(() => {
+    // Pointless inside the Android app (immersive mode, no browser fullscreen): never listen.
+    if (isAndroidWebView()) return
+
     const reset = () => {
       taps.current = []
       setCount(0)

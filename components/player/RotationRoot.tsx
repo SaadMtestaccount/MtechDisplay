@@ -21,6 +21,8 @@ export function RotationRoot({
   children: ReactNode
 }) {
   const swapped = rotation === 90 || rotation === 270
+  // `containerType: 'size'` lets stage-relative units (cqmin — the Watermark badge) size against
+  // whichever box the children fill: the surface, or the portrait stage below.
   const surface: CSSProperties = swapped
     ? {
         position: 'absolute',
@@ -29,11 +31,13 @@ export function RotationRoot({
         width: '100vh',
         height: '100vw',
         transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
+        containerType: 'size',
       }
     : {
         position: 'absolute',
         inset: 0,
         transform: rotation === 180 ? 'rotate(180deg)' : undefined,
+        containerType: 'size',
       }
 
   // The surface is 100vw×100vh (or 100vh×100vw when swapped), so a contain-fit 9:16 stage is a
@@ -41,8 +45,16 @@ export function RotationRoot({
   const stage: CSSProperties | null =
     orientation === 'portrait'
       ? swapped
-        ? { width: 'min(100vh, calc(100vw * 9 / 16))', height: 'min(100vw, calc(100vh * 16 / 9))' }
-        : { width: 'min(100vw, calc(100vh * 9 / 16))', height: 'min(100vh, calc(100vw * 16 / 9))' }
+        ? {
+            width: 'min(100vh, calc(100vw * 9 / 16))',
+            height: 'min(100vw, calc(100vh * 16 / 9))',
+            containerType: 'size',
+          }
+        : {
+            width: 'min(100vw, calc(100vh * 9 / 16))',
+            height: 'min(100vh, calc(100vw * 16 / 9))',
+            containerType: 'size',
+          }
       : null
 
   return (

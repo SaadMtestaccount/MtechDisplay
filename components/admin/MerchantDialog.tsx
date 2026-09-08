@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { RefreshCwIcon } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+import { generatePassword } from '@/components/admin/password'
 import { Button } from '@/components/ui/button'
 import {
   Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
@@ -19,14 +20,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
 import type { MerchantView } from '@/types/api'
-
-const PASSWORD_ALPHABET = 'abcdefghjkmnpqrstuvwxyzABCDEFGHJKMNPQRSTUVWXYZ23456789'
-
-function generatePassword(): string {
-  const bytes = new Uint8Array(14)
-  crypto.getRandomValues(bytes)
-  return Array.from(bytes, (b) => PASSWORD_ALPHABET[b % PASSWORD_ALPHABET.length]).join('')
-}
 
 export function MerchantDialog({ open, onOpenChange }: { open: boolean; onOpenChange(open: boolean): void }) {
   const queryClient = useQueryClient()

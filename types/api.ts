@@ -58,6 +58,9 @@ export type Rotation = (typeof ROTATIONS)[number]
 export const ORIENTATIONS = ['landscape', 'portrait'] as const
 export type Orientation = (typeof ORIENTATIONS)[number]
 
+/** "Powered by MTech" badge centre as fractions (0..1) of the player stage (0013); null = default corner. */
+export type WatermarkPosition = { x: number; y: number }
+
 /** Website refresh interval options: Never / 1m / 5m / 15m / 1h (numeric — `z.literal(REFRESH_OPTIONS)`). */
 export const REFRESH_OPTIONS = [0, 60, 300, 900, 3600] as const
 export type RefreshSeconds = (typeof REFRESH_OPTIONS)[number]
@@ -205,12 +208,26 @@ export const SUBSCRIPTION_LABELS: Record<SubscriptionTier, string> = {
 }
 
 /** Merchant / store login (non-staff user). role 'member' = TV only, 'admin' = manager (multi-location). */
+/** One of a merchant's locations (an organization) with what's in it (§19). */
+export type MerchantLocation = { id: string; name: string; screen_count: number; content_count: number }
+
+/** An extra login under a merchant: Manager or TV only, for some or all of the merchant's locations (§19). */
+export type EmployeeView = {
+  id: string
+  email: string
+  role: MembershipRole
+  location_ids: string[]
+  last_sign_in_at: string | null
+  created_at: string
+}
+
 export type MerchantView = {
   id: string
   email: string
   role: MembershipRole
   /** the locations (organizations) this login can access */
-  locations: { id: string; name: string }[]
+  locations: MerchantLocation[]
+  employees: EmployeeView[]
   subscription_tier: SubscriptionTier
   last_sign_in_at: string | null
   created_at: string
@@ -308,7 +325,14 @@ export type ManifestItem = {
 }
 
 export type Manifest = {
-  screen: { id: string; name: string; rotation: Rotation; orientation: Orientation; timezone: string }
+  screen: {
+    id: string
+    name: string
+    rotation: Rotation
+    orientation: Orientation
+    watermark: WatermarkPosition | null
+    timezone: string
+  }
   org: { name: string; logo_url: string | null }
   playlist_version: number
   generated_at: string

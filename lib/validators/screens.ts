@@ -45,6 +45,11 @@ export const screenUpdateSchema = z
     name: nameSchema.optional(),
     rotation: z.literal(ROTATIONS).optional(),
     orientation: z.enum(ORIENTATIONS).optional(),
+    /** Badge centre as stage fractions; null = back to the default corner. Super admins only (updateScreen). */
+    watermark: z
+      .object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
+      .nullable()
+      .optional(),
     group_id: uuidSchema.nullable().optional(),
     locked: z.boolean().optional(),
   })

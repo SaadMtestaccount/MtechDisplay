@@ -153,12 +153,20 @@ export async function updateScreen(
     name?: string
     rotation?: number
     orientation?: string
+    watermark_x?: number | null
+    watermark_y?: number | null
     group_id?: string | null
     locked?: boolean
   } = {}
   if (input.name !== undefined) patch.name = input.name
   if (input.rotation !== undefined) patch.rotation = input.rotation
   if (input.orientation !== undefined) patch.orientation = input.orientation
+  if (input.watermark !== undefined) {
+    // The badge is MTech's mark — only staff move it (§18).
+    if (!ctx.profile.is_super_admin) throw new ApiError(403, 'Only MTech staff can position the watermark')
+    patch.watermark_x = input.watermark?.x ?? null
+    patch.watermark_y = input.watermark?.y ?? null
+  }
   if (input.group_id !== undefined) patch.group_id = input.group_id
   if (input.locked !== undefined) patch.locked = input.locked
 
@@ -168,8 +176,13 @@ export async function updateScreen(
   // Anything the player draws differently → bump + sync so the TV refetches its manifest.
   const rotationChanged = patch.rotation !== undefined && patch.rotation !== current.rotation
   const orientationChanged = patch.orientation !== undefined && patch.orientation !== current.orientation
+  const watermarkChanged =
+    input.watermark !== undefined &&
+    (patch.watermark_x !== current.watermark_x || patch.watermark_y !== current.watermark_y)
   const groupChanged = patch.group_id !== undefined && patch.group_id !== current.group_id
-  if (rotationChanged || orientationChanged || groupChanged) await bumpAndSyncScreens(admin, [id])
+  if (rotationChanged || orientationChanged || watermarkChanged || groupChanged) {
+    await bumpAndSyncScreens(admin, [id])
+  }
 
   await notifyOrgChanged(ctx.org.id, 'screens', id)
   return getScreenView(ctx.supabase, ctx.org.id, id)

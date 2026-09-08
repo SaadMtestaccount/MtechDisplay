@@ -1318,6 +1318,50 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
   blocked for 5 s; after that a SINGLE tap re-enters as normal. A reload resets everything. Bottom-right stays free for
   `Watermark`. `ContextMenuBlocker()` (also rendered by `PlayerApp`) cancels `contextmenu` (right-click / long-press)
   while fullscreen only.
+
+---
+
+## 18. Addendum — "Powered by MTech" badge with per-TV positioning (added 2026-09-08, additive)
+
+- **Schema (`0013_watermark_position.sql`)**: `screens.watermark_x / watermark_y double precision null` = the badge CENTRE
+  as fractions (0..1) of the player stage; both null = default bottom-right (check constraint).
+- **Types**: `WatermarkPosition = { x, y }`; `Manifest.screen.watermark: WatermarkPosition | null`; `ScreenRow` carries
+  the two columns (ride into `ScreenView`).
+- **`PATCH /api/screens/[id]`**: `screenUpdateSchema.watermark?: { x, y } | null`. `updateScreen` refuses it with **403**
+  unless `ctx.profile.is_super_admin`; a change calls `bumpAndSyncScreens` (the TV redraws).
+- **Player**: `Watermark({ position })` renders the "Powered by MTech" pill (replaces the logo chip); `WatermarkBadge` +
+  `watermarkStyle()` are shared with the admin preview. Sizes use `cqmin` — `RotationRoot`'s surface and portrait stage
+  declare `container-type: size`. `lib/player/platform.ts` `isAndroidWebView()` (UA `; wv)`): `ExitFullscreenHotspot`
+  never listens inside the Android app.
+- **Admin**: `WatermarkPositionDialog({ screen, onOpenChange })` — full-screen preview (stage matches the TV's orientation,
+  `container-type: size`, background = the TV's preview thumb) where the badge is dragged (grab offset kept) or placed by
+  clicking; the centre is clamped so the badge stays fully inside; Save → PATCH; "Reset to corner" → `watermark: null`;
+  Esc closes. `WallTile` gains `onPositionWatermark?` → kebab "Position watermark"; `WallBoard` passes it only when
+  `profile.is_super_admin`.
+
+---
+
+## 19. Addendum — Employees + side-by-side locations in Team (added 2026-09-08, additive)
+
+- **Schema (`0014_employees.sql`)**: `profiles.employer_id uuid null → profiles(id) on delete cascade` (+ partial index).
+  An employee = a non-staff login whose profile points at the merchant (owner) login; access = memberships to a subset of
+  the owner's locations with role `'admin'` (Manager) or `'member'` (TV only). Employees never have employees.
+- **Types**: `MerchantLocation = { id, name, screen_count, content_count }`; `EmployeeView = { id, email, role,
+  location_ids, last_sign_in_at, created_at }`; `MerchantView.locations: MerchantLocation[]` + `employees: EmployeeView[]`.
+- **lib/merchants split** (all re-exported from `lib/merchants.ts`): `lib/merchants/list.ts` (`listMerchants` is
+  profiles-driven: skips staff and employees as top-level rows, folds employees under their employer, tallies TVs/content
+  per org in two cheap selects; `getMerchant`, `toTier`), `lib/merchants/employees.ts` (`createEmployee`,
+  `updateEmployee`, `deleteEmployee`, `deleteEmployeesOf`), `lib/merchants/copy.ts` (`copyLocationContent`).
+  `deleteMerchant` removes the employees' logins first. `setMerchantPassword` works for employees too (refuses staff).
+- **Routes (super admin)**: `POST /api/merchants/[id]/employees` `{ email, password, role, org_ids[] }` → 201 MerchantView;
+  `PATCH /api/merchants/[id]/employees/[employeeId]` `{ role?, org_ids? }` → MerchantView; `DELETE` → OkResponse.
+  Validators `createEmployeeSchema` / `updateEmployeeSchema`. Password reset reuses `POST /api/merchants/[employeeId]/password`;
+  location rename reuses `PATCH /api/orgs/[id] { name }`.
+- **UI**: `MerchantManageDialog` is now `sm:max-w-4xl` with the locations as side-by-side `LocationPanel`s (inline rename,
+  TV/content counts, access badges, "Open in console" = `setActiveOrg` + `/tvs`) plus an "Add a location" panel;
+  `MerchantEmployees` (list with inline access `Select`, per-location toggle chips when the merchant has 2+ locations,
+  reset password, remove, and the "Add employee" form) sits ABOVE the owner's "Reset password". Team search also matches
+  employee emails and the Access cell shows the employee count. `generatePassword` lives in `components/admin/password.ts`.
 - **Wall**: clicking a `WallTile`'s TV frame opens `/player?code=<login_code>` in a new tab (identical to the kebab's
   "Open full screen"; a screen without a code falls back to `onOpen`). `WallTile` gains `onDelete(): void`; the kebab ends
   with "Delete screen" (destructive, separator) and `WallBoard` renders `DeleteScreenDialog` for it. "Clear" is no longer

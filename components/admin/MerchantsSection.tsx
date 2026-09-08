@@ -76,7 +76,10 @@ export function MerchantsSection() {
     const q = search.trim().toLowerCase()
     if (q.length === 0) return all
     return all.filter(
-      (m) => m.email.toLowerCase().includes(q) || m.locations.some((l) => l.name.toLowerCase().includes(q)),
+      (m) =>
+        m.email.toLowerCase().includes(q) ||
+        m.locations.some((l) => l.name.toLowerCase().includes(q)) ||
+        m.employees.some((e) => e.email.toLowerCase().includes(q)),
     )
   }, [merchantsQuery.data, search])
 
@@ -99,7 +102,7 @@ export function MerchantsSection() {
         <Input
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search by email or location…"
+          placeholder="Search by email, employee or location…"
           className="rounded-full pl-9"
           aria-label="Search merchants"
         />
@@ -154,7 +157,12 @@ export function MerchantsSection() {
                   >
                     <TableCell className="pl-4 font-medium">{m.email}</TableCell>
                     <TableCell className="text-muted-foreground">{locationsLabel(m)}</TableCell>
-                    <TableCell className="text-muted-foreground">{m.role === 'admin' ? 'Manager' : 'TV only'}</TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {m.role === 'admin' ? 'Manager' : 'TV only'}
+                      {m.employees.length > 0 ? (
+                        <span className="text-xs"> · {m.employees.length} {m.employees.length === 1 ? 'employee' : 'employees'}</span>
+                      ) : null}
+                    </TableCell>
                     <TableCell onClick={(e) => e.stopPropagation()}>
                       <Select
                         value={m.subscription_tier}

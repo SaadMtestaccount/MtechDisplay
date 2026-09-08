@@ -45,6 +45,8 @@ export type ProfileRow = {
   is_super_admin: boolean
   /** dummy per-merchant subscription label; set by the super admin (types/api SubscriptionTier). */
   subscription_tier: string
+  /** Set on an employee login: the merchant (owner) login it belongs to (0014). */
+  employer_id: string | null
   created_at: string
 }
 
@@ -143,6 +145,9 @@ export type ScreenRow = {
   rotation: number
   /** 'landscape' | 'portrait' — portrait = upright 9:16 player stage (0012). Narrow with isOrientation. */
   orientation: string
+  /** "Powered by MTech" badge centre as fractions of the stage; both null = default corner (0013). */
+  watermark_x: number | null
+  watermark_y: number | null
   last_seen_at: string | null
   last_ip: string | null
   user_agent: string | null
