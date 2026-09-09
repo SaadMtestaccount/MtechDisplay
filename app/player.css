@@ -1,0 +1,356 @@
+/* ============================================================
+   app/player.css — the TV player's own stylesheet (docs/CONTRACTS.md §20).
+   Plain, un-layered CSS on purpose: TV browsers (LG webOS, Samsung Tizen,
+   old Android WebViews) run Chromium engines years behind desktop and ignore
+   the cascade layers / colour functions the console's Tailwind build relies
+   on. Everything here is Chrome ~64-safe: no @layer, no oklch/color-mix,
+   no min()/clamp(), no flex gap (margins instead). Newer units only inside
+   @supports. Loaded globally after globals.css so the admin preview can
+   reuse the badge; player components use only these classes.
+   ============================================================ */
+
+.pl-root {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: var(--font-sans), "Segoe UI", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+.pl-fill {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+.pl-black { background: #000; }
+.pl-clip { overflow: hidden; }
+.pl-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pl-surface,
+.pl-stage {
+  position: relative;
+  overflow: hidden;
+  background: #000;
+}
+
+/* Playback layers */
+.pl-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.pl-iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #fff;
+}
+
+/* Standby: logo (or name) + clock */
+.pl-standby {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  color: #fff;
+  text-align: center;
+}
+.pl-standby > * + * { margin-top: 6vmin; }
+.pl-standby-logo {
+  max-height: 40vh;
+  max-width: 60%;
+  object-fit: contain;
+}
+.pl-standby-name {
+  font-size: 5vmin;
+  font-weight: 600;
+  line-height: 1.05;
+  color: rgba(255, 255, 255, 0.8);
+}
+.pl-clock {
+  font-size: 14vmin;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+.pl-date {
+  margin-top: 1.5vmin;
+  font-size: 3.2vmin;
+  color: rgba(255, 255, 255, 0.5);
+}
+.pl-note {
+  max-width: 80%;
+  padding: 0 4vmin;
+  font-size: 3.2vmin;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Enter-code screen */
+.pl-code {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6vmin;
+  background: #000;
+  color: #fff;
+  text-align: center;
+}
+.pl-code > * + * { margin-top: 5vmin; }
+.pl-code-logo {
+  height: 7vmin;
+  width: auto;
+}
+.pl-code-title {
+  font-size: 5.5vmin;
+  font-weight: 600;
+  line-height: 1.2;
+}
+.pl-code-help {
+  margin-top: 1.5vmin;
+  max-width: 100vmin;
+  font-size: 3.2vmin;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}
+.pl-code-help strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.85);
+}
+.pl-code-form {
+  width: 100%;
+  max-width: 100vmin;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.pl-code-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 2.5vmin;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 3vmin 4vmin;
+  font-family: inherit;
+  font-size: 8vmin;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  color: #fff;
+  outline: none;
+}
+.pl-code-input::placeholder { color: rgba(255, 255, 255, 0.25); }
+.pl-code-input:focus { border-color: rgba(255, 255, 255, 0.6); }
+.pl-code-btn {
+  margin-top: 2.5vmin;
+  width: 100%;
+  border: 0;
+  border-radius: 2.5vmin;
+  background: #5b57e8;
+  padding: 2.5vmin 3vmin;
+  font-family: inherit;
+  font-size: 4vmin;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+}
+.pl-code-btn:disabled { opacity: 0.5; }
+.pl-error {
+  font-size: 2.8vmin;
+  color: #fbbf24;
+}
+.pl-url {
+  font-size: 2.4vmin;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* Identify overlay */
+.pl-identify {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+}
+.pl-identify-card {
+  border: 4px solid #5b57e8;
+  border-radius: 2.5vmin;
+  background: rgba(0, 0, 0, 0.8);
+  padding: 5vmin 8vmin;
+  text-align: center;
+}
+.pl-identify-label {
+  font-size: 2.8vmin;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.6);
+}
+.pl-identify-name {
+  margin-top: 1.5vmin;
+  font-size: 9vmin;
+  font-weight: 600;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+/* "Powered by MTech" badge — also used by the admin positioning preview. Container units
+   (cqmin, against a container-type:size stage) only where supported; vmin otherwise. */
+.mtech-badge {
+  position: absolute;
+  z-index: 20;
+  white-space: nowrap;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  font-weight: 600;
+  line-height: 1;
+  font-size: 1.9vmin;
+  padding: 0.9vmin 1.8vmin;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.25);
+  pointer-events: none;
+}
+.mtech-badge[data-corner] {
+  right: 2.5vmin;
+  bottom: 2.5vmin;
+}
+.mtech-badge b {
+  font-weight: 600;
+  color: #c7c5ff;
+}
+.mtech-badge--live {
+  pointer-events: auto;
+  cursor: grab;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 0 0 2px #5b57e8;
+}
+.mtech-badge--live:active { cursor: grabbing; }
+@supports (font-size: 1cqmin) {
+  .mtech-badge {
+    font-size: 1.9cqmin;
+    padding: 0.9cqmin 1.8cqmin;
+  }
+  .mtech-badge[data-corner] {
+    right: 2.5cqmin;
+    bottom: 2.5cqmin;
+  }
+}
+
+/* Corner exit hotspot + tap feedback (browser fullscreen only) */
+.pl-hotspot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+.pl-progress {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.6);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+.pl-dot {
+  box-sizing: border-box;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: transparent;
+}
+.pl-dot + .pl-dot { margin-left: 8px; }
+.pl-dot--on { background: #fff; }
+.pl-ripple {
+  position: fixed;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+  animation: pl-tap 900ms ease-out forwards;
+}
+@keyframes pl-tap {
+  from { opacity: 1; transform: translate(-50%, -50%) scale(0.5); }
+  to { opacity: 0; transform: translate(-50%, -50%) scale(1.8); }
+}
+
+/* Boot message (server-rendered; removed when the app mounts) and the fatal-error screen.
+   Above the player root so it is visible even before any script runs. */
+.pl-boot,
+.pl-fatal {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6vmin;
+  background: #000;
+  color: #fff;
+  text-align: center;
+  font-family: var(--font-sans), "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+.pl-boot-title {
+  font-size: 4vmin;
+  font-weight: 600;
+}
+.pl-boot-text {
+  margin-top: 2vmin;
+  max-width: 110vmin;
+  font-size: 2.6vmin;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.6);
+}
+.pl-boot-fine {
+  margin-top: 3vmin;
+  max-width: 120vmin;
+  font-size: 1.8vmin;
+  line-height: 1.5;
+  word-break: break-all;
+  color: rgba(255, 255, 255, 0.3);
+}

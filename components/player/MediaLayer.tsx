@@ -45,7 +45,7 @@ export function MediaLayer({
         src={src}
         alt=""
         draggable={false}
-        className="h-full w-full object-contain"
+        className="pl-media"
         onError={onError}
       />
     )
@@ -59,7 +59,7 @@ export function MediaLayer({
       playsInline
       autoPlay
       preload="auto"
-      className="h-full w-full object-contain"
+      className="pl-media"
       onEnded={onEnded}
       onError={onError}
     />

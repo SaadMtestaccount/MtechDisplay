@@ -2,13 +2,11 @@
  * components/player/Watermark.tsx — the "Powered by MTech" badge shown on every playing screen
  * (docs/CONTRACTS.md §18). `position` is the badge CENTRE as fractions of the stage (set by MTech
  * staff in WatermarkPositionDialog); null = the default bottom-right corner. Size and corner
- * offsets come from the `.mtech-badge` rules in globals.css: container units (cqmin) against the
- * stage — RotationRoot and the admin preview both declare `container-type: size` — with a
- * viewport-unit fallback for Android WebViews that predate them. So the same component is
- * WYSIWYG in the preview and on the TV.
+ * offsets come from `.mtech-badge` in app/player.css: viewport units by default, container units
+ * (cqmin, against a container-type:size stage) where the engine supports them (§20). The admin
+ * preview reuses the component with `interactive` (draggable styling).
  */
 import type { CSSProperties, Ref } from 'react'
-import { cn } from '@/lib/utils'
 import type { WatermarkPosition } from '@/types/api'
 
 /** Positioned badge: centre at the fractions. Corner badge: offsets come from CSS (`data-corner`). */
@@ -20,11 +18,11 @@ export function watermarkStyle(position: WatermarkPosition | null): CSSPropertie
 
 export function WatermarkBadge({
   position,
-  className,
+  interactive = false,
   ref,
 }: {
   position: WatermarkPosition | null
-  className?: string
+  interactive?: boolean
   ref?: Ref<HTMLDivElement>
 }) {
   return (
@@ -32,13 +30,10 @@ export function WatermarkBadge({
       ref={ref}
       aria-hidden
       data-corner={position ? undefined : ''}
-      className={cn(
-        'mtech-badge pointer-events-none absolute z-20 whitespace-nowrap rounded-full bg-black/60 leading-none font-semibold text-white shadow-md ring-1 ring-white/25 backdrop-blur-sm',
-        className,
-      )}
+      className={interactive ? 'mtech-badge mtech-badge--live' : 'mtech-badge'}
       style={watermarkStyle(position)}
     >
-      Powered by <span className="text-[#c7c5ff]">MTech</span>
+      Powered by <b>MTech</b>
     </div>
   )
 }

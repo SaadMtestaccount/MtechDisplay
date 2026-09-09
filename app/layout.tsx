@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
+import './player.css'
+import { POLYFILLS_JS } from '@/lib/player/polyfills'
 
 // Plus Jakarta Sans carries display + body (same family as the MTech console); IBM Plex Mono
 // carries pairing codes and generated passwords.
@@ -28,6 +30,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${jakarta.variable} ${plexMono.variable}`}>
+      <head>
+        {/* Old TV browsers: fill missing JS features before any app chunk executes (§20). Inline
+            so it runs during parsing — Next emits its async chunks ahead of this head content. */}
+        <script dangerouslySetInnerHTML={{ __html: POLYFILLS_JS }} />
+      </head>
       <body className="min-h-screen bg-background text-foreground antialiased">{children}</body>
     </html>
   )

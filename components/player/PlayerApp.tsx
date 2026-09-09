@@ -43,6 +43,12 @@ export function PlayerApp() {
   const identifyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const unpairCheckRef = useRef(false)
 
+  // The server-rendered boot message (app/player/page.tsx) has done its job once we're running (§20).
+  useEffect(() => {
+    const boot = document.getElementById('player-boot')
+    if (boot && boot.parentNode) boot.parentNode.removeChild(boot)
+  }, [])
+
   // Fingerprint: created once, reused forever (msign.fingerprint, §10).
   useEffect(() => {
     const existing = readJson<string>(FINGERPRINT_KEY)

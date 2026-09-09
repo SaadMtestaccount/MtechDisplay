@@ -1364,6 +1364,39 @@ thumbnail with the user's own session. A store manager's (role `admin`) thumbnai
   `MerchantEmployees` (list with inline access `Select`, per-location toggle chips when the merchant has 2+ locations,
   reset password, remove, and the "Add employee" form) sits ABOVE the owner's "Reset password". Team search also matches
   employee emails and the Access cell shows the employee count. `generatePassword` lives in `components/admin/password.ts`.
+
+---
+
+## 20. Addendum — Player on old TV browsers (added 2026-09-09, additive)
+
+TV browsers (LG webOS ≈ Chrome 68/79/87/94 for 2020–2023 sets, Samsung Tizen, old Android WebViews) rendered
+`/player` as a blank page: Tailwind v4's cascade layers (Chrome 99+) dropped every style, and the app script failed
+before hydration, so nothing painted. The console stays desktop-only; the player is made engine-tolerant.
+
+- **`app/player.css`** — the player's own plain stylesheet, imported globally by the root layout AFTER globals.css
+  (un-layered, so it wins over Tailwind and is the only CSS old engines apply). `.pl-*` classes for every player
+  surface (root/fill/surface/stage/media/iframe/standby/code/identify/hotspot/progress/dot/ripple/boot/fatal) plus
+  `.mtech-badge` (+ `--live` for the admin preview) and `@keyframes pl-tap`. Rules are Chrome ~64-safe: no `@layer`,
+  `oklch`, `color-mix`, `min()`/`clamp()` or flex `gap` (margins); `cqmin` only inside `@supports`.
+- **`RotationRoot`** measures `window.innerWidth/Height` (resize-tracked) and computes the swapped surface and the
+  portrait 9:16 stage in px — no CSS `min()`.
+- **`lib/player/polyfills.ts`** — `POLYFILLS_JS`, an ES5 string: `globalThis`, `queueMicrotask`, `Array/String.prototype.at`,
+  `flat`/`flatMap`, `Object.fromEntries`/`hasOwn`, `replaceAll`, `Promise.allSettled`/`any`, `structuredClone` (JSON),
+  `replaceChildren`. The root layout INLINES it as the first `<script>` in `<head>` on every page: Next emits its async
+  chunks ahead of the layout's head content, so an external tag (or `next/script beforeInteractive`, which only preloads)
+  could lose the race; an inline script runs during parsing.
+- **Syntax targets** — `package.json#browserslist` (chrome ≥ 64 … — the single config; a `.browserslistrc` alongside it is
+  a browserslist error). Production builds use **webpack** (`next build`, no `--turbopack`): Turbopack's runtime chunk
+  carries `?.`/`??` regardless of browserslist. `next.config.ts` lists every `@supabase/*` package in `transpilePackages`,
+  but `@supabase/realtime-js`/`auth-js` still ship `?.`/`??` in the built chunk, so the **effective floor for the player
+  is Chrome 80** (LG webOS 22 / 2022+, Samsung Tizen 6.5 / 2022+, Android WebView 80+). Older sets show the boot message
+  with their user agent instead of a blank page.
+- **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
+  user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine
+  that never runs the app the message stays and names the browser. `PlayerErrorBoundary` shows `.pl-fatal` (error +
+  user agent) instead of a bare black screen, still reloading after 10 s.
+- Verified with an ES2020 parse of every chunk the built `/player` page loads (acorn), an ES5 parse of the inline polyfill,
+  and the CDP tests.
 - **Wall**: clicking a `WallTile`'s TV frame opens `/player?code=<login_code>` in a new tab (identical to the kebab's
   "Open full screen"; a screen without a code falls back to `onOpen`). `WallTile` gains `onDelete(): void`; the kebab ends
   with "Delete screen" (destructive, separator) and `WallBoard` renders `DeleteScreenDialog` for it. "Clear" is no longer

@@ -16,7 +16,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { suppressAutoFullscreenFor } from '@/lib/player/fullscreen'
 import { isAndroidWebView } from '@/lib/player/platform'
-import { cn } from '@/lib/utils'
 
 const TAPS_TO_EXIT = 5
 const TAP_WINDOW_MS = 5000
@@ -90,34 +89,16 @@ export function ExitFullscreenHotspot() {
 
   return (
     <>
-      <div
-        aria-hidden
-        className="fixed top-0 left-0 z-[9999] select-none"
-        style={{ width: ZONE_PX, height: ZONE_PX, touchAction: 'manipulation' }}
-      />
+      <div aria-hidden className="pl-hotspot" style={{ width: ZONE_PX, height: ZONE_PX }} />
       {count > 0 ? (
-        <div
-          aria-hidden
-          className="pointer-events-none fixed top-3 left-3 z-[9999] flex items-center gap-2 rounded-full bg-black/60 px-3 py-2 ring-1 ring-white/40"
-        >
+        <div aria-hidden className="pl-progress">
           {Array.from({ length: TAPS_TO_EXIT }).map((_, i) => (
-            <span
-              key={i}
-              className={cn(
-                'size-3.5 rounded-full border-2 border-white',
-                i < count ? 'bg-white' : 'bg-transparent',
-              )}
-            />
+            <span key={i} className={i < count ? 'pl-dot pl-dot--on' : 'pl-dot'} />
           ))}
         </div>
       ) : null}
       {ripples.map((r) => (
-        <span
-          key={r.id}
-          aria-hidden
-          className="pointer-events-none fixed z-[9999] size-12 rounded-full border-4 border-white bg-white/60 shadow-[0_0_0_3px_rgba(0,0,0,0.5)] animate-[tap-dot_900ms_ease-out_forwards]"
-          style={{ left: r.x, top: r.y }}
-        />
+        <span key={r.id} aria-hidden className="pl-ripple" style={{ left: r.x, top: r.y }} />
       ))}
     </>
   )

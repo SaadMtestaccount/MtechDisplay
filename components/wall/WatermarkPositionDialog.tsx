@@ -166,11 +166,7 @@ export function WatermarkPositionDialog({
               Nothing is assigned to this TV yet — the badge sits over the standby screen the same way.
             </div>
           )}
-          <WatermarkBadge
-            ref={badgeRef}
-            position={pos}
-            className="pointer-events-auto cursor-grab ring-2 ring-primary active:cursor-grabbing"
-          />
+          <WatermarkBadge ref={badgeRef} position={pos} interactive />
         </div>
       </div>
     </div>

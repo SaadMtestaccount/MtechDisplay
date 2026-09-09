@@ -27,7 +27,7 @@ export function WebsiteLayer({ item, active }: { item: ManifestItem | null; acti
       src={item.url}
       title={item.name}
       sandbox="allow-scripts allow-same-origin"
-      className="h-full w-full border-0 bg-white"
+      className="pl-iframe"
     />
   )
 }

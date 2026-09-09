@@ -233,7 +233,7 @@ export function PlaybackEngine({
   }, [])
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-black">
+    <div className="pl-fill pl-clip pl-black">
       {standby ? (
         <StandbyScreen
           orgName={manifest.org.name}
@@ -247,7 +247,7 @@ export function PlaybackEngine({
         return (
           <div
             key={idx}
-            className="absolute inset-0"
+            className="pl-fill"
             style={{
               opacity: isActive ? 1 : 0,
               transition: fade ? `opacity ${FADE_MS}ms ease-in-out` : 'none',

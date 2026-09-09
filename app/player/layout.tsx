@@ -5,7 +5,7 @@ export const metadata: Metadata = {
   title: 'Player',
 }
 
-/** Player shell: black full-screen container, no navbar, default viewport (§10). */
+/** Player shell: black full-screen container, no navbar (§10). Styled by app/player.css (§20). */
 export default function PlayerLayout({ children }: { children: ReactNode }) {
-  return <div className="fixed inset-0 overflow-hidden bg-black text-white">{children}</div>
+  return <div className="pl-root">{children}</div>
 }

@@ -6,10 +6,13 @@
  * (docs/CONTRACTS.md §9.7). In portrait orientation the children render inside an upright
  * 9:16 stage contain-fitted and centered on that surface (§15) — so a tall menu shows
  * vertically in a landscape browser window, and fills a display that is already portrait.
- * Children lay out with `absolute inset-0` against the stage.
+ * Sizes are measured from the viewport in JS rather than CSS min() so old TV browsers work
+ * (§20). Children lay out with the `.pl-fill` class against the stage.
  */
-import type { CSSProperties, ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import type { Orientation, Rotation } from '@/types/api'
+
+type Viewport = { w: number; h: number }
 
 export function RotationRoot({
   rotation,
@@ -20,49 +23,54 @@ export function RotationRoot({
   orientation?: Orientation
   children: ReactNode
 }) {
+  const [vp, setVp] = useState<Viewport | null>(null)
+  useEffect(() => {
+    const update = () => setVp({ w: window.innerWidth, h: window.innerHeight })
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
+
   const swapped = rotation === 90 || rotation === 270
   // `containerType: 'size'` lets stage-relative units (cqmin — the Watermark badge) size against
-  // whichever box the children fill: the surface, or the portrait stage below.
+  // whichever box the children fill; engines without it simply ignore the property.
   const surface: CSSProperties = swapped
     ? {
         position: 'absolute',
         top: '50%',
         left: '50%',
-        width: '100vh',
-        height: '100vw',
+        width: vp ? `${vp.h}px` : '100vh',
+        height: vp ? `${vp.w}px` : '100vw',
         transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
         containerType: 'size',
       }
     : {
         position: 'absolute',
-        inset: 0,
+        top: 0,
+        right: 0,
+        bottom: 0,
+        left: 0,
         transform: rotation === 180 ? 'rotate(180deg)' : undefined,
         containerType: 'size',
       }
 
-  // The surface is 100vw×100vh (or 100vh×100vw when swapped), so a contain-fit 9:16 stage is a
-  // pure CSS min() — no measuring needed.
-  const stage: CSSProperties | null =
-    orientation === 'portrait'
-      ? swapped
-        ? {
-            width: 'min(100vh, calc(100vw * 9 / 16))',
-            height: 'min(100vw, calc(100vh * 16 / 9))',
-            containerType: 'size',
-          }
-        : {
-            width: 'min(100vw, calc(100vh * 9 / 16))',
-            height: 'min(100vh, calc(100vw * 16 / 9))',
-            containerType: 'size',
-          }
-      : null
+  // Portrait: contain-fit a 9:16 stage inside the surface (whose size is the viewport, or the
+  // viewport swapped for 90/270). Until the first measurement the children fill the surface.
+  let stage: CSSProperties | null = null
+  if (orientation === 'portrait' && vp) {
+    const surfW = swapped ? vp.h : vp.w
+    const surfH = swapped ? vp.w : vp.h
+    const height = Math.min(surfH, (surfW * 16) / 9)
+    const width = Math.min(surfW, (surfH * 9) / 16)
+    stage = { width: `${Math.round(width)}px`, height: `${Math.round(height)}px`, containerType: 'size' }
+  }
 
   return (
-    <div className="absolute inset-0 overflow-hidden bg-black">
-      <div className="relative overflow-hidden bg-black" style={surface}>
+    <div className="pl-fill pl-clip pl-black">
+      <div className="pl-surface" style={surface}>
         {stage ? (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="relative overflow-hidden bg-black" style={stage}>
+          <div className="pl-fill pl-center">
+            <div className="pl-stage" style={stage}>
               {children}
             </div>
           </div>

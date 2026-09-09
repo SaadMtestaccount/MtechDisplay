@@ -3,6 +3,7 @@
 /**
  * components/player/EnterCodeScreen.tsx — the unpaired TV state (docs/CONTRACTS.md §15).
  * The store operator opens their MSIGN dashboard, adds/opens a TV, and types its login code here.
+ * Styled by app/player.css (§20).
  */
 import { useState, type FormEvent } from 'react'
 import { enroll } from '@/lib/player/device-api'
@@ -39,16 +40,15 @@ export function EnterCodeScreen({
   }
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 bg-black px-10 text-center text-white">
-      <img src="/msign.svg" alt="MSIGN" className="h-12 w-auto" />
-      <div className="flex flex-col items-center gap-3">
-        <div className="text-4xl font-semibold leading-tight">Enter this TV&apos;s code</div>
-        <div className="max-w-2xl text-2xl leading-relaxed text-white/60">
-          On your MSIGN dashboard, open <span className="font-semibold text-white/80">TVs</span>, pick this TV,
-          and type its code below.
+    <div className="pl-code">
+      <img src="/msign.svg" alt="MSIGN" className="pl-code-logo" />
+      <div>
+        <div className="pl-code-title">Enter this TV&apos;s code</div>
+        <div className="pl-code-help">
+          On your MSIGN dashboard, open <strong>TVs</strong>, pick this TV, and type its code below.
         </div>
       </div>
-      <form onSubmit={handleSubmit} className="flex w-full max-w-2xl flex-col items-center gap-5">
+      <form onSubmit={handleSubmit} className="pl-code-form">
         <input
           value={code}
           onChange={(e) => setCode(e.target.value.toUpperCase())}
@@ -58,18 +58,14 @@ export function EnterCodeScreen({
           autoComplete="off"
           autoCapitalize="characters"
           aria-label="TV code"
-          className="w-full rounded-2xl border border-white/20 bg-white/10 px-8 py-6 text-center text-6xl font-semibold uppercase tracking-[0.2em] text-white placeholder:text-white/25 outline-none focus:border-white/60"
+          className="pl-code-input"
         />
-        <button
-          type="submit"
-          disabled={busy || !code.trim()}
-          className="w-full rounded-2xl bg-primary px-6 py-5 text-3xl font-semibold text-white disabled:opacity-50"
-        >
+        <button type="submit" disabled={busy || !code.trim()} className="pl-code-btn">
           {busy ? 'Signing in…' : 'Sign in'}
         </button>
       </form>
-      {error ? <div className="text-xl text-warning">{error}</div> : null}
-      <div className="text-lg text-white/25">{appUrl}</div>
+      {error ? <div className="pl-error">{error}</div> : null}
+      <div className="pl-url">{appUrl}</div>
     </div>
   )
 }
