@@ -61,6 +61,14 @@ Android TV / Google TV needs a file-manager app first.
    when the location has no content at all).
 
 Version history: 1.0 (2026-09-03) first release · 1.1 (2026-09-08) indigo launcher icon /
-TV banner matching the redesigned console. The web player itself updates without a new APK.
+TV banner matching the redesigned console · 1.2 (2026-09-09) resilience for cheap boxes: keeps
+retrying (5 s → 60 s, and instantly when a network appears) with a readable notice instead of
+"webpage not available" when the box boots before Wi-Fi; pins the WebView text scale to 100 %
+so the box's accessibility font size can't distort the UI; never bypasses TLS (a wrong clock
+shows a "check date and time" notice); logs the page console to logcat (`MSIGN` tag); user agent
+carries `MSIGN-Android/<version>`. The web player itself updates without a new APK.
+
+Minimum: Android 7.0 (API 24). The player needs Android System WebView ≈ Chrome 66+; older
+boxes show "Starting MSIGN…" with advice to update the WebView from the Play Store.
 
 Emulator install: `adb install -r app\build\outputs\apk\debug\app-debug.apk`.

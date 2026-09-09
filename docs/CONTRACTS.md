@@ -1394,6 +1394,10 @@ before hydration, so nothing painted. The console stays desktop-only; the player
   the player without realtime: content changes arrive with the 30 s heartbeat's version check, a 401 still unpairs;
   `identify`/`reload` commands are not delivered there. **Effective floor: Chrome ~66** (LG webOS 5+ / 2020+, Samsung
   Tizen 5.5+, Android WebView 66+); realtime on Chrome 80+. Older sets show the boot message with their user agent.
+- **Android app 1.2** appends `MSIGN-Android/<version>` to its user agent (`isAndroidWebView()` matches it or `; wv)`); the
+  boot script swaps the advice to "update Android System WebView" when it sees it. The shell retries main-frame failures
+  (5 s → 60 s, and immediately on a `ConnectivityManager` network callback) behind a native notice, pins `textZoom = 100`,
+  cancels TLS errors with a "check date and time" notice, and logs the page console under the `MSIGN` logcat tag.
 - **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
   user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine
   that never runs the app the message stays and names the browser. `PlayerErrorBoundary` shows `.pl-fatal` (error +
