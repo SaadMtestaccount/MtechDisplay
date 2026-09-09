@@ -27,9 +27,31 @@ Release APKs are signed with `android/msign-release.jks` (alias `msign`); the pa
 `android/keystore.properties`. **Keep both files** — Android only accepts updates signed with the
 same key. Neither belongs in version control if this folder ever gets one.
 
-## Sideloading onto a TV / stick
+## Installing over Wi-Fi from a PC (recommended — nothing to add on the TV)
 
-1. Copy the APK to a USB drive (or a file-manager download link).
+Android TV won't install from a USB stick by itself and Google-certified TVs have no file
+manager, so the fastest route for one TV or a whole store is ADB over the network:
+
+1. On the TV: **Settings → About → tap "Build" 7 times**, then **Developer options → enable
+   USB debugging / Network debugging** (wording varies by brand). Note the TV's IP address
+   (Settings → Network, or About → Status).
+2. TV and PC on the same Wi-Fi. Double-click **`tools\Install to TV.cmd`** (or run
+   `tools\install-to-tv.ps1 192.168.1.50 192.168.1.51 …`). It connects, installs the APK sitting
+   next to it (or `dist\msign-tv.apk`) and launches MSIGN. First time per TV, accept the
+   "Allow USB debugging?" prompt on the screen (tick *Always allow*).
+3. On the TV, type the code from the site (**TVs → Show code**).
+
+Needs Android platform-tools (`adb`) on the PC — auto-detected from the Android SDK, or unzip
+`platform-tools` next to the script.
+
+## Sideloading with a USB stick
+
+Only works on boxes that ship a file manager (most generic X96/T95/MECOOL boxes do); certified
+Android TV / Google TV needs a file-manager app first.
+
+1. Format the stick **FAT32** (or exFAT) on the PC and copy the APK to it. On the TV, if asked how
+   to use the stick pick **Portable storage** — never *internal/device storage* (that reformats it
+   so only that TV can read it).
 2. On the device: Settings → Security → allow "Install unknown apps" for the file manager.
 3. Open the APK from the file manager → Install → open MSIGN.
 4. The TV shows an "Enter code" screen. On the MSIGN site, **TVs → Add TV** (or **Show code** on
