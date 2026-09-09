@@ -2,28 +2,16 @@
 
 /**
  * hooks/usePlayerChannel.ts — the player's ONLY realtime subscription (docs/CONTRACTS.md
- * §7, §8): the private `screen-{id}` channel. Payloads are narrowed with
- * isScreenCommandPayload and console.warn'd + ignored otherwise; `sync`/`identify` are
- * coalesced to one per second and `reload` to one per 30s. A SUBSCRIBED that follows a
- * CHANNEL_ERROR/TIMED_OUT/CLOSED fires onReconnect (the app refetches the manifest).
+ * §7, §8): the private `screen-{id}` channel, implemented in lib/player/realtime.ts. That module
+ * (and the Supabase client with it) is loaded with a dynamic import only on engines that can
+ * parse it (§20): old TV browsers skip realtime and rely on the 30 s heartbeat — content still
+ * updates, just not instantly, and a 401 on the heartbeat still unpairs.
  */
 import { useEffect, useRef, useState } from 'react'
-import type { RealtimeChannel } from '@supabase/supabase-js'
-import { CHANNEL_CONFIG, isScreenCommandPayload, screenChannel } from '@/lib/channels'
-import { createBrowserClient } from '@/lib/supabase/client'
+import { supportsModernSyntax } from '@/lib/player/engine'
+import type { PlayerChannelHandlers } from '@/lib/player/realtime'
 
-const SYNC_GAP_MS = 1_000
-const IDENTIFY_GAP_MS = 1_000
-const RELOAD_GAP_MS = 30_000
-
-export function usePlayerChannel(opts: {
-  screenId: string | null
-  onSync(): void
-  onReload(): void
-  onIdentify(): void
-  onUnpair(): void
-  onReconnect(): void
-}): { connected: boolean } {
+export function usePlayerChannel(opts: { screenId: string | null } & PlayerChannelHandlers): { connected: boolean } {
   const { screenId } = opts
   const [connected, setConnected] = useState(false)
 
@@ -33,60 +21,23 @@ export function usePlayerChannel(opts: {
   useEffect(() => {
     setConnected(false)
     if (!screenId) return
-
-    const supabase = createBrowserClient()
-    let cancelled = false
-    let channel: RealtimeChannel | null = null
-    let wasDisrupted = false
-    const lastAt: Record<string, number> = {}
-
-    const onCommand = (event: string, gapMs: number, payload: unknown, run: () => void) => {
-      if (!isScreenCommandPayload(payload)) {
-        console.warn('[player] ignoring malformed command payload', event, payload)
-        return
-      }
-      const now = Date.now()
-      if (gapMs > 0 && now - (lastAt[event] ?? 0) < gapMs) return
-      lastAt[event] = now
-      run()
+    if (!supportsModernSyntax()) {
+      console.warn('[player] realtime disabled on this engine — updates arrive with the heartbeat')
+      return
     }
 
-    void (async () => {
-      // Private-channel joins carry the client's token (anon key for the player).
-      await supabase.realtime.setAuth()
-      if (cancelled) return
-      channel = supabase
-        .channel(screenChannel(screenId), CHANNEL_CONFIG)
-        .on('broadcast', { event: 'sync' }, (message) =>
-          onCommand('sync', SYNC_GAP_MS, (message as Record<string, unknown>).payload, () => optsRef.current.onSync()),
-        )
-        .on('broadcast', { event: 'reload' }, (message) =>
-          onCommand('reload', RELOAD_GAP_MS, (message as Record<string, unknown>).payload, () => optsRef.current.onReload()),
-        )
-        .on('broadcast', { event: 'identify' }, (message) =>
-          onCommand('identify', IDENTIFY_GAP_MS, (message as Record<string, unknown>).payload, () => optsRef.current.onIdentify()),
-        )
-        .on('broadcast', { event: 'unpair' }, (message) =>
-          onCommand('unpair', 0, (message as Record<string, unknown>).payload, () => optsRef.current.onUnpair()),
-        )
-        .subscribe((status) => {
-          if (cancelled) return
-          if (status === 'SUBSCRIBED') {
-            setConnected(true)
-            if (wasDisrupted) {
-              wasDisrupted = false
-              optsRef.current.onReconnect()
-            }
-          } else {
-            wasDisrupted = true
-            setConnected(false)
-          }
-        })
-    })()
+    let cancelled = false
+    let unsubscribe: (() => void) | null = null
+    import('@/lib/player/realtime')
+      .then((mod) => {
+        if (cancelled) return
+        unsubscribe = mod.subscribePlayerChannel(screenId, () => optsRef.current, setConnected)
+      })
+      .catch((e) => console.warn('[player] realtime unavailable — updates arrive with the heartbeat', e))
 
     return () => {
       cancelled = true
-      if (channel) void supabase.removeChannel(channel)
+      if (unsubscribe) unsubscribe()
     }
   }, [screenId])
 

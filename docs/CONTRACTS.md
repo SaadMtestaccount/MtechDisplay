@@ -1388,9 +1388,12 @@ before hydration, so nothing painted. The console stays desktop-only; the player
 - **Syntax targets** — `package.json#browserslist` (chrome ≥ 64 … — the single config; a `.browserslistrc` alongside it is
   a browserslist error). Production builds use **webpack** (`next build`, no `--turbopack`): Turbopack's runtime chunk
   carries `?.`/`??` regardless of browserslist. `next.config.ts` lists every `@supabase/*` package in `transpilePackages`,
-  but `@supabase/realtime-js`/`auth-js` still ship `?.`/`??` in the built chunk, so the **effective floor for the player
-  is Chrome 80** (LG webOS 22 / 2022+, Samsung Tizen 6.5 / 2022+, Android WebView 80+). Older sets show the boot message
-  with their user agent instead of a blank page.
+  but `@supabase/realtime-js`/`auth-js` still ship `?.`/`??`, so the Supabase client is kept OUT of the player page:
+  `usePlayerChannel` only `import()`s `lib/player/realtime.ts` (the channel subscription, moved there) when
+  `lib/player/engine.ts` `supportsModernSyntax()` passes (a `new Function('null ?? 1')` probe, cached). Older engines run
+  the player without realtime: content changes arrive with the 30 s heartbeat's version check, a 401 still unpairs;
+  `identify`/`reload` commands are not delivered there. **Effective floor: Chrome ~66** (LG webOS 5+ / 2020+, Samsung
+  Tizen 5.5+, Android WebView 66+); realtime on Chrome 80+. Older sets show the boot message with their user agent.
 - **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
   user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine
   that never runs the app the message stays and names the browser. `PlayerErrorBoundary` shows `.pl-fatal` (error +
