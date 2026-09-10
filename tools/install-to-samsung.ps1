@@ -117,16 +117,24 @@ if ($Wgt) {
   $build = Join-Path $Source '.buildResult'
   if (Test-Path $build) { [System.IO.Directory]::Delete($build, $true) }
   Write-Host 'building...'
-  $out = Invoke-Tool $tizen @('build-web', '-out', '.buildResult', '--', $Source)
-  if ($LASTEXITCODE -ne 0) { Write-Host $out -ForegroundColor Red; exit 1 }
+  $out = Invoke-Tool $tizen @('build-web', '-e', 'README.md', '-out', '.buildResult', '--', $Source)
+  if ($LASTEXITCODE -ne 0 -or $out -notmatch 'BUILD SUCCESSFUL') { Write-Host $out -ForegroundColor Red; exit 1 }
   Write-Host 'signing + packaging...'
   $out = Invoke-Tool $tizen @('package', '-t', 'wgt', '-s', $Profile, '--', $build)
   $wgtFile = Get-ChildItem $build -Filter *.wgt -ErrorAction SilentlyContinue | Select-Object -First 1
-  if ($LASTEXITCODE -ne 0 -or -not $wgtFile) {
+  # The CLI still emits a .wgt when the profile is missing — just UNSIGNED, which every TV rejects.
+  $unsigned = $out -match '(?i)not found tizen (author )?signature'
+  if ($LASTEXITCODE -ne 0 -or -not $wgtFile -or $unsigned) {
     Write-Host $out -ForegroundColor Red
     Write-Host ''
-    Write-Host "Packaging failed. Does a certificate profile named '$Profile' exist in Tizen Studio > Tools > Certificate Manager," -ForegroundColor Yellow
-    Write-Host 'and does its distributor certificate include this TV''s DUID? See tizen\README.md.' -ForegroundColor Yellow
+    if ($unsigned) {
+      Write-Host "The package was NOT signed: no certificate profile named '$Profile' was found." -ForegroundColor Yellow
+      Write-Host 'Create it in Tizen Studio > Tools > Certificate Manager (Samsung > TV) with the TV DUIDs, then run again.' -ForegroundColor Yellow
+      Write-Host 'Different profile name? Pass -Profile <name>. See tizen\README.md Part 3.' -ForegroundColor Yellow
+      if ($wgtFile) { Remove-Item $wgtFile.FullName -Force -ErrorAction SilentlyContinue }
+    } else {
+      Write-Host "Packaging failed. See tizen\README.md." -ForegroundColor Yellow
+    }
     exit 1
   }
   $keep = Join-Path $PSScriptRoot 'msign.wgt'
