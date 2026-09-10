@@ -40,7 +40,7 @@ export function SetPasswordForm() {
       return
     }
     toast.success('Password set — welcome to MSIGN')
-    router.replace('/tvs')
+    router.replace('/')
   }
 
   return (

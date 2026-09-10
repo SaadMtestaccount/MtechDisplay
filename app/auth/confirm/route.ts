@@ -17,7 +17,7 @@ function isOtpType(value: string | null): value is EmailOtpType {
 
 function safeNext(value: string | null): string {
   if (value && value.startsWith('/') && !value.startsWith('//')) return value
-  return '/tvs'
+  return '/'
 }
 
 export async function GET(request: NextRequest): Promise<NextResponse> {

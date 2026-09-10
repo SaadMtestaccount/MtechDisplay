@@ -1469,8 +1469,12 @@ Two consoles in one shell, both phone-first and written in plain words. No drag-
   `ADMIN_TABS` = Merchants `/admin/merchants` · All TVs `/admin/tvs` · Staff `/admin/users` · Settings `/admin/settings`.
   `tabsFor(pathname, isSuperAdmin)` picks the admin set only for super admins on `/admin/*`. `NavTabs` renders them from
   `md` up; `MobileTabBar` (fixed bottom, icon + word, 64 px) below `md`; `PageContainer` pads the bottom for it.
-  `Navbar` shows a "Super admin" badge plus a switch: "Admin" (→ `/admin/merchants`) inside a location, "Open a location"
-  (→ `/tvs`) on `/admin/*`; the OrgSwitcher hides in admin mode. `UserMenu`'s staff item is "Merchants".
+  **Landing**: `app/page.tsx` is a server page — no session → `/login`, super admin → `/admin/merchants`, else `/tvs`;
+  `middleware` sends a signed-in `/login` visit to `/`, and `LoginForm` / `SetPasswordForm` / `auth/confirm` default to
+  `/`. **View as a merchant**: `OrgSwitcher({ label?, onSelected? })` — in admin mode `Navbar` renders it as "Open a
+  location" (grouped by merchant email, `onSelected` → `/tvs`); inside a location a super admin sees an amber
+  `data-testid="viewing-as-bar"` under the navbar ("Viewing {org} as the merchant sees it", a "Switch location"
+  switcher, "Back to Merchants"). Managers see the plain OrgSwitcher and no bar. `UserMenu`'s staff item is "Merchants".
 - **Lock**: merchants never see it. `components/tvs/useAssignScreen.ts` `assignUnlocked({screen, body})` PATCHes
   `locked:false` first when the screen is locked, then POSTs `/assign` — so a merchant's change always lands. The Lock
   toggle remains in `TvTools` for super admins only.

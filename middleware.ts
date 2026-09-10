@@ -23,7 +23,8 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
 
   if (isPublicPath(pathname)) {
     if (user && pathname === '/login') {
-      return withCookies(response, NextResponse.redirect(new URL('/tvs', request.url)))
+      // "/" picks the landing page by role (app/page.tsx).
+      return withCookies(response, NextResponse.redirect(new URL('/', request.url)))
     }
     return response
   }
@@ -38,10 +39,6 @@ export async function middleware(request: NextRequest): Promise<NextResponse> {
     const login = new URL('/login', request.url)
     login.searchParams.set('next', `${pathname}${search}`)
     return withCookies(response, NextResponse.redirect(login))
-  }
-
-  if (pathname === '/') {
-    return withCookies(response, NextResponse.redirect(new URL('/tvs', request.url)))
   }
 
   return response

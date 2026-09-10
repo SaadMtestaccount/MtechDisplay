@@ -12,7 +12,7 @@ import { createBrowserClient } from '@/lib/supabase/client'
 /** `next` must be a same-site path: starts with '/' and not '//' (docs/CONTRACTS.md §9.1). */
 function safeNext(value: string | null): string {
   if (value && value.startsWith('/') && !value.startsWith('//')) return value
-  return '/tvs'
+  return '/'
 }
 
 export function LoginForm() {
