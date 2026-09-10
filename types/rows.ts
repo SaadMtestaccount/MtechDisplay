@@ -97,6 +97,8 @@ export type PlaylistRow = {
   org_id: string
   name: string
   kind: PlaylistKind
+  /** Synchronized playback: TVs on this playlist follow the shared server clock (0015, §21). */
+  sync: boolean
   updated_at: string
   created_at: string
 }

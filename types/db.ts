@@ -65,7 +65,7 @@ export type Database = {
         ]
       >
       websites: Table<WebsiteRow, 'id' | 'refresh_seconds' | 'created_at', [FK<'websites_org_id_fkey', 'org_id', 'organizations'>]>
-      playlists: Table<PlaylistRow, 'id' | 'updated_at' | 'created_at', [FK<'playlists_org_id_fkey', 'org_id', 'organizations'>]>
+      playlists: Table<PlaylistRow, 'id' | 'sync' | 'updated_at' | 'created_at', [FK<'playlists_org_id_fkey', 'org_id', 'organizations'>]>
       playlist_items: Table<
         PlaylistItemRow,
         | 'id' | 'position' | 'content_id' | 'website_id' | 'duration_seconds' | 'transition' | 'mute'

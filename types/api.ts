@@ -295,7 +295,11 @@ export type HeartbeatRequest = {
   playlist_version: number
   uptime_seconds?: number
 }
-export type HeartbeatResponse = { playlist_version: number }
+export type HeartbeatResponse = {
+  playlist_version: number
+  /** server clock at the beat (ISO) — the player keeps its synced-playback clock aligned with it (§21) */
+  server_time: string
+}
 
 export type ManifestSchedule = {
   active_from: string | null
@@ -335,6 +339,8 @@ export type Manifest = {
   }
   org: { name: string; logo_url: string | null }
   playlist_version: number
+  /** playlists.sync of the effective playlist: synchronized playback across TVs (§21) */
+  sync: boolean
   generated_at: string
   items: ManifestItem[]
 }

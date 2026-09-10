@@ -3,7 +3,7 @@
  */
 import { z } from 'zod'
 import type { PlaylistListQuery } from '@/types/api'
-import { uuidSchema } from '@/lib/validators/common'
+import { hasAtLeastOneKey, nameSchema, uuidSchema } from '@/lib/validators/common'
 
 export const playlistKindSchema = z.enum(['screen', 'group', 'menu'] as const)
 export const playlistItemTypeSchema = z.enum(['content', 'website'] as const)
@@ -53,6 +53,15 @@ export const playlistItemInputSchema = z
     }
   })
 export type PlaylistItemInput = z.infer<typeof playlistItemInputSchema>
+
+/** PATCH /api/playlists/[id] — rename and/or toggle synchronized playback (§21). */
+export const playlistUpdateSchema = z
+  .object({
+    name: nameSchema.optional(),
+    sync: z.boolean().optional(),
+  })
+  .refine(hasAtLeastOneKey, { message: 'Nothing to update' })
+export type PlaylistUpdateInput = z.infer<typeof playlistUpdateSchema>
 
 /** PUT /api/playlists/[id]/items — the full ordered list. */
 export const savePlaylistItemsSchema = z.object({

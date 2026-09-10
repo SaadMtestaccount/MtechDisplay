@@ -13,16 +13,20 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { toast } from 'sonner'
 import { EmptyPlaylist } from '@/components/playlist/EmptyPlaylist'
 import { LibraryPanel } from '@/components/playlist/LibraryPanel'
 import { PlaylistDropPane } from '@/components/playlist/PlaylistDropPane'
 import { PlaylistRow } from '@/components/playlist/PlaylistRow'
 import { SaveStatus } from '@/components/playlist/SaveStatus'
 import { newItemFromPick, type LibraryPick } from '@/components/playlist/playlist-utils'
+import { Label } from '@/components/ui/label'
+import { Switch } from '@/components/ui/switch'
 import { useApp } from '@/hooks/useApp'
 import { usePlaylistAutosave } from '@/hooks/usePlaylistAutosave'
+import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
 import type { PlaylistItemInput } from '@/lib/validators/playlists'
 import type { PlaylistView } from '@/types/api'
@@ -68,6 +72,23 @@ export function PlaylistEditor({
     playlistId,
     initialItems: initial.items,
     onSaved: handleSaved,
+  })
+
+  // Synchronized playback (§21): every TV on this playlist follows the shared clock.
+  const [sync, setSync] = useState(initial.sync)
+  const syncMutation = useMutation({
+    mutationFn: (next: boolean) =>
+      apiFetch<PlaylistView>(`/api/playlists/${playlistId}`, { method: 'PATCH', json: { sync: next } }),
+    onMutate: (next) => setSync(next),
+    onSuccess: (view) => {
+      setSync(view.sync)
+      handleSaved(view)
+      toast.success(view.sync ? 'TVs on this playlist now play in sync' : 'Sync turned off')
+    },
+    onError: (e, next) => {
+      setSync(!next)
+      toast.error(e instanceof Error ? e.message : 'Something went wrong')
+    },
   })
 
   // In-app <Link> navigation within the 500 ms debounce must not lose an edit: flush (with
@@ -161,7 +182,26 @@ export function PlaylistEditor({
                   {items.length} {items.length === 1 ? 'item' : 'items'}
                 </span>
               </div>
-              <SaveStatus status={status} lastSavedAt={lastSavedAt} />
+              <div className="flex items-center gap-4">
+                <Label
+                  htmlFor={`sync-${playlistId}`}
+                  className="flex cursor-pointer items-center gap-2 text-sm font-normal text-muted-foreground"
+                  title="Every TV showing this playlist plays the same item at the same moment — videos included"
+                >
+                  <Switch
+                    id={`sync-${playlistId}`}
+                    size="sm"
+                    checked={sync}
+                    onCheckedChange={(next) => {
+                      if (!syncMutation.isPending) syncMutation.mutate(next)
+                    }}
+                    disabled={syncMutation.isPending}
+                    aria-label="Sync playback across TVs"
+                  />
+                  Sync across TVs
+                </Label>
+                <SaveStatus status={status} lastSavedAt={lastSavedAt} />
+              </div>
             </div>
             <PlaylistDropPane highlight={drag?.kind === 'lib'}>
               {items.length === 0 ? (

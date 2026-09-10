@@ -3,9 +3,11 @@
  * deletion. `savePlaylistItems` lives in lib/playlists/save.ts and is re-exported here.
  */
 import { ApiError } from '@/lib/api'
+import type { OrgContext } from '@/lib/auth'
 import { broadcastToScreens, notifyOrgChanged } from '@/lib/broadcast'
 import { logEvent } from '@/lib/events'
 import { publicThumbUrl } from '@/lib/storage'
+import type { PlaylistUpdateInput } from '@/lib/validators/playlists'
 import type { PlaylistItemView, PlaylistListQuery, PlaylistView } from '@/types/api'
 import type { Content, DbClient, Playlist, PlaylistItem, PlaylistKind, Screen, Website } from '@/types/db'
 
@@ -97,6 +99,24 @@ export async function getPlaylistView(supabase: DbClient, orgId: string, playlis
   if (!data) throw new ApiError(404, 'Playlist not found')
   const items = await listPlaylistItemViews(supabase, playlistId)
   return { ...data, items }
+}
+
+/** Rename and/or toggle synchronized playback; a sync change re-syncs every TV on the playlist (§21). */
+export async function updatePlaylist(
+  ctx: OrgContext,
+  admin: DbClient,
+  playlistId: string,
+  input: PlaylistUpdateInput,
+): Promise<PlaylistView> {
+  const before = await getPlaylistView(ctx.supabase, ctx.org.id, playlistId)
+  const patch: { name?: string; sync?: boolean } = {}
+  if (input.name !== undefined) patch.name = input.name
+  if (input.sync !== undefined) patch.sync = input.sync
+  const { error } = await ctx.supabase.from('playlists').update(patch).eq('id', playlistId).eq('org_id', ctx.org.id)
+  if (error) throw error
+  if (input.sync !== undefined && input.sync !== before.sync) await touchPlaylist(admin, playlistId)
+  else if (input.name !== undefined) await notifyOrgChanged(ctx.org.id, 'playlists', playlistId)
+  return getPlaylistView(ctx.supabase, ctx.org.id, playlistId)
 }
 
 /**

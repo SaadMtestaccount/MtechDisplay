@@ -175,6 +175,10 @@ export function useMediaCache(manifest: Manifest | null, offline: boolean): {
   const srcFor = useCallback(
     (item: ManifestItem): string | null => {
       if (item.type === 'website') return item.url
+      // Videos stream from their https URL while online: TV browsers (Android WebView, LG, Samsung)
+      // hand an https <video> to the platform's hardware decoder but push a blob: source through the
+      // browser's software decoder, which stutters on TV boxes. The cached copy is the offline path (§21).
+      if (item.type === 'video' && !offline) return item.url
       const url = item.content_id ? objectUrls[item.content_id] : undefined
       if (url) return url
       return offline ? null : item.url

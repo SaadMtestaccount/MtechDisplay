@@ -13,11 +13,15 @@ import type { Content, DbClient, PlaylistItem, Screen, Website } from '@/types/d
 
 type ItemSource = PlaylistItem & { content: Content | null; websites: Website | null }
 
-/** override ?? (video ? ceil(detected) : null) ?? DEFAULT_ITEM_DURATION_SECONDS */
+/**
+ * override ?? (video ? detected, to 10 ms : null) ?? DEFAULT_ITEM_DURATION_SECONDS. Video durations
+ * are kept exact (not rounded up) so synced playback slots match the file and TVs don't sit on a
+ * finished frame waiting for the boundary (§21).
+ */
 export function resolveDuration(item: PlaylistItem, content: Content | null): number {
   if (item.duration_seconds !== null && item.duration_seconds > 0) return item.duration_seconds
   if (content && content.type === 'video' && content.duration_seconds !== null && content.duration_seconds > 0) {
-    return Math.ceil(content.duration_seconds)
+    return Math.max(1, Math.round(content.duration_seconds * 100) / 100)
   }
   return DEFAULT_ITEM_DURATION_SECONDS
 }
@@ -101,6 +105,11 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
 
   const effective = await getEffectivePlaylistId(admin, screen)
   const items = await loadItems(admin, effective, now)
+  let sync = false
+  if (effective !== null) {
+    const { data: playlist } = await admin.from('playlists').select('sync').eq('id', effective).maybeSingle()
+    sync = playlist?.sync ?? false
+  }
 
   const mediaKeys = items.flatMap((i) => (i.content ? [i.content.storage_path] : []))
   const urls = await createMediaSignedUrls(admin, mediaKeys, DEVICE_SIGNED_URL_TTL_SECONDS)
@@ -116,6 +125,7 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
     screen: { id: screen.id, name: screen.name, rotation, orientation, watermark, timezone: org.timezone },
     org: { name: org.name, logo_url: org.logo_url },
     playlist_version: screen.playlist_version,
+    sync,
     generated_at: now.toISOString(),
     items: items.flatMap((item) => {
       const mapped = toManifestItem(item, urls)

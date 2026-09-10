@@ -109,5 +109,5 @@ export async function recordHeartbeat(
     online: true,
   })
 
-  return { playlist_version }
+  return { playlist_version, server_time: nowIso }
 }

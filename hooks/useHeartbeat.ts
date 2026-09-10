@@ -9,6 +9,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { nextDelay } from '@/lib/player/backoff'
+import { noteServerTime } from '@/lib/player/clock'
 import { DeviceApiError, sendHeartbeat } from '@/lib/player/device-api'
 import { HEARTBEAT_INTERVAL_MS } from '@/lib/status'
 import type { HeartbeatRequest } from '@/types/api'
@@ -48,6 +49,7 @@ export function useHeartbeat(opts: {
       try {
         const res = await sendHeartbeat(deviceToken, body)
         if (cancelled) return
+        if (typeof res.server_time === 'string') noteServerTime(res.server_time)
         consecutiveFailures = 0
         setFailing(false)
         setLastOkAt(new Date())

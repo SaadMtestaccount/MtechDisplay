@@ -2,17 +2,21 @@
 
 /**
  * components/player/PlaybackEngine.tsx — the playback loop (docs/CONTRACTS.md §10).
- * Active items = schedule (screen timezone) + expiry filter, re-evaluated on every
- * advance and every 30s. Two stacked layers give the 300ms fade crossfade with the next
- * item pre-mounted ('none' swaps instantly); images/websites advance after
- * duration_seconds, videos on `ended` with a duration+1s safety timer; media errors skip
- * the item; websites are skipped while offline; standby when nothing is playable.
- * A manifest swap keeps the position by item id.
+ * Active items = schedule (screen timezone) + expiry filter, re-evaluated on every advance and
+ * every 30s. Two stacked layers give the 300ms fade crossfade with the next item pre-mounted
+ * ('none' swaps instantly); images/websites advance after duration_seconds, videos on `ended`
+ * (or the near-end signal, so the fade covers the finish) with a duration+1s safety timer; media
+ * errors skip the item; websites are skipped while offline; standby when nothing is playable.
+ * A lone video loops seamlessly. A manifest swap keeps the position by item id.
+ * Synced playback (manifest.sync, §21): the shared server clock decides the slot instead of
+ * free-running timers — every TV on the playlist shows the same item at the same offset.
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MutableRefObject } from 'react'
 import type { useMediaCache } from '@/hooks/useMediaCache'
+import { syncedNow } from '@/lib/player/clock'
 import { advanceDelayMs, isItemExpired, nextPlayable } from '@/lib/player/playback'
+import { slotAt } from '@/lib/player/sync'
 import { isItemActive } from '@/lib/schedule'
 import type { Manifest, ManifestItem } from '@/types/api'
 import { MediaLayer } from '@/components/player/MediaLayer'
@@ -23,9 +27,10 @@ const FADE_MS = 300
 const PREMOUNT_MS = 60
 const REEVALUATE_MS = 30_000
 const ERROR_RETRY_MS = 30_000
+const SYNC_SLACK_MS = 30
 
-type Layer = { item: ManifestItem | null; src: string | null; nonce: number }
-const EMPTY_LAYER: Layer = { item: null, src: null, nonce: 0 }
+type Layer = { item: ManifestItem | null; src: string | null; nonce: number; syncStartMs: number | null }
+const EMPTY_LAYER: Layer = { item: null, src: null, nonce: 0, syncStartMs: null }
 
 function stopTimer(ref: MutableRefObject<ReturnType<typeof setTimeout> | null>): void {
   if (ref.current) {
@@ -51,6 +56,7 @@ export function PlaybackEngine({
   const [activeIdx, setActiveIdx] = useState<0 | 1>(0)
   const [fade, setFade] = useState(true)
   const [standby, setStandby] = useState(true)
+  const [single, setSingle] = useState(false)
 
   const manifestRef = useRef(manifest)
   const timeZoneRef = useRef(timeZone)
@@ -65,6 +71,7 @@ export function PlaybackEngine({
   const currentRef = useRef<ManifestItem | null>(null)
   const activeIdxRef = useRef<0 | 1>(0)
   const nonceRef = useRef(0)
+  const singleRef = useRef(false)
   const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const swapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -91,6 +98,11 @@ export function PlaybackEngine({
     advanceTimerRef.current = setTimeout(() => advanceRef.current(), advanceDelayMs(item))
   }, [])
 
+  const markSingle = useCallback((count: number) => {
+    singleRef.current = count === 1
+    setSingle(count === 1)
+  }, [])
+
   const goStandby = useCallback(() => {
     stopTimer(advanceTimerRef)
     stopTimer(swapTimerRef)
@@ -101,9 +113,9 @@ export function PlaybackEngine({
     setStandby(true)
   }, [])
 
-  /** Mounts `next` in the inactive layer, then crossfades (300ms) or swaps instantly. */
+  /** Mounts `next` in the inactive layer, then crossfades (300ms) or swaps instantly. Callers arm timers. */
   const show = useCallback(
-    (next: ManifestItem) => {
+    (next: ManifestItem, syncStartMs: number | null) => {
       stopTimer(swapTimerRef)
       stopTimer(clearTimerRef)
       const incoming: 0 | 1 = activeIdxRef.current === 0 ? 1 : 0
@@ -111,7 +123,7 @@ export function PlaybackEngine({
       currentRef.current = next
       setStandby(false)
       onCurrentItemRef.current(next.id)
-      setLayer(incoming, { item: next, src: cacheRef.current.srcFor(next), nonce: nonceRef.current })
+      setLayer(incoming, { item: next, src: cacheRef.current.srcFor(next), nonce: nonceRef.current, syncStartMs })
       const useFade = next.transition === 'fade'
       setFade(useFade)
       const activate = () => {
@@ -124,16 +136,16 @@ export function PlaybackEngine({
       }
       if (useFade) swapTimerRef.current = setTimeout(activate, PREMOUNT_MS)
       else activate()
-      armAdvance(next)
     },
-    [armAdvance, setLayer],
+    [setLayer],
   )
 
-  /** Re-evaluates the active list and moves to the next playable item (or standby). */
+  /** Free-running mode: re-evaluate the active list and move to the next playable item (or standby). */
   const advance = useCallback(() => {
     stopTimer(advanceTimerRef)
     const now = new Date()
     const list = manifestRef.current.items.filter((item) => isActiveNow(item, now))
+    markSingle(list.length)
     const current = currentRef.current
     const next = nextPlayable(list, current?.id ?? null, canPlay)
     if (!next) {
@@ -141,31 +153,52 @@ export function PlaybackEngine({
       return
     }
     if (current && next.id === current.id) {
-      // The only playable item repeats: videos remount (restart), images just re-arm.
+      // The only playable item repeats: images re-arm; videos loop on their own (MediaLayer `loop`).
       currentRef.current = next
       const idx = activeIdxRef.current
-      if (next.type === 'video') {
-        nonceRef.current += 1
-        setLayer(idx, { item: next, src: cacheRef.current.srcFor(next), nonce: nonceRef.current })
-      } else {
-        setLayers((prev) => {
-          const existing = prev[idx]
-          if (!existing.item) return prev
-          const updated: Layer = { ...existing, item: next }
-          return idx === 0 ? [updated, prev[1]] : [prev[0], updated]
-        })
-      }
-      armAdvance(next)
+      setLayers((prev) => {
+        const existing = prev[idx]
+        if (!existing.item) return prev
+        const updated: Layer = { ...existing, item: next }
+        return idx === 0 ? [updated, prev[1]] : [prev[0], updated]
+      })
+      if (next.type !== 'video') armAdvance(next)
       return
     }
-    show(next)
-  }, [isActiveNow, canPlay, goStandby, show, armAdvance, setLayer])
-  advanceRef.current = advance
+    show(next, null)
+    armAdvance(next)
+  }, [isActiveNow, canPlay, goStandby, show, armAdvance, markSingle])
+
+  /** Synced mode: the shared clock picks the slot; the timer only wakes us at the next boundary. */
+  const tickSync = useCallback(() => {
+    stopTimer(advanceTimerRef)
+    const nowMs = syncedNow()
+    const list = manifestRef.current.items.filter((item) => isActiveNow(item, new Date(nowMs)))
+    markSingle(list.length)
+    const slot = slotAt(list, nowMs)
+    if (!slot) {
+      goStandby()
+      return
+    }
+    const wake = () => {
+      stopTimer(advanceTimerRef)
+      advanceTimerRef.current = setTimeout(() => advanceRef.current(), slot.remainingMs + SYNC_SLACK_MS)
+    }
+    if (!canPlay(slot.item)) {
+      // Hold the slot in standby so the phase stays shared; the next boundary re-evaluates.
+      if (currentRef.current) goStandby()
+      wake()
+      return
+    }
+    if (currentRef.current?.id !== slot.item.id) show(slot.item, slot.startMs)
+    wake()
+  }, [isActiveNow, canPlay, goStandby, show, markSingle])
+  advanceRef.current = manifestRef.current.sync ? tickSync : advance
 
   /** Interrupts only when the current item became invalid (or we are in standby). */
   const reconsider = useCallback(() => {
     const current = currentRef.current
-    if (!current) {
+    if (!current || manifestRef.current.sync) {
       advanceRef.current()
       return
     }
@@ -176,8 +209,9 @@ export function PlaybackEngine({
   // Manifest swap: keep playing the same item id when it is still active and playable.
   useEffect(() => {
     manifestRef.current = manifest
+    advanceRef.current = manifest.sync ? tickSync : advance
     const current = currentRef.current
-    if (!current) {
+    if (!current || manifest.sync) {
       advanceRef.current()
       return
     }
@@ -191,11 +225,11 @@ export function PlaybackEngine({
         const updated: Layer = { ...existing, item: replacement } // keep src — no restart
         return idx === 0 ? [updated, prev[1]] : [prev[0], updated]
       })
-      armAdvance(replacement)
+      if (replacement.type !== 'video' || !singleRef.current) armAdvance(replacement)
     } else {
       advanceRef.current()
     }
-  }, [manifest, isActiveNow, canPlay, armAdvance])
+  }, [manifest, isActiveNow, canPlay, armAdvance, advance, tickSync])
 
   // Schedule boundaries and expirations: re-evaluate every 30s.
   useEffect(() => {
@@ -223,6 +257,12 @@ export function PlaybackEngine({
   )
 
   const handleEnded = useCallback((item: ManifestItem) => {
+    if (currentRef.current?.id === item.id) advanceRef.current()
+  }, [])
+
+  /** Free-running only: start the next item ~0.35 s early so the crossfade hides the video's end. */
+  const handleNearEnd = useCallback((item: ManifestItem) => {
+    if (manifestRef.current.sync || singleRef.current) return
     if (currentRef.current?.id === item.id) advanceRef.current()
   }, [])
 
@@ -262,7 +302,10 @@ export function PlaybackEngine({
                 item={item}
                 src={layer.src}
                 active={isActive}
+                loop={single && item.type === 'video'}
+                syncStartMs={layer.syncStartMs}
                 onEnded={() => handleEnded(item)}
+                onNearEnd={() => handleNearEnd(item)}
                 onError={() => handleError(item)}
               />
             )}

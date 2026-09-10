@@ -10,6 +10,7 @@
  */
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { nextDelay } from '@/lib/player/backoff'
+import { noteServerTime } from '@/lib/player/clock'
 import { DeviceApiError, fetchManifest } from '@/lib/player/device-api'
 import { isManifest } from '@/lib/player/playback'
 import { MANIFEST_KEY, readJson, writeJson } from '@/lib/player/player-storage'
@@ -65,6 +66,7 @@ export function usePlayerManifest(opts: { deviceToken: string | null; onUnauthor
       try {
         const fresh = await fetchManifest(token)
         if (!mountedRef.current || tokenRef.current !== token) return
+        noteServerTime(fresh.generated_at)
         attemptRef.current = 0
         manifestRef.current = fresh
         setManifest(fresh)

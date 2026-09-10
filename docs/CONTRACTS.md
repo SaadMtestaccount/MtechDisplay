@@ -1398,6 +1398,30 @@ before hydration, so nothing painted. The console stays desktop-only; the player
   boot script swaps the advice to "update Android System WebView" when it sees it. The shell retries main-frame failures
   (5 s → 60 s, and immediately on a `ConnectivityManager` network callback) behind a native notice, pins `textZoom = 100`,
   cancels TLS errors with a "check date and time" notice, and logs the page console under the `MSIGN` logcat tag.
+
+---
+
+## 21. Addendum — Smooth video, no end-of-video overlay, synchronized playback (added 2026-09-10, additive)
+
+- **Video source (`useMediaCache.srcFor`)**: videos play from their signed **https URL while online**; the Cache Storage
+  copy (object URL) is the offline path only. TV engines (Android WebView, LG, Samsung) hand an https `<video>` to the
+  platform hardware decoder but push `blob:` sources through the browser's software decoder — the cause of stuttering
+  even at 720p. Images keep using object URLs.
+- **End of video**: `MediaLayer` fires `onNearEnd` 0.35 s before the end (free-running mode; the engine starts the next
+  item so the crossfade covers the finish) and hides the element on `ended` — TV browsers paint their own grey "paused"
+  overlay on a finished video. A lone video gets `loop` (seamless, no remount); `disableRemotePlayback` is set.
+- **Manifest durations**: `resolveDuration` keeps detected video durations exact (to 10 ms, min 1 s) instead of `ceil`.
+- **Synchronized playback** — `playlists.sync boolean not null default false` (`0015_playlist_sync.sql`);
+  `PlaylistRow.sync`; `Manifest.sync` = the effective playlist's flag; `HeartbeatResponse.server_time` (ISO).
+  `PATCH /api/playlists/[id]` (`playlistUpdateSchema`: `name?`, `sync?`; `updatePlaylist` → `touchPlaylist` on a sync
+  change so every TV re-syncs). `PlaylistEditor` shows a **Sync across TVs** switch in its header.
+  Player: `lib/player/clock.ts` (`noteServerTime` from `manifest.generated_at` and every heartbeat; `syncedNow()`),
+  `lib/player/sync.ts` (`slotAt(items, nowMs)`: the active list repeats as consecutive duration slots from the Unix
+  epoch — any TV with the same list computes the same slot and offset with no coordination). `PlaybackEngine` in sync
+  mode (`tickSync`) shows the clock's slot, wakes at the next boundary, holds an unplayable slot in standby (keeps the
+  phase) and passes `syncStartMs` to `MediaLayer`, which seeks the video to `(syncedNow − syncStartMs)` once metadata is
+  known and re-aligns every 3 s when drift exceeds 0.5 s. `identify`/`reload`/`sync` commands are unchanged.
+
 - **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
   user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine
   that never runs the app the message stays and names the browser. `PlayerErrorBoundary` shows `.pl-fatal` (error +
