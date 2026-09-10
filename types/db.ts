@@ -65,7 +65,11 @@ export type Database = {
         ]
       >
       websites: Table<WebsiteRow, 'id' | 'refresh_seconds' | 'created_at', [FK<'websites_org_id_fkey', 'org_id', 'organizations'>]>
-      playlists: Table<PlaylistRow, 'id' | 'sync' | 'updated_at' | 'created_at', [FK<'playlists_org_id_fkey', 'org_id', 'organizations'>]>
+      playlists: Table<
+        PlaylistRow,
+        'id' | 'sync' | 'sync_started_at' | 'updated_at' | 'created_at',
+        [FK<'playlists_org_id_fkey', 'org_id', 'organizations'>]
+      >
       playlist_items: Table<
         PlaylistItemRow,
         | 'id' | 'position' | 'content_id' | 'website_id' | 'duration_seconds' | 'transition' | 'mute'
@@ -86,8 +90,8 @@ export type Database = {
       screens: Table<
         ScreenRow,
         | 'id' | 'playlist_id' | 'group_id' | 'menu_id' | 'locked' | 'device_token_hash' | 'fingerprint' | 'login_code'
-        | 'rotation' | 'orientation' | 'watermark_x' | 'watermark_y' | 'sync' | 'last_seen_at' | 'last_ip'
-        | 'user_agent' | 'resolution' | 'current_item_id' | 'playlist_version' | 'paired_at' | 'created_at',
+        | 'rotation' | 'orientation' | 'watermark_x' | 'watermark_y' | 'sync' | 'sync_started_at' | 'last_seen_at'
+        | 'last_ip' | 'user_agent' | 'resolution' | 'current_item_id' | 'playlist_version' | 'paired_at' | 'created_at',
         [
           FK<'screens_org_id_fkey', 'org_id', 'organizations'>,
           FK<'screens_playlist_id_fkey', 'playlist_id', 'playlists', true>,

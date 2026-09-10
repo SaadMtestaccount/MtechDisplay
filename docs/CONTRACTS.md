@@ -1426,6 +1426,13 @@ before hydration, so nothing painted. The console stays desktop-only; the player
   a change → `bumpAndSyncScreens`). TVs page: **Select TVs** enters selection mode (tiles become checkboxes, dropping is
   disabled, the frame click toggles selection); the toolbar offers **Sync selected** / **Unsync selected** (one PATCH per
   TV) and **Done**. Tiles with `sync` show a **Synced** badge; the tile kebab has **Sync playback / Turn sync off**.
+- **Starting line (`0017_sync_started_at.sql`)**: `screens.sync_started_at` / `playlists.sync_started_at timestamptz`
+  are set to now when sync turns on and cleared when it turns off (`updateScreen`, `updatePlaylist`). `Manifest.sync_epoch`
+  = the applicable one (screen's when the TV is flagged, else the playlist's); `slotAt(items, nowMs, epochMs)` counts the
+  loop from it (`epochMsOf(iso)`, 0 when null), so pressing Sync starts every TV from item 1 / 0:00 at that instant.
+  **`POST /api/screens/sync` `{ ids[], sync }`** (`screensSyncSchema`, `setScreensSync`) updates a whole selection in ONE
+  statement with ONE timestamp → `bumpAndSyncScreens`; the TVs page uses it for **Sync/Unsync selected**. The selection
+  toolbar also has **Identify selected** and **Reload selected** (one `POST /api/screens/[id]/actions` per paired TV).
 
 - **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
   user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine

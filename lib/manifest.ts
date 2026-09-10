@@ -105,11 +105,18 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
 
   const effective = await getEffectivePlaylistId(admin, screen)
   const items = await loadItems(admin, effective, now)
-  // Synced playback when the TV itself is flagged (TVs page selection) OR its playlist is (§21).
+  // Synced playback when the TV itself is flagged (TVs page selection) OR its playlist is (§21);
+  // the starting line comes from whichever flag applies.
   let sync = screen.sync
+  let syncEpoch: string | null = screen.sync ? screen.sync_started_at : null
   if (!sync && effective !== null) {
-    const { data: playlist } = await admin.from('playlists').select('sync').eq('id', effective).maybeSingle()
+    const { data: playlist } = await admin
+      .from('playlists')
+      .select('sync, sync_started_at')
+      .eq('id', effective)
+      .maybeSingle()
     sync = playlist?.sync ?? false
+    syncEpoch = sync ? (playlist?.sync_started_at ?? null) : null
   }
 
   const mediaKeys = items.flatMap((i) => (i.content ? [i.content.storage_path] : []))
@@ -127,6 +134,7 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
     org: { name: org.name, logo_url: org.logo_url },
     playlist_version: screen.playlist_version,
     sync,
+    sync_epoch: syncEpoch,
     generated_at: now.toISOString(),
     items: items.flatMap((item) => {
       const mapped = toManifestItem(item, urls)

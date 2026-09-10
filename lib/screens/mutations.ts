@@ -158,9 +158,14 @@ export async function updateScreen(
     group_id?: string | null
     locked?: boolean
     sync?: boolean
+    sync_started_at?: string | null
   } = {}
   if (input.name !== undefined) patch.name = input.name
-  if (input.sync !== undefined) patch.sync = input.sync
+  if (input.sync !== undefined) {
+    patch.sync = input.sync
+    // Turning sync on starts the loop from 0:00 now; turning it off clears the starting line (§21).
+    if (input.sync !== current.sync) patch.sync_started_at = input.sync ? new Date().toISOString() : null
+  }
   if (input.rotation !== undefined) patch.rotation = input.rotation
   if (input.orientation !== undefined) patch.orientation = input.orientation
   if (input.watermark !== undefined) {
@@ -189,6 +194,30 @@ export async function updateScreen(
 
   await notifyOrgChanged(ctx.org.id, 'screens', id)
   return getScreenView(ctx.supabase, ctx.org.id, id)
+}
+
+/**
+ * Sync (or unsync) several TVs at once with ONE starting line, so a selection restarts its loop
+ * from 0:00 together (§21). Only the org's own screens are touched; all of them are re-synced.
+ */
+export async function setScreensSync(
+  ctx: OrgContext,
+  admin: DbClient,
+  ids: string[],
+  sync: boolean,
+): Promise<{ updated: number }> {
+  if (ids.length === 0) return { updated: 0 }
+  const { data, error } = await ctx.supabase
+    .from('screens')
+    .update({ sync, sync_started_at: sync ? new Date().toISOString() : null })
+    .in('id', ids)
+    .eq('org_id', ctx.org.id)
+    .select('id')
+  if (error) throw error
+  const updated = (data ?? []).map((row) => row.id)
+  if (updated.length > 0) await bumpAndSyncScreens(admin, updated)
+  await notifyOrgChanged(ctx.org.id, 'screens')
+  return { updated: updated.length }
 }
 
 /** Revoke token FIRST → `unpair` → delete row → delete own playlist → event → notify. */

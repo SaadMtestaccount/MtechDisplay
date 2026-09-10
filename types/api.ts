@@ -339,8 +339,10 @@ export type Manifest = {
   }
   org: { name: string; logo_url: string | null }
   playlist_version: number
-  /** playlists.sync of the effective playlist: synchronized playback across TVs (§21) */
+  /** screen.sync || playlist.sync: synchronized playback across TVs (§21) */
   sync: boolean
+  /** the loop's shared starting line (ISO) — when sync was turned on; null = count from the epoch */
+  sync_epoch: string | null
   generated_at: string
   items: ManifestItem[]
 }

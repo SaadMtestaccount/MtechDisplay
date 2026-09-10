@@ -109,9 +109,13 @@ export async function updatePlaylist(
   input: PlaylistUpdateInput,
 ): Promise<PlaylistView> {
   const before = await getPlaylistView(ctx.supabase, ctx.org.id, playlistId)
-  const patch: { name?: string; sync?: boolean } = {}
+  const patch: { name?: string; sync?: boolean; sync_started_at?: string | null } = {}
   if (input.name !== undefined) patch.name = input.name
-  if (input.sync !== undefined) patch.sync = input.sync
+  if (input.sync !== undefined) {
+    patch.sync = input.sync
+    // Turning sync on starts the loop from 0:00 now; off clears the starting line (§21).
+    if (input.sync !== before.sync) patch.sync_started_at = input.sync ? new Date().toISOString() : null
+  }
   const { error } = await ctx.supabase.from('playlists').update(patch).eq('id', playlistId).eq('org_id', ctx.org.id)
   if (error) throw error
   if (input.sync !== undefined && input.sync !== before.sync) await touchPlaylist(admin, playlistId)

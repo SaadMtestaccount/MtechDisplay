@@ -99,6 +99,8 @@ export type PlaylistRow = {
   kind: PlaylistKind
   /** Synchronized playback: TVs on this playlist follow the shared server clock (0015, §21). */
   sync: boolean
+  /** When sync was turned on — the loop's shared starting line (0017); null when off. */
+  sync_started_at: string | null
   updated_at: string
   created_at: string
 }
@@ -152,6 +154,8 @@ export type ScreenRow = {
   watermark_y: number | null
   /** Per-TV synchronized playback (0016); the manifest ORs it with the playlist's flag (§21). */
   sync: boolean
+  /** When sync was turned on — the loop's shared starting line (0017); null when off. */
+  sync_started_at: string | null
   last_seen_at: string | null
   last_ip: string | null
   user_agent: string | null

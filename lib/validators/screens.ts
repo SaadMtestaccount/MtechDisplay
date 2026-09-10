@@ -67,6 +67,13 @@ export const assignScreenSchema = z.discriminatedUnion('kind', [
 ])
 export type AssignScreenInput = z.infer<typeof assignScreenSchema>
 
+/** POST /api/screens/sync — sync/unsync several TVs with one shared starting line (§21). */
+export const screensSyncSchema = z.object({
+  ids: z.array(uuidSchema).min(1).max(200),
+  sync: z.boolean(),
+})
+export type ScreensSyncInput = z.infer<typeof screensSyncSchema>
+
 /** POST /api/screens/[id]/actions */
 export const screenActionSchema = z.object({ action: z.enum(SCREEN_ACTIONS) })
 export type ScreenActionInput = z.infer<typeof screenActionSchema>

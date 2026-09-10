@@ -16,7 +16,7 @@ import type { MutableRefObject } from 'react'
 import type { useMediaCache } from '@/hooks/useMediaCache'
 import { syncedNow } from '@/lib/player/clock'
 import { advanceDelayMs, isItemExpired, nextPlayable } from '@/lib/player/playback'
-import { slotAt } from '@/lib/player/sync'
+import { epochMsOf, slotAt } from '@/lib/player/sync'
 import { isItemActive } from '@/lib/schedule'
 import type { Manifest, ManifestItem } from '@/types/api'
 import { MediaLayer } from '@/components/player/MediaLayer'
@@ -175,7 +175,7 @@ export function PlaybackEngine({
     const nowMs = syncedNow()
     const list = manifestRef.current.items.filter((item) => isActiveNow(item, new Date(nowMs)))
     markSingle(list.length)
-    const slot = slotAt(list, nowMs)
+    const slot = slotAt(list, nowMs, epochMsOf(manifestRef.current.sync_epoch))
     if (!slot) {
       goStandby()
       return
