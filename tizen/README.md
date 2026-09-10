@@ -69,6 +69,30 @@ MSIGN site, **TVs → Show code**, type the code on the TV. It's now that screen
 
 The app also appears in the TV's **Apps** row (icon: MSIGN), so it can be reopened from there.
 
+## Part 4b — A store visit WITHOUT Tizen Studio (the "kit")
+
+Only signing needs Tizen Studio, and that happens at the office. A laptop at the store needs just
+two files next to `install-to-samsung.ps1` / `Install to Samsung.cmd`:
+
+- **`sdb.exe`** — copy it from the office PC's `tizen-studio\tools\sdb.exe` (a small standalone
+  tool). If it complains about a missing DLL, copy the neighbouring `*.dll` files from that folder too.
+- **`msign.wgt`** — the signed package the office produced (the installer saves it as
+  `tools\msign.wgt` after a build).
+
+The first visit to a new store is a two-step handshake because the package is signed per TV:
+
+1. **Store:** TVs into Developer Mode (Part 2, host = the store laptop's IP). Then
+   `powershell -File install-to-samsung.ps1 -GetDuid 192.168.1.60 192.168.1.61 …` — it prints one
+   **DUID** per TV and saves `duids.txt`. Send the list to the office.
+2. **Office (2 min):** Certificate Manager → `MSIGN` profile → distributor certificate → add the
+   DUIDs → save. Run **Install to Samsung.cmd** once against any TV (or `tizen package` alone) to
+   produce a fresh signed `tools\msign.wgt`. Send it back.
+3. **Store:** `powershell -File install-to-samsung.ps1 -Wgt msign.wgt 192.168.1.60 192.168.1.61 …`
+   — installs and launches on every TV. Type each TV's code. Done.
+
+Collect the DUIDs before the visit (a TV's ID is readable the moment it is in Developer Mode) and
+it becomes a single trip. Samsung's app store removes the whole handshake.
+
 ## Part 5 — Make it start on its own
 
 Consumer Samsung TVs don't auto-launch apps on power-on, but most have **Autorun Last App**:
