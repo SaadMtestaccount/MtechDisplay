@@ -1530,4 +1530,7 @@ Two consoles in one shell, both phone-first and written in plain words. No drag-
   `sync_started_at` + `bumpAndSyncScreens`; identify/reload `broadcastToScreens`; every touched org gets
   `notifyOrgChanged('screens')`). Tile kebab: Open TV page / Open location (`setActiveOrg` then navigate), Watch full
   screen, Sync toggle. Both routes `requireSuperAdmin()` + `createAdminClient()`; validator `fleetActionSchema`.
+- **`/admin/settings`** — `SettingsPage` is titled "Location settings": an "Editing {org}" card with an `OrgSwitcher`
+  ("Change location") sits above `SettingsForm` + `LogoUpload`, so it is always clear which store's name / time zone /
+  logo is being edited (they are per location, never MTech-wide).
 - **Query keys**: `merchants.detail(id)`, `fleet.all()`, `fleet.list()`.
