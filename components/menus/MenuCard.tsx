@@ -1,7 +1,7 @@
 'use client'
 
-/** components/menus/MenuCard.tsx — one menu in the library: cover, name, board/screen counts, kebab. */
-import { LayoutGridIcon } from 'lucide-react'
+/** components/menus/MenuCard.tsx — one menu in the library: big cover, name, counts, kebab (§23). */
+import { ListIcon } from 'lucide-react'
 import { KebabMenu } from '@/components/shell/KebabMenu'
 import type { MenuView } from '@/types/api'
 
@@ -16,9 +16,11 @@ export function MenuCard({
   onRename(): void
   onDelete(): void
 }) {
-  const boards = `${menu.item_count} board${menu.item_count === 1 ? '' : 's'}`
+  const things = `${menu.item_count} ${menu.item_count === 1 ? 'photo or video' : 'photos & videos'}`
   const screens =
-    menu.screen_count > 0 ? ` · on ${menu.screen_count} screen${menu.screen_count === 1 ? '' : 's'}` : ''
+    menu.screen_count > 0
+      ? ` · on ${menu.screen_count} ${menu.screen_count === 1 ? 'TV' : 'TVs'}`
+      : ' · not on a TV'
 
   return (
     <div
@@ -31,29 +33,29 @@ export function MenuCard({
           onOpen()
         }
       }}
-      className="flex cursor-pointer flex-col overflow-hidden rounded-xl border border-border bg-card transition-colors hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-xs transition-colors hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <div className="relative aspect-video bg-muted">
+      <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
         {menu.thumb_url ? (
           <img src={menu.thumb_url} alt="" className="size-full object-cover" />
         ) : (
           <div className="flex size-full items-center justify-center text-muted-foreground">
-            <LayoutGridIcon className="size-8" />
+            <ListIcon className="size-8" />
           </div>
         )}
       </div>
-      <div className="flex items-start gap-2 p-3">
+      <div className="flex items-start gap-2 px-1">
         <div className="min-w-0 flex-1">
-          <div className="truncate font-medium">{menu.name}</div>
-          <div className="truncate text-xs text-muted-foreground">
-            {boards}
+          <div className="truncate text-lg font-bold">{menu.name}</div>
+          <div className="truncate text-sm text-muted-foreground">
+            {things}
             {screens}
           </div>
         </div>
         <KebabMenu
           label={`Actions for ${menu.name}`}
           items={[
-            { label: 'Edit boards', onSelect: onOpen },
+            { label: 'Open', onSelect: onOpen },
             { label: 'Rename', onSelect: onRename },
             { label: 'Delete', destructive: true, separatorBefore: true, onSelect: onDelete },
           ]}

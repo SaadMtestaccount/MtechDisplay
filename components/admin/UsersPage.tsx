@@ -5,10 +5,8 @@ import { UserPlusIcon } from 'lucide-react'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { InviteUserDialog } from '@/components/admin/InviteUserDialog'
-import { MerchantsSection } from '@/components/admin/MerchantsSection'
 import { UsersTable } from '@/components/admin/UsersTable'
 import { ConfirmDialog } from '@/components/shell/ConfirmDialog'
-import { PageHeader } from '@/components/shell/PageHeader'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useApp } from '@/hooks/useApp'
@@ -16,7 +14,7 @@ import { apiFetch } from '@/lib/api-client'
 import { queryKeys } from '@/lib/query-keys'
 import type { OkResponse, UserView } from '@/types/api'
 
-/** /admin/users — the Team page: merchants (stores) first, then MTech staff (spec §15). */
+/** /admin/users — MTech staff (super admins). Merchants live on /admin/merchants (§23). */
 export function UsersPage() {
   const { user } = useApp()
   const queryClient = useQueryClient()
@@ -39,38 +37,29 @@ export function UsersPage() {
   })
 
   return (
-    <>
-      <PageHeader
-        title="Team"
-        description="Merchants are the stores that use MSIGN. MTech staff are super admins across every store."
-      />
-
-      <MerchantsSection />
-
-      <section className="mt-10 flex flex-col gap-4">
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold">MTech staff</h2>
-            <p className="text-sm text-muted-foreground">Everyone here is a super admin across all stores.</p>
-          </div>
-          <Button variant="outline" size="sm" onClick={() => setInviteOpen(true)}>
-            <UserPlusIcon /> Invite staff
-          </Button>
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-wrap items-end gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <h1 className="text-3xl font-extrabold tracking-tight">Staff</h1>
+          <p className="text-base text-muted-foreground">Everyone here is an MTech super admin across every merchant.</p>
         </div>
+        <Button size="lg" onClick={() => setInviteOpen(true)}>
+          <UserPlusIcon /> Invite staff
+        </Button>
+      </div>
 
-        {usersQuery.isPending ? (
-          <div className="flex flex-col gap-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        ) : usersQuery.isError ? (
-          <p className="text-sm text-destructive">
-            {usersQuery.error instanceof Error ? usersQuery.error.message : 'Could not load staff.'}
-          </p>
-        ) : (
-          <UsersTable users={usersQuery.data} currentUserId={user.id} onRemove={setRemoveTarget} />
-        )}
-      </section>
+      {usersQuery.isPending ? (
+        <div className="flex flex-col gap-2">
+          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
+      ) : usersQuery.isError ? (
+        <p className="text-sm text-destructive">
+          {usersQuery.error instanceof Error ? usersQuery.error.message : 'Could not load staff.'}
+        </p>
+      ) : (
+        <UsersTable users={usersQuery.data} currentUserId={user.id} onRemove={setRemoveTarget} />
+      )}
 
       <InviteUserDialog open={inviteOpen} onOpenChange={setInviteOpen} />
 
@@ -88,6 +77,6 @@ export function UsersPage() {
           if (removeTarget && !removeMutation.isPending) removeMutation.mutate(removeTarget)
         }}
       />
-    </>
+    </div>
   )
 }

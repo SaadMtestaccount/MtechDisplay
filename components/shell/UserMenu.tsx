@@ -66,8 +66,8 @@ export function UserMenu() {
         </DropdownMenuItem>
         {profile.is_super_admin ? (
           <>
-            <DropdownMenuItem onClick={() => router.push('/admin/users')}>
-              <UsersIcon /> Team
+            <DropdownMenuItem onClick={() => router.push('/admin/merchants')}>
+              <UsersIcon /> Merchants
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => router.push('/admin/settings')}>
               <SettingsIcon /> Settings

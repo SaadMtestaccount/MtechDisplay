@@ -209,7 +209,21 @@ export const SUBSCRIPTION_LABELS: Record<SubscriptionTier, string> = {
 
 /** Merchant / store login (non-staff user). role 'member' = TV only, 'admin' = manager (multi-location). */
 /** One of a merchant's locations (an organization) with what's in it (§19). */
-export type MerchantLocation = { id: string; name: string; screen_count: number; content_count: number }
+export type MerchantLocation = {
+  id: string
+  name: string
+  screen_count: number
+  /** screens a TV has signed into (device_token_hash set); off = paired − online (§23 health) */
+  paired_count: number
+  /** screens whose last heartbeat is inside ONLINE_WINDOW_MS at list time (§23 health) */
+  online_count: number
+  content_count: number
+}
+
+/** One TV in the super-admin fleet view (§23): a ScreenView plus the name of its location. */
+export type FleetScreenView = ScreenView & { org_name: string }
+export const FLEET_ACTIONS = ['sync', 'unsync', 'identify', 'reload'] as const
+export type FleetAction = (typeof FLEET_ACTIONS)[number]
 
 /** An extra login under a merchant: Manager or TV only, for some or all of the merchant's locations (§19). */
 export type EmployeeView = {

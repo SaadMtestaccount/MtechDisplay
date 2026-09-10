@@ -1456,3 +1456,74 @@ before Wi-Fi never lands on a browser error page. `tools/install-to-samsung.ps1`
   "Open full screen"; a screen without a code falls back to `onOpen`). `WallTile` gains `onDelete(): void`; the kebab ends
   with "Delete screen" (destructive, separator) and `WallBoard` renders `DeleteScreenDialog` for it. "Clear" is no longer
   styled destructive — it empties the TV; deleting removes the screen.
+  *(Superseded by §23: the drag-and-drop wall was removed; `/tvs` is now the merchant TVs page.)*
+
+---
+
+## 23. Addendum — Merchant-first console redesign ("the TV is the remote") (added 2026-09-10)
+
+Two consoles in one shell, both phone-first and written in plain words. No drag-and-drop anywhere. Big controls:
+`Button size="xl"` (h-12, 16 px) for the primary action of a screen, `lg` for secondary; 15–16 px body copy.
+
+- **Tabs (`components/shell/nav-tabs.ts`)**: `MERCHANT_TABS` = TVs `/tvs` · Menus `/menus` · Photos `/photos` · Help `/help`;
+  `ADMIN_TABS` = Merchants `/admin/merchants` · All TVs `/admin/tvs` · Staff `/admin/users` · Settings `/admin/settings`.
+  `tabsFor(pathname, isSuperAdmin)` picks the admin set only for super admins on `/admin/*`. `NavTabs` renders them from
+  `md` up; `MobileTabBar` (fixed bottom, icon + word, 64 px) below `md`; `PageContainer` pads the bottom for it.
+  `Navbar` shows a "Super admin" badge plus a switch: "Admin" (→ `/admin/merchants`) inside a location, "Open a location"
+  (→ `/tvs`) on `/admin/*`; the OrgSwitcher hides in admin mode. `UserMenu`'s staff item is "Merchants".
+- **Lock**: merchants never see it. `components/tvs/useAssignScreen.ts` `assignUnlocked({screen, body})` PATCHes
+  `locked:false` first when the screen is locked, then POSTs `/assign` — so a merchant's change always lands. The Lock
+  toggle remains in `TvTools` for super admins only.
+- **`/tvs` → `components/tvs/TvsPage.tsx`** (replaces `WallBoard`/`WallTile`/`WallTray`/`wall-dnd`, all deleted).
+  `TvCard({ screen, onOpen, onShowCode, onHelpOffline, selectable?, selected?, onToggleSelect? })`: TvFrame, name +
+  StatusPill, `tvSubtitle(screen)` (`components/tvs/tv-copy.ts`; also `tvShowing(screen)`), ONE button: online →
+  "Change what's showing" (→ `/tvs/[id]`), offline → "How to fix this" (`OfflineHelpDialog({ screen, onOpenChange })`,
+  four steps + call/email MTech), unpaired → "Get the sign-in code" (`ScreenCodeDialog`). "Select TVs" (2+ TVs) keeps the
+  §21 group actions with plain labels: Play together / Stop playing together / Flash names / Restart. Help card at the
+  bottom uses `lib/support.ts` (`SUPPORT_EMAIL`, `SUPPORT_PHONE` = `NEXT_PUBLIC_SUPPORT_PHONE`, `supportPhoneHref()`).
+- **`/tvs/[id]` → `components/tvs/TvPage.tsx`** (new route; `/screens/[id]` stays as the advanced page, linked from
+  TvTools for staff). Loads `GET /api/screens/[id]` (+ `GET /api/menus/[menu_id]` when a menu is assigned) and merges
+  realtime status. Left: TvFrame with a LIVE pill when online + "Now showing" card (items of the effective playlist, the
+  live item ringed, "Edit this menu" link). Right: `ShowPicker({ screen, kind: 'menu'|'content'|'website'|null,
+  onOpenChange })` behind three `xl` buttons — one radio list, one "Show on {name}" button; the photo picker uploads a new
+  file in place (`useUpload`, folder null, selected on completion); the web-page picker adds a page (name + https URL →
+  `POST /api/websites`). `TvTools({ screen })`: Restart (`reload`), Flash its name (`identify`), Make it vertical / wide
+  (PATCH `orientation`), Show nothing (assign `clear`), Watch it here (`/player?code=`), Sign-in code, Remove this TV;
+  staff row: Move the MTech badge (`WatermarkPositionDialog`), Sync, Lock, `RotationSelect`, Advanced. Rename via
+  `RenameDialog` → PATCH `{ name }`.
+- **`/menus`** — `MenusPage`/`MenuCard` restyled (big cover, "N photos & videos · on N TVs", dashed "Make a new menu"
+  card); deleting also invalidates screens. **`/menus/[id]`** — `MenuDetail({ id, advanced? })` (the page passes
+  `?advanced=1`; honoured for super admins only → `PlaylistEditor`). Default = `SimpleMenuEditor({ menu })`:
+  `usePlaylistAutosave` (unchanged contract; flush on unmount) + `MenuItemRow({ item, index, count, onDuration, onMove,
+  onRemove })` — number, thumb, name, "Show for [−] N s [+]" stepper (3–600 s in 5 s steps; videos read "plays to the
+  end"), up/down/remove — + `AddItemsDialog({ open, onOpenChange, onAdd(picks: LibraryPick[]) })` (multi-select grid,
+  Photos & videos / Web pages, "Upload new" adds straight into the selection; appends via `newItemFromPick`) +
+  `MenuScreensCard({ menu })`: checklist of the location's TVs (checked = `menu_id === menu.id`), Save assigns
+  (`assignUnlocked` menu) / clears (`assignUnlocked` clear) the differences; "Play the same thing on every TV at once?"
+  switch = `PATCH /api/playlists/[id] { sync }`. On phones the TVs card renders above the list.
+- **`/photos` → `components/photos/PhotosPage.tsx`** (new; `/content` stays as the advanced library, `ContentSubnav`
+  now offers Photos & videos / Web pages / Advanced library). Whole-org list (`sort=newest`, `expired=false`, optional
+  `type`), giant upload box (click → file input; `UploadDropzone` still catches drops), chips All / Photos / Videos with
+  counts, `PhotoCard({ item, onAction: 'use'|'preview'|'rename'|'delete' })` with "Use on a TV" →
+  `UseOnTvDialog({ item, onOpenChange })` (radio list of TVs → assign `content`). Dialogs reused: `PreviewModal`,
+  `RenameDialog`, `DeleteContentDialog`, `UploadProgress`.
+- **`/help` → `components/help/HelpPage.tsx`**: call/email MTech banner + four how-to cards (TVs, Photos, Menus, TV off).
+- **Super admin — `/admin/merchants` → `components/admin/MerchantsPage.tsx`** (replaces `MerchantsSection` +
+  `MerchantManageDialog`, both deleted; `/admin/users` is now Staff only). `MerchantLocation` gains `paired_count` +
+  `online_count` (`listMerchants` tallies `screens.device_token_hash` / `last_seen_at` with `isOnline`; `createMerchant`
+  seeds 0). "Off" = paired − online (a TV that never signed in is not an alarm). Stat tiles (merchants, TVs, on now,
+  need attention = TVs off), chips All / Has a TV off / New this month, search, rows sorted off-count desc
+  (health bar green/red, plan `Select` → `POST /subscription`, last sign-in, Manage → `/admin/merchants/[id]`, kebab
+  Remove). Polls every 30 s. **`/admin/merchants/[id]` → `MerchantPage({ id })`**: `GET /api/merchants/[id]` under
+  `queryKeys.merchants.detail(id)`; header (initials, first location name, email, role, joined, counts, plan Select,
+  "Open as this merchant" = `setActiveOrg(first location)` → `/tvs`); `LocationPanel`s side by side (now show "N on") +
+  add-location form (copy from); `MerchantEmployees`; owner password; plan card; Remove (typed confirm).
+- **Super admin — `/admin/tvs` → `components/admin/FleetPage.tsx`**: `GET /api/admin/screens` → `FleetScreenView[]`
+  (`ScreenView & { org_name }`, `lib/screens/fleet.ts` `listAllScreens(admin)`, sorted by location then name) under
+  `queryKeys.fleet.list()` (not org-scoped → polls every 15 s). Location `Select`, status chips, search; clicking a
+  tile selects it; a black bar runs `POST /api/admin/screens/actions { ids: uuid[1..500], action: FLEET_ACTIONS =
+  'sync'|'unsync'|'identify'|'reload' }` → `{ updated }` (`fleetAction(admin, ids, action)`: sync/unsync share one
+  `sync_started_at` + `bumpAndSyncScreens`; identify/reload `broadcastToScreens`; every touched org gets
+  `notifyOrgChanged('screens')`). Tile kebab: Open TV page / Open location (`setActiveOrg` then navigate), Watch full
+  screen, Sync toggle. Both routes `requireSuperAdmin()` + `createAdminClient()`; validator `fleetActionSchema`.
+- **Query keys**: `merchants.detail(id)`, `fleet.all()`, `fleet.list()`.

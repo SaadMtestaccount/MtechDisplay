@@ -2,27 +2,26 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { isActiveTab, tabsFor } from '@/components/shell/nav-tabs'
+import { useApp } from '@/hooks/useApp'
 import { cn } from '@/lib/utils'
 
-const TABS = [
-  { href: '/tvs', label: 'TVs', match: ['/tvs', '/screens', '/wall', '/groups'] },
-  { href: '/content', label: 'Content', match: ['/content', '/websites'] },
-  { href: '/menus', label: 'Menus', match: ['/menus'] },
-] as const
-
+/** Desktop tab strip; the mobile bottom bar (MobileTabBar) renders the same list under `md`. */
 export function NavTabs() {
   const pathname = usePathname()
+  const { profile } = useApp()
+  const tabs = tabsFor(pathname, profile.is_super_admin)
 
   return (
-    <nav className="flex items-center gap-1">
-      {TABS.map((tab) => {
-        const active = tab.match.some((m) => pathname.startsWith(m))
+    <nav className="hidden items-center gap-1 md:flex" aria-label="Main">
+      {tabs.map((tab) => {
+        const active = isActiveTab(tab, pathname)
         return (
           <Link
             key={tab.href}
             href={tab.href}
             className={cn(
-              'flex h-8 items-center rounded-lg px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
+              'flex h-9 items-center rounded-lg px-3.5 text-[15px] font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground',
               active && 'bg-primary/10 text-primary hover:bg-primary/10 hover:text-primary',
             )}
           >

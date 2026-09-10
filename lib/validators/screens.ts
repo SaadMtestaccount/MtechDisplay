@@ -3,7 +3,7 @@
  */
 import { z } from 'zod'
 import {
-  ORIENTATIONS, PAIRING_CODE_ALPHABET, PAIRING_CODE_LENGTH, ROTATIONS, SCREEN_ACTIONS, SCREEN_SORTS, SCREEN_STATUSES,
+  FLEET_ACTIONS, ORIENTATIONS, PAIRING_CODE_ALPHABET, PAIRING_CODE_LENGTH, ROTATIONS, SCREEN_ACTIONS, SCREEN_SORTS, SCREEN_STATUSES,
   type ScreenListQuery,
 } from '@/types/api'
 import {
@@ -77,3 +77,10 @@ export type ScreensSyncInput = z.infer<typeof screensSyncSchema>
 /** POST /api/screens/[id]/actions */
 export const screenActionSchema = z.object({ action: z.enum(SCREEN_ACTIONS) })
 export type ScreenActionInput = z.infer<typeof screenActionSchema>
+
+/** POST /api/admin/screens/actions — one action for TVs that may span locations (§23, super admin). */
+export const fleetActionSchema = z.object({
+  ids: z.array(uuidSchema).min(1).max(500),
+  action: z.enum(FLEET_ACTIONS),
+})
+export type FleetActionInput = z.infer<typeof fleetActionSchema>

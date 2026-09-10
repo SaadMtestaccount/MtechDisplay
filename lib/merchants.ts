@@ -69,7 +69,7 @@ export async function createMerchant(admin: DbClient, input: CreateMerchantInput
     id: user.id,
     email: user.email ?? input.email,
     role: input.role,
-    locations: [{ ...location, screen_count: 0, content_count: 0 }],
+    locations: [{ ...location, screen_count: 0, paired_count: 0, online_count: 0, content_count: 0 }],
     employees: [],
     subscription_tier: SUBSCRIPTION_TIERS[0],
     last_sign_in_at: null,

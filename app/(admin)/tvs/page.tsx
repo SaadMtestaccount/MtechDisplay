@@ -1,5 +1,5 @@
-import { WallBoard } from '@/components/wall/WallBoard'
+import { TvsPage } from '@/components/tvs/TvsPage'
 
-export default function TvsPage() {
-  return <WallBoard />
+export default function Page() {
+  return <TvsPage />
 }

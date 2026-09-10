@@ -55,5 +55,11 @@ export const queryKeys = {
   merchants: {
     all: () => ['merchants'] as const,
     list: () => ['merchants', 'list'] as const,
+    detail: (id: string) => ['merchants', 'detail', id] as const,
+  },
+  /** Super-admin fleet (every location); not org-scoped, so realtime never invalidates it — it polls. */
+  fleet: {
+    all: () => ['fleet'] as const,
+    list: () => ['fleet', 'list'] as const,
   },
 }

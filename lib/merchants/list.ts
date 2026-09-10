@@ -5,6 +5,7 @@
  * top-level rows.
  */
 import { ApiError } from '@/lib/api'
+import { isOnline } from '@/lib/status'
 import type { EmployeeView, MerchantLocation, MerchantView, SubscriptionTier } from '@/types/api'
 import { SUBSCRIPTION_TIERS } from '@/types/api'
 import type { DbClient, MembershipRole } from '@/types/db'
@@ -42,7 +43,7 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
       .order('created_at', { ascending: true }),
     admin.from('profiles').select('id, is_super_admin, subscription_tier, employer_id'),
     admin.auth.admin.listUsers({ perPage: 1000 }),
-    admin.from('screens').select('org_id'),
+    admin.from('screens').select('org_id, last_seen_at, device_token_hash'),
     admin.from('content').select('org_id'),
   ])
   if (memberships.error) throw memberships.error
@@ -58,7 +59,10 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
     byUser.set(m.user_id, list)
   }
   const userById = new Map(users.data.users.map((u) => [u.id, u] as const))
+  const now = new Date()
   const screenCount = tally(screens.data ?? [])
+  const pairedCount = tally((screens.data ?? []).filter((s) => s.device_token_hash !== null))
+  const onlineCount = tally((screens.data ?? []).filter((s) => isOnline(s.last_seen_at, now)))
   const contentCount = tally(content.data ?? [])
   const allProfiles = profiles.data ?? []
 
@@ -76,6 +80,8 @@ export async function listMerchants(admin: DbClient): Promise<MerchantView[]> {
               id: m.organizations.id,
               name: m.organizations.name,
               screen_count: screenCount.get(m.organizations.id) ?? 0,
+              paired_count: pairedCount.get(m.organizations.id) ?? 0,
+              online_count: onlineCount.get(m.organizations.id) ?? 0,
               content_count: contentCount.get(m.organizations.id) ?? 0,
             },
           ]

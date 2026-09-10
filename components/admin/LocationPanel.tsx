@@ -96,6 +96,14 @@ export function LocationPanel({
       <div className="flex items-center gap-3 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <TvIcon className="size-3.5" /> {location.screen_count} {location.screen_count === 1 ? 'TV' : 'TVs'}
+          {location.paired_count > 0 ? (
+            <span className={location.online_count < location.paired_count ? 'font-semibold text-offline' : 'text-online'}>
+              {' '}
+              · {location.online_count} of {location.paired_count} on
+            </span>
+          ) : location.screen_count > 0 ? (
+            <span> · none signed in yet</span>
+          ) : null}
         </span>
         <span className="inline-flex items-center gap-1">
           <ImageIcon className="size-3.5" /> {location.content_count} {location.content_count === 1 ? 'item' : 'items'}

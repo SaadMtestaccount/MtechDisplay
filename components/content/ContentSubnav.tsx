@@ -1,13 +1,14 @@
 'use client'
 
-/** components/content/ContentSubnav.tsx — switch between the two kinds of content in one place. */
+/** components/content/ContentSubnav.tsx — switch between the kinds of content in one place (§23). */
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 
 const ITEMS = [
-  { href: '/content', label: 'Images & Videos' },
-  { href: '/websites', label: 'Web pages' },
+  { href: '/photos', label: 'Photos & videos', match: ['/photos'] },
+  { href: '/websites', label: 'Web pages', match: ['/websites'] },
+  { href: '/content', label: 'Advanced library', match: ['/content'] },
 ] as const
 
 export function ContentSubnav() {
@@ -15,7 +16,7 @@ export function ContentSubnav() {
   return (
     <div className="mb-5 inline-flex gap-1 rounded-lg border border-border bg-card p-1">
       {ITEMS.map((item) => {
-        const active = pathname.startsWith(item.href)
+        const active = item.match.some((m) => pathname.startsWith(m))
         return (
           <Link
             key={item.href}
