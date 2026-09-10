@@ -1434,6 +1434,18 @@ before hydration, so nothing painted. The console stays desktop-only; the player
   statement with ONE timestamp → `bumpAndSyncScreens`; the TVs page uses it for **Sync/Unsync selected**. The selection
   toolbar also has **Identify selected** and **Reload selected** (one `POST /api/screens/[id]/actions` per paired TV).
 
+---
+
+## 22. Addendum — Samsung Tizen app (added 2026-09-10, additive; not part of the Next build)
+
+`tizen/` is a thin Tizen web app (`config.xml`, `index.html`, `icon.png`): app id `MSIGNtvApp.MSIGN`, `allow-navigation`
+to the MSIGN/Supabase hosts, landscape, no background support. `index.html` probes `/player` (XHR, backoff 3 s → 30 s)
+and then `location.replace`s to it, so the TV runs the same web player first-party (storage, realtime) and a TV that boots
+before Wi-Fi never lands on a browser error page. `tools/install-to-samsung.ps1` (+ `.cmd`) finds Tizen Studio, runs
+`tizen build-web` → `tizen package -t wgt -s <profile>` (default profile `MSIGN`) → `sdb connect <ip>:26101` →
+`sdb install` → `was_execute`. Signing needs a Samsung distributor certificate whose DUID list includes each TV
+(`tizen/README.md` has the full click-path); Samsung's store is the scale path.
+
 - **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
   user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine
   that never runs the app the message stays and names the browser. `PlayerErrorBoundary` shows `.pl-fatal` (error +
