@@ -13,6 +13,7 @@
 
 .PARAMETER Ip
   TV IP address(es). Prompted for when omitted. Several: separate with spaces or commas.
+  The word 'emulator' targets the Tizen Studio TV emulator on this PC (a rehearsal before a store visit).
 #>
 param(
   [string[]] $Ip,
@@ -57,10 +58,21 @@ if (-not $Ip -or $Ip.Count -eq 0) {
   $answer = Read-Host 'TV IP address(es) - separate several with spaces or commas'
   $Ip = @($answer)
 }
-$targets = @($Ip -join ' ' -split '[\s,;]+' | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' })
+# 'emulator' = the Tizen Studio TV emulator running on this PC (rehearsal); it is already an sdb device.
+$targets = @($Ip -join ' ' -split '[\s,;]+' | Where-Object { $_ -match '^\d{1,3}(\.\d{1,3}){3}$' -or $_ -match '^(?i)emulator(-\d+)?$' })
 if ($targets.Count -eq 0) { Write-Host 'No valid IP address given.' -ForegroundColor Red; exit 1 }
 
 function Connect-Tv([string] $target) {
+  if ($target -match '^(?i)emulator(-\d+)?$') {
+    $serial = if ($target -match '-\d+$') { $target } else { 'emulator-26101' }
+    $seen = Invoke-Tool $sdb @('devices')
+    if ($seen -notmatch [regex]::Escape($serial)) {
+      Write-Host "  The emulator is not running (sdb does not list $serial). Start it: Tizen Studio > Emulator Manager > MSIGN-TV > Launch." -ForegroundColor Yellow
+      return $null
+    }
+    Write-Host "  emulator: $serial"
+    return $serial
+  }
   $serial = "$target`:26101"
   $connect = Invoke-Tool $sdb @('connect', $serial)
   Write-Host "  connect: $connect"

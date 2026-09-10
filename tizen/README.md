@@ -54,6 +54,25 @@ TV's device ID (DUID). Do this once, then just add DUIDs for new TVs.
 Adding a TV later: Part 2 on the new TV, then Certificate Manager → select `MSIGN` → edit the
 distributor certificate → add its DUID → save. Then install (Part 4). Existing TVs are unaffected.
 
+## Part 3b — Rehearse on the TV emulator (no TV needed)
+
+Tizen Studio ships a Samsung TV emulator that runs the real Samsung web engine and the real
+install/signature checks, so the whole loop can be practised at the office the day before.
+
+1. Tizen Studio → **Tools → Emulator Manager** → the VM **MSIGN-TV** (platform
+   `tv-samsung-10.0`, 1080p) → **Launch**. (Create it if missing: *Create* → TV → tv-samsung-10.0
+   → HD1080 TV.) It boots to the Samsung home screen in about a minute.
+2. Get its DUID: double-click `tools\Install to Samsung.cmd`, type **`emulator`** at the IP
+   prompt, or run `install-to-samsung.ps1 -Ip emulator -GetDuid`. Put that DUID in the `MSIGN`
+   distributor certificate (Part 3, step 5) next to the real TVs' DUIDs.
+3. Install exactly like a real TV: `Install to Samsung.cmd` → type **`emulator`**. The app
+   builds, signs, installs and launches inside the emulator; the MSIGN code screen appears.
+4. On the MSIGN site, **TVs → Get the sign-in code**, type it with the emulator's remote
+   (click the on-screen remote, or use the keyboard). The emulator now plays that TV's content.
+
+Video in the emulator is software-decoded and may stutter; that is the emulator, not the TV.
+The emulator's DUID can stay in the certificate — it hurts nothing.
+
 ## Part 4 — Build, sign and install (per TV, ~1 minute)
 
 Double-click **`tools\Install to Samsung.cmd`** and type the TV's IP (several: separate with
