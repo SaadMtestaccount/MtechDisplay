@@ -163,8 +163,17 @@ foreach ($target in $targets) {
   $serial = Connect-Tv $target
   if (-not $serial) { $results += [pscustomobject]@{ TV = $target; Result = 'unreachable' }; continue }
   Write-Host '  installing MSIGN...'
-  $install = Invoke-Tool $sdb @('-s', $serial, 'install', $wgtFile.FullName)
-  if ($install -notmatch '(?i)ok|success|install completed') {
+  # Samsung TVs install through their own command (vd_appinstall) after the package is pushed to the
+  # SDK temp folder — plain `sdb install` only pushes the file and reports nothing (verified on the emulator).
+  $remote = '/home/owner/share/tmp/sdk_tools/tmp/msign.wgt'
+  $push = Invoke-Tool $sdb @('-s', $serial, 'push', $wgtFile.FullName, $remote)
+  if ($push -notmatch '(?i)pushed') {
+    Write-Host "  Could not copy the package to the TV: $push" -ForegroundColor Red
+    $results += [pscustomobject]@{ TV = $target; Result = 'install failed' }
+    continue
+  }
+  $install = Invoke-Tool $sdb @('-s', $serial, 'shell', '0', 'vd_appinstall', $appId, $remote)
+  if ($install -notmatch '(?i)install completed') {
     Write-Host "  Install failed: $install" -ForegroundColor Red
     Write-Host '  A signature / DUID error means this TV''s DUID is not in the distributor certificate the package was signed with.' -ForegroundColor Yellow
     $results += [pscustomobject]@{ TV = $target; Result = 'install failed' }
