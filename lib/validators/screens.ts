@@ -52,6 +52,8 @@ export const screenUpdateSchema = z
       .optional(),
     group_id: uuidSchema.nullable().optional(),
     locked: z.boolean().optional(),
+    /** per-TV synchronized playback (§21) */
+    sync: z.boolean().optional(),
   })
   .refine(hasAtLeastOneKey, { message: 'Nothing to update' })
 export type ScreenUpdateInput = z.infer<typeof screenUpdateSchema>

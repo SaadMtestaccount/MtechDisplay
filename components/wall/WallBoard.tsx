@@ -3,7 +3,8 @@
 /**
  * components/wall/WallBoard.tsx — the Screen Wall (docs/CONTRACTS.md §14). A grid of live TV tiles
  * plus a draggable tray; dropping a menu / board / web page on a tile assigns it live and pins it.
- * One DndContext wraps the tray (draggables) and the tiles (droppables).
+ * One DndContext wraps the tray (draggables) and the tiles (droppables). "Select TVs" enters a
+ * selection mode where tiles act as checkboxes and the toolbar syncs / unsyncs them together (§21).
  */
 import {
   DndContext,
@@ -16,7 +17,7 @@ import {
   type DragStartEvent,
 } from '@dnd-kit/core'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { PlusIcon } from 'lucide-react'
+import { CheckSquareIcon, PlusIcon, RadioIcon } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'
@@ -52,6 +53,8 @@ export function WallBoard() {
   const [codeTarget, setCodeTarget] = useState<ScreenView | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<ScreenView | null>(null)
   const [watermarkTarget, setWatermarkTarget] = useState<ScreenView | null>(null)
+  const [selecting, setSelecting] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 6 } }))
 
   const screensQuery = useQuery({
@@ -63,6 +66,7 @@ export function WallBoard() {
   const invalidate = () => {
     if (org) void queryClient.invalidateQueries({ queryKey: queryKeys.screens.all(org.id) })
   }
+  const fail = (e: unknown) => toast.error(e instanceof Error ? e.message : 'Something went wrong')
 
   const assign = useMutation({
     mutationFn: ({ screenId, body }: { screenId: string; body: AssignScreenInput }) =>
@@ -71,7 +75,7 @@ export function WallBoard() {
       invalidate()
       toast.success(body.kind === 'clear' ? `Cleared ${screen.name}` : `Now showing on ${screen.name}`)
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
+    onError: fail,
   })
 
   const lock = useMutation({
@@ -81,12 +85,45 @@ export function WallBoard() {
       invalidate()
       toast.success(screen.locked ? `Locked ${screen.name}` : `Unlocked ${screen.name}`)
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : 'Something went wrong'),
+    onError: fail,
+  })
+
+  /** One PATCH per TV; the selection is kept so a follow-up action can use it. */
+  const syncMany = useMutation({
+    mutationFn: async ({ ids, sync }: { ids: string[]; sync: boolean }) => {
+      await Promise.all(ids.map((id) => apiFetch<ScreenView>(`/api/screens/${id}`, { method: 'PATCH', json: { sync } })))
+      return { count: ids.length, sync }
+    },
+    onSuccess: ({ count, sync }) => {
+      invalidate()
+      toast.success(
+        sync
+          ? `${count} ${count === 1 ? 'TV' : 'TVs'} now play in sync`
+          : `Sync turned off for ${count} ${count === 1 ? 'TV' : 'TVs'}`,
+      )
+    },
+    onError: (e) => {
+      invalidate()
+      fail(e)
+    },
   })
 
   if (!org) return <NoOrgState />
 
   const screens = (screensQuery.data ?? []).map((s) => mergeScreenStatus(s, statuses[s.id], now))
+  const selectedIds = screens.filter((s) => selected.has(s.id)).map((s) => s.id)
+
+  const toggleSelect = (id: string) =>
+    setSelected((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  const exitSelection = () => {
+    setSelecting(false)
+    setSelected(new Set())
+  }
 
   const onDragStart = (e: DragStartEvent) => setDrag((e.active.data.current?.pick as WallPick | undefined) ?? null)
   const onDragEnd = (e: DragEndEvent) => {
@@ -101,13 +138,43 @@ export function WallBoard() {
     <>
       <PageHeader
         title="TVs"
-        description="Every TV in your store. Click a TV to watch it full screen. Drag a menu, image or web page onto one to show it — it locks on. Add a TV to get a code you type on the screen."
+        description="Every TV in your store. Click a TV to watch it full screen. Drag a menu, image or web page onto one to show it — it locks on. Select TVs to make them play in sync."
         primary={
           <Button size="sm" onClick={() => setAddOpen(true)}>
             <PlusIcon /> Add TV
           </Button>
         }
-      />
+      >
+        {selecting ? (
+          <div className="flex flex-wrap items-center gap-2" data-testid="selection-toolbar">
+            <span className="text-sm text-muted-foreground">
+              {selectedIds.length} selected
+            </span>
+            <Button
+              size="sm"
+              disabled={selectedIds.length === 0 || syncMany.isPending}
+              onClick={() => syncMany.mutate({ ids: selectedIds, sync: true })}
+            >
+              <RadioIcon /> Sync selected
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              disabled={selectedIds.length === 0 || syncMany.isPending}
+              onClick={() => syncMany.mutate({ ids: selectedIds, sync: false })}
+            >
+              Unsync selected
+            </Button>
+            <Button size="sm" variant="ghost" onClick={exitSelection} disabled={syncMany.isPending}>
+              Done
+            </Button>
+          </div>
+        ) : screens.length > 0 ? (
+          <Button size="sm" variant="outline" onClick={() => setSelecting(true)}>
+            <CheckSquareIcon /> Select TVs
+          </Button>
+        ) : null}
+      </PageHeader>
       <DndContext
         sensors={sensors}
         collisionDetection={pointerWithin}
@@ -148,9 +215,13 @@ export function WallBoard() {
                     onOpen={() => router.push(`/screens/${s.id}`)}
                     onShowCode={() => setCodeTarget(s)}
                     onToggleLock={() => lock.mutate({ screenId: s.id, locked: !s.locked })}
+                    onToggleSync={() => syncMany.mutate({ ids: [s.id], sync: !s.sync })}
                     onClear={() => assign.mutate({ screenId: s.id, body: { kind: 'clear' } })}
                     onDelete={() => setDeleteTarget(s)}
                     onPositionWatermark={profile.is_super_admin ? () => setWatermarkTarget(s) : undefined}
+                    selectable={selecting}
+                    selected={selected.has(s.id)}
+                    onToggleSelect={() => toggleSelect(s.id)}
                   />
                 ))}
               </div>

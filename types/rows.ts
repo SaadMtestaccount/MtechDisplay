@@ -150,6 +150,8 @@ export type ScreenRow = {
   /** "Powered by MTech" badge centre as fractions of the stage; both null = default corner (0013). */
   watermark_x: number | null
   watermark_y: number | null
+  /** Per-TV synchronized playback (0016); the manifest ORs it with the playlist's flag (§21). */
+  sync: boolean
   last_seen_at: string | null
   last_ip: string | null
   user_agent: string | null

@@ -1421,6 +1421,11 @@ before hydration, so nothing painted. The console stays desktop-only; the player
   mode (`tickSync`) shows the clock's slot, wakes at the next boundary, holds an unplayable slot in standby (keeps the
   phase) and passes `syncStartMs` to `MediaLayer`, which seeks the video to `(syncedNow − syncStartMs)` once metadata is
   known and re-aligns every 3 s when drift exceeds 0.5 s. `identify`/`reload`/`sync` commands are unchanged.
+- **Per-TV sync (`0016_screen_sync.sql`)**: `screens.sync boolean not null default false` (`ScreenRow.sync`, rides into
+  `ScreenView`). `Manifest.sync = screen.sync || playlist.sync`. `PATCH /api/screens/[id] { sync }` (`screenUpdateSchema`;
+  a change → `bumpAndSyncScreens`). TVs page: **Select TVs** enters selection mode (tiles become checkboxes, dropping is
+  disabled, the frame click toggles selection); the toolbar offers **Sync selected** / **Unsync selected** (one PATCH per
+  TV) and **Done**. Tiles with `sync` show a **Synced** badge; the tile kebab has **Sync playback / Turn sync off**.
 
 - **Visible failure** — `app/player/page.tsx` server-renders a `.pl-boot` message ("Starting MSIGN…" + the browser's
   user agent via an inline script) ABOVE the player (`z-index: 5`); `PlayerApp` removes it on mount, so on an engine

@@ -2,11 +2,14 @@
 
 /**
  * components/wall/WallTile.tsx — one TV on the Screen Wall: a droppable TvFrame (live thumbnail +
- * status) that opens the TV full screen in a new tab when clicked, plus a lock overlay and a
- * kebab (code, full screen, settings, lock, clear, delete). A locked tile is not a drop target.
+ * status) that opens the TV full screen in a new tab when clicked, plus a lock overlay, a Synced
+ * badge and a kebab (code, full screen, settings, sync, lock, clear, delete). In selection mode
+ * (§21) clicking the frame toggles the tile instead. A locked tile is not a drop target.
  */
 import { useDroppable } from '@dnd-kit/core'
-import { KeyRoundIcon, LockIcon, MaximizeIcon, MoveIcon, SettingsIcon, Trash2Icon } from 'lucide-react'
+import {
+  CheckIcon, KeyRoundIcon, LockIcon, MaximizeIcon, MoveIcon, RadioIcon, SettingsIcon, Trash2Icon,
+} from 'lucide-react'
 import { KebabMenu, type KebabItem } from '@/components/shell/KebabMenu'
 import { TvFrame } from '@/components/screens/TvFrame'
 import { tileDropId } from '@/components/wall/wall-dnd'
@@ -19,20 +22,28 @@ export function WallTile({
   onOpen,
   onShowCode,
   onToggleLock,
+  onToggleSync,
   onClear,
   onDelete,
   onPositionWatermark,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
 }: {
   screen: ScreenView
   onOpen(): void
   onShowCode(): void
   onToggleLock(): void
+  onToggleSync(): void
   onClear(): void
   onDelete(): void
   /** MTech staff only: opens the "Powered by MTech" positioning preview (§18). */
   onPositionWatermark?: () => void
+  selectable?: boolean
+  selected?: boolean
+  onToggleSelect?: () => void
 }) {
-  const { setNodeRef, isOver } = useDroppable({ id: tileDropId(screen.id), disabled: screen.locked })
+  const { setNodeRef, isOver } = useDroppable({ id: tileDropId(screen.id), disabled: screen.locked || selectable })
   const status = screenStatus(screen)
   const configured = screen.preview_thumb_url !== null || screen.preview_website_url !== null
   const hasContent = screen.menu_name !== null || screen.current_item !== null || configured
@@ -51,6 +62,7 @@ export function WallTile({
     }
     window.open(`/player?code=${screen.login_code}`, '_blank', 'noopener')
   }
+  const primary = () => (selectable ? onToggleSelect?.() : openFullScreen())
 
   const menuItems: KebabItem[] = [
     { label: 'Show code', icon: <KeyRoundIcon />, onSelect: onShowCode },
@@ -59,9 +71,15 @@ export function WallTile({
     ...(onPositionWatermark
       ? [{ label: 'Position watermark', icon: <MoveIcon />, onSelect: onPositionWatermark }]
       : []),
+    {
+      label: screen.sync ? 'Turn sync off' : 'Sync playback',
+      icon: <RadioIcon />,
+      onSelect: onToggleSync,
+      separatorBefore: true,
+    },
     screen.locked
-      ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock, separatorBefore: true }
-      : { label: 'Lock', icon: <LockIcon />, onSelect: onToggleLock, disabled: !hasContent, separatorBefore: true },
+      ? { label: 'Unlock', icon: <LockIcon />, onSelect: onToggleLock }
+      : { label: 'Lock', icon: <LockIcon />, onSelect: onToggleLock, disabled: !hasContent },
     { label: 'Clear', disabled: screen.locked, onSelect: onClear },
     { label: 'Delete screen', icon: <Trash2Icon />, destructive: true, separatorBefore: true, onSelect: onDelete },
   ]
@@ -69,20 +87,22 @@ export function WallTile({
   return (
     <div ref={setNodeRef} className="flex flex-col gap-2">
       <div
-        role="button"
+        role={selectable ? 'checkbox' : 'button'}
+        aria-checked={selectable ? selected : undefined}
         tabIndex={0}
-        onClick={openFullScreen}
+        onClick={primary}
         onKeyDown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault()
-            openFullScreen()
+            primary()
           }
         }}
-        title="Open full screen in a new tab"
-        aria-label={`Open ${screen.name} full screen`}
+        title={selectable ? (selected ? 'Selected — click to deselect' : 'Click to select') : 'Open full screen in a new tab'}
+        aria-label={selectable ? `Select ${screen.name}` : `Open ${screen.name} full screen`}
         className={cn(
-          'cursor-pointer overflow-hidden rounded-lg outline-none transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-ring',
+          'relative cursor-pointer overflow-hidden rounded-lg outline-none transition-shadow hover:ring-2 hover:ring-primary/40 focus-visible:ring-2 focus-visible:ring-ring',
           isOver && !screen.locked && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+          selectable && selected && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
         )}
       >
         <TvFrame
@@ -99,7 +119,22 @@ export function WallTile({
               </span>
             </div>
           ) : null}
+          {screen.sync ? (
+            <span className="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1 rounded-full bg-primary/90 px-2 py-0.5 text-[11px] font-medium text-white">
+              <RadioIcon className="size-3" /> Synced
+            </span>
+          ) : null}
           {isOver && !screen.locked ? <div className="absolute inset-0 bg-primary/15" /> : null}
+          {selectable ? (
+            <span
+              className={cn(
+                'absolute top-2 left-2 z-10 flex size-6 items-center justify-center rounded-full border-2 border-white shadow-md',
+                selected ? 'bg-primary text-white' : 'bg-black/40',
+              )}
+            >
+              {selected ? <CheckIcon className="size-4" /> : null}
+            </span>
+          ) : null}
         </TvFrame>
       </div>
       <div className="flex items-start gap-2">

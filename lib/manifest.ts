@@ -105,8 +105,9 @@ export async function buildManifest(admin: DbClient, screen: Screen): Promise<Ma
 
   const effective = await getEffectivePlaylistId(admin, screen)
   const items = await loadItems(admin, effective, now)
-  let sync = false
-  if (effective !== null) {
+  // Synced playback when the TV itself is flagged (TVs page selection) OR its playlist is (§21).
+  let sync = screen.sync
+  if (!sync && effective !== null) {
     const { data: playlist } = await admin.from('playlists').select('sync').eq('id', effective).maybeSingle()
     sync = playlist?.sync ?? false
   }

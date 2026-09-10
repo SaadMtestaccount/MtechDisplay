@@ -157,8 +157,10 @@ export async function updateScreen(
     watermark_y?: number | null
     group_id?: string | null
     locked?: boolean
+    sync?: boolean
   } = {}
   if (input.name !== undefined) patch.name = input.name
+  if (input.sync !== undefined) patch.sync = input.sync
   if (input.rotation !== undefined) patch.rotation = input.rotation
   if (input.orientation !== undefined) patch.orientation = input.orientation
   if (input.watermark !== undefined) {
@@ -180,7 +182,8 @@ export async function updateScreen(
     input.watermark !== undefined &&
     (patch.watermark_x !== current.watermark_x || patch.watermark_y !== current.watermark_y)
   const groupChanged = patch.group_id !== undefined && patch.group_id !== current.group_id
-  if (rotationChanged || orientationChanged || watermarkChanged || groupChanged) {
+  const syncChanged = patch.sync !== undefined && patch.sync !== current.sync
+  if (rotationChanged || orientationChanged || watermarkChanged || groupChanged || syncChanged) {
     await bumpAndSyncScreens(admin, [id])
   }
 
