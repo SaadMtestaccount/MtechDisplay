@@ -1,0 +1,35 @@
+{
+  "name": "msign-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "MSIGN merchant app for iPhone/iPad and Android: a native Capacitor shell around the hosted merchant console (docs/CONTRACTS.md §24).",
+  "scripts": {
+    "assets:make": "node scripts/make-assets.cjs",
+    "assets:fanout": "node scripts/fanout-assets.cjs",
+    "sync": "cap sync",
+    "ios": "cap open ios",
+    "android": "cap open android",
+    "build:android": "cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.0",
+    "@capacitor/app": "^7.0.0",
+    "@capacitor/core": "^7.4.0",
+    "@capacitor/ios": "^7.4.0",
+    "@capacitor/splash-screen": "^7.0.0",
+    "@capacitor/status-bar": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.0",
+    "sharp": "^0.34.0",
+    "typescript": "^5.9.0"
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp": "^0.34.0"
+    },
+    "onlyBuiltDependencies": [
+      "sharp"
+    ]
+  }
+}

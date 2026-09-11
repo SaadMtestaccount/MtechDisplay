@@ -138,7 +138,7 @@ export function TvsPage() {
 
       {selecting ? (
         <div
-          className="sticky top-[4.5rem] z-30 flex flex-wrap items-center gap-2 rounded-2xl bg-foreground p-3 text-background shadow-lg"
+          className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-30 flex flex-wrap items-center gap-2 rounded-2xl bg-foreground p-3 text-background shadow-lg"
           data-testid="selection-toolbar"
         >
           <span className="px-1 text-sm font-semibold">

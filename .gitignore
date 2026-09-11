@@ -53,3 +53,8 @@ dist/
 .vercel
 .env*
 Screenshot *.png
+
+# Samsung TV build products (tools/install-to-samsung.ps1)
+tizen/.buildResult/
+tools/msign.wgt
+tools/duids.txt

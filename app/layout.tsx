@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { IBM_Plex_Mono, Plus_Jakarta_Sans } from 'next/font/google'
 import './globals.css'
 import './player.css'
@@ -21,6 +21,18 @@ const plexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: { default: 'MSIGN', template: '%s · MSIGN' },
   description: 'MTech digital signage platform',
+  // Installable on a phone home screen (Safari "Add to Home Screen") and inside the native shell (§24).
+  manifest: '/manifest.webmanifest',
+  icons: { apple: '/apple-touch-icon.png' },
+  appleWebApp: { capable: true, title: 'MSIGN', statusBarStyle: 'default' },
+}
+
+/** viewport-fit=cover lets the console draw under the notch and pad itself with env(safe-area-inset-*). */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
+  themeColor: '#ffffff',
 }
 
 export default function RootLayout({

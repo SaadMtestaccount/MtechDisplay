@@ -1534,3 +1534,27 @@ Two consoles in one shell, both phone-first and written in plain words. No drag-
   ("Change location") sits above `SettingsForm` + `LogoUpload`, so it is always clear which store's name / time zone /
   logo is being edited (they are per location, never MTech-wide).
 - **Query keys**: `merchants.detail(id)`, `fleet.all()`, `fleet.list()`.
+
+---
+
+## 24. Addendum — Merchant app for iPhone / iPad / Android (`mobile/`, added 2026-09-11; not part of the Next build)
+
+A Capacitor 7 shell that opens the HOSTED merchant console (`server.url`), so console changes never need a store
+release. One value binds the app to a deployment: `MSIGN_APP_URL` (default the Vercel deployment; MTech's hosting
+later) read by `mobile/capacitor.config.ts`; `MSIGN_APP_ID` (default `com.mtechdistributors.msign`) is fixed after the
+first store submission. No Supabase keys or secrets are in the app. `allowNavigation` = the console host, `*.supabase.co`,
+`*.vercel.app`, `*.mtechdistributors.com`; other links open in the system browser/dialer.
+
+- `mobile/` is its own pnpm package (`pnpm install --ignore-workspace`), excluded from the root tsconfig/eslint.
+  `ios/` (SwiftPM, no CocoaPods) and `android/` are COMMITTED so a clone builds; only their build products and the
+  synced `public/` + `capacitor.config.json` are ignored. `www/index.html` is the offline placeholder.
+- Art: `scripts/make-assets.cjs` draws `assets/icon.png` (1024), `icon-foreground.png`, `icon-background.png`,
+  `splash.png` (2732) plus the site's `public/apple-touch-icon.png`, `icon-192.png`, `icon-512.png`;
+  `scripts/fanout-assets.cjs` writes every iOS/Android icon + splash size (replaces `@capacitor/assets`, whose pinned
+  sharp does not run on Node 24). Adaptive-icon background = `#5B57E8`.
+- iOS `Info.plist`: `ITSAppUsesNonExemptEncryption=false`, `NSPhotoLibraryUsageDescription`, `NSCameraUsageDescription`.
+- **Website side**: `app/layout.tsx` exports `viewport` (`viewportFit: 'cover'`, `themeColor #ffffff`) and metadata
+  `manifest: /manifest.webmanifest`, `icons.apple`, `appleWebApp` — installable via "Add to Home Screen" too.
+  `Navbar`'s header pads `env(safe-area-inset-top)`; the sticky selection bars use
+  `top-[calc(4.5rem+env(safe-area-inset-top))]`; `MobileTabBar` already pads the bottom inset.
+- Build/ship steps live in `mobile/README.md` (Xcode archive → App Store Connect; Android `gradlew assembleRelease`).

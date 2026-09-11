@@ -158,7 +158,7 @@ export function FleetPage() {
       </div>
 
       {selectedIds.length > 0 ? (
-        <div className="sticky top-[4.5rem] z-30 flex flex-wrap items-center gap-2 rounded-2xl bg-foreground p-3 text-background shadow-lg" data-testid="fleet-toolbar">
+        <div className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-30 flex flex-wrap items-center gap-2 rounded-2xl bg-foreground p-3 text-background shadow-lg" data-testid="fleet-toolbar">
           <span className="px-1 text-sm font-bold">
             {selectedIds.length} {selectedIds.length === 1 ? 'TV' : 'TVs'} selected
           </span>

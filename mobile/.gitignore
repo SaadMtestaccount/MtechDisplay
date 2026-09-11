@@ -1,0 +1,17 @@
+node_modules/
+# The native projects ARE committed (signing team, versions and capabilities live in them);
+# only their build products are ignored (each platform folder also carries its own .gitignore).
+ios/App/build/
+ios/App/DerivedData/
+ios/App/Pods/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+android/build/
+android/app/build/
+android/.gradle/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+android/local.properties
+*.log
+.DS_Store

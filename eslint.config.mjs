@@ -25,6 +25,9 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "mobile/**",
+      "android/**",
+      "tizen/**",
     ],
   },
 ];
