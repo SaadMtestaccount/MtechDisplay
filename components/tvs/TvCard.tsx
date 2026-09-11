@@ -39,9 +39,9 @@ export function TvCard({
   return (
     <div
       className={cn(
-        'flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-xs transition-shadow',
-        selectable && 'cursor-pointer',
-        selectable && selected && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
+        'surface flex flex-col gap-3 p-3.5 transition-[box-shadow,transform] duration-200',
+        selectable && 'pressable cursor-pointer',
+        selectable && selected && 'ring-2 ring-primary shadow-primary',
       )}
       role={selectable ? 'checkbox' : undefined}
       aria-checked={selectable ? selected : undefined}
@@ -57,7 +57,7 @@ export function TvCard({
           open()
         }}
         aria-label={selectable ? `Select ${screen.name}` : `Open ${screen.name}`}
-        className="relative block w-full cursor-pointer rounded-xl text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="pressable relative block w-full cursor-pointer rounded-[18px] text-left outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         <TvFrame
           thumbUrl={screen.current_item?.thumb_url ?? screen.preview_thumb_url}
@@ -85,10 +85,10 @@ export function TvCard({
       </button>
 
       <div className="flex items-center gap-2 px-1">
-        <h2 className="min-w-0 flex-1 truncate text-xl font-bold tracking-tight">{screen.name}</h2>
+        <h2 className="min-w-0 flex-1 truncate text-[19px] font-extrabold tracking-[-0.02em]">{screen.name}</h2>
         <StatusPill status={status} size="md" />
       </div>
-      <p className={cn('px-1 text-[15px]', status === 'offline' ? 'text-offline' : 'text-muted-foreground')}>
+      <p className={cn('px-1 text-[15px] leading-snug', status === 'offline' ? 'font-medium text-offline' : 'text-muted-foreground')}>
         {subtitle}
       </p>
 
@@ -98,7 +98,7 @@ export function TvCard({
         </Button>
       ) : status === 'offline' ? (
         <div className="flex flex-col gap-2">
-          <Button size="xl" variant="outline" className="border-2 border-primary text-primary" onClick={onHelpOffline}>
+          <Button size="xl" variant="outline" className="border-2 border-primary/70 text-primary" onClick={onHelpOffline}>
             How to fix this
           </Button>
           <button type="button" onClick={onOpen} className="text-center text-sm font-semibold text-primary hover:underline">

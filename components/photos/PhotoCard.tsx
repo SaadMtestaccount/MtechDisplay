@@ -14,12 +14,12 @@ export function PhotoCard({ item, onAction }: { item: ContentView; onAction(acti
   const meta = item.type === 'video' ? `Video${item.duration_seconds ? ` · ${formatDuration(item.duration_seconds)}` : ''}` : 'Photo'
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-2.5 shadow-xs">
+    <div className="surface flex flex-col gap-2.5 p-2.5">
       <button
         type="button"
         onClick={() => onAction('preview')}
         aria-label={`Preview ${item.name}`}
-        className="relative aspect-video w-full overflow-hidden rounded-xl bg-muted outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+        className="pressable relative aspect-video w-full overflow-hidden rounded-[14px] bg-muted ring-1 ring-black/[0.05] outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
       >
         {item.thumb_url ? (
           <img src={item.thumb_url} alt="" loading="lazy" className="size-full object-cover" />

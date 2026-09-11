@@ -33,9 +33,9 @@ export function MenuCard({
           onOpen()
         }
       }}
-      className="flex cursor-pointer flex-col gap-3 rounded-2xl border border-border bg-card p-3 shadow-xs transition-colors hover:border-primary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="surface pressable flex cursor-pointer flex-col gap-3 p-3.5 transition-[box-shadow] hover:shadow-float focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
-      <div className="relative aspect-video overflow-hidden rounded-xl bg-muted">
+      <div className="relative aspect-video overflow-hidden rounded-[14px] bg-muted ring-1 ring-black/[0.05]">
         {menu.thumb_url ? (
           <img src={menu.thumb_url} alt="" className="size-full object-cover" />
         ) : (
@@ -46,7 +46,7 @@ export function MenuCard({
       </div>
       <div className="flex items-start gap-2 px-1">
         <div className="min-w-0 flex-1">
-          <div className="truncate text-lg font-bold">{menu.name}</div>
+          <div className="truncate text-[17px] font-extrabold tracking-[-0.01em]">{menu.name}</div>
           <div className="truncate text-sm text-muted-foreground">
             {things}
             {screens}

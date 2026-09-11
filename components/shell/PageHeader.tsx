@@ -20,12 +20,12 @@ export function PageHeader({
   return (
     <div className="mb-6 flex flex-col gap-1.5">
       <div className="flex flex-wrap items-center gap-3">
-        <h1 className="text-2xl leading-[1.05] font-semibold tracking-[-0.02em]">{title}</h1>
+        <h1 className="text-[26px] leading-none font-extrabold tracking-[-0.025em]">{title}</h1>
         {primary}
         {menu}
         {children ? <div className="ml-auto flex flex-wrap items-center gap-2">{children}</div> : null}
       </div>
-      {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
+      {description ? <p className="text-[15px] text-muted-foreground">{description}</p> : null}
     </div>
   )
 }

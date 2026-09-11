@@ -26,10 +26,14 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-border bg-card/95 pt-[env(safe-area-inset-top)] backdrop-blur supports-backdrop-filter:bg-card/80">
-        <div className="mx-auto flex h-16 max-w-7xl items-center gap-5 px-4 sm:px-6">
-          <Link href={profile.is_super_admin ? '/admin/merchants' : '/tvs'} className="flex shrink-0 items-center" aria-label="MSIGN home">
-            <img src="/msign.svg" alt="MSIGN" className="h-6 w-auto" />
+      <header className="glass sticky top-0 z-40 border-b border-black/[0.06] pt-[env(safe-area-inset-top)] dark:border-white/[0.06]">
+        <div className="mx-auto flex h-[60px] max-w-7xl items-center gap-5 px-4 sm:px-6">
+          <Link
+            href={profile.is_super_admin ? '/admin/merchants' : '/tvs'}
+            className="pressable flex shrink-0 items-center rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            aria-label="MSIGN home"
+          >
+            <img src="/msign.svg" alt="MSIGN" className="h-7 w-auto drop-shadow-[0_2px_6px_rgba(91,87,232,0.35)]" />
           </Link>
           <NavTabs />
           <div className="ml-auto flex items-center gap-2">
@@ -49,7 +53,7 @@ export function Navbar() {
           </div>
         </div>
         {viewingAs ? (
-          <div className="border-t border-warning/30 bg-warning-soft" data-testid="viewing-as-bar">
+          <div className="border-t border-warning/20 bg-warning-soft/90" data-testid="viewing-as-bar">
             <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-x-3 gap-y-1.5 px-4 py-1.5 text-sm text-warning sm:px-6">
               <span className="inline-flex items-center gap-1.5 font-semibold">
                 <EyeIcon className="size-4" /> Viewing {org?.name ?? 'a location'} as the merchant sees it

@@ -58,3 +58,7 @@ Screenshot *.png
 tizen/.buildResult/
 tools/msign.wgt
 tools/duids.txt
+
+# Cowork desktop app drops delivered files here
+Claude outputs/
+.claude-tmp/

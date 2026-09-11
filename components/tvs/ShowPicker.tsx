@@ -217,7 +217,7 @@ export function ShowPicker({
                 }}
               />
               {activeUploads.map((u) => (
-                <div key={u.id} className="rounded-xl border border-border p-3 text-sm">
+                <div key={u.id} className="rounded-2xl border border-border bg-card p-3 text-sm shadow-card">
                   <div className="flex items-center justify-between gap-2">
                     <span className="truncate font-medium">{u.name}</span>
                     <span className="text-muted-foreground">{u.status === 'error' ? 'Failed' : `${u.progress}%`}</span>
@@ -233,7 +233,7 @@ export function ShowPicker({
           {kind === 'website' ? (
             addingSite ? (
               <form
-                className="flex flex-col gap-3 rounded-xl border-2 border-primary/40 p-3"
+                className="flex flex-col gap-3 rounded-2xl border-2 border-primary/40 bg-primary/[0.03] p-3"
                 onSubmit={(e) => {
                   e.preventDefault()
                   if (siteName.trim() && siteUrl.trim() && !addSite.isPending) addSite.mutate()

@@ -113,8 +113,8 @@ export function TvsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h1 className="text-3xl font-extrabold tracking-tight">Your TVs</h1>
-          <p className="text-base text-muted-foreground">
+          <h1 className="text-[30px] font-extrabold tracking-[-0.03em]">Your TVs</h1>
+          <p className="text-[15px] text-muted-foreground">
             {screensQuery.isPending
               ? 'Loading…'
               : screens.length === 0
@@ -138,7 +138,7 @@ export function TvsPage() {
 
       {selecting ? (
         <div
-          className="sticky top-[calc(4.5rem+env(safe-area-inset-top))] z-30 flex flex-wrap items-center gap-2 rounded-2xl bg-foreground p-3 text-background shadow-lg"
+          className="sticky top-[calc(4.25rem+env(safe-area-inset-top))] z-30 flex flex-wrap items-center gap-2 rounded-[22px] bg-foreground p-3 text-background shadow-float"
           data-testid="selection-toolbar"
         >
           <span className="px-1 text-sm font-semibold">
@@ -213,8 +213,8 @@ export function TvsPage() {
         </div>
       )}
 
-      <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 sm:flex-row sm:items-center">
-        <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+      <div className="surface flex flex-col gap-3 p-4 sm:flex-row sm:items-center">
+        <div className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
           <CircleHelpIcon className="size-6" />
         </div>
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">

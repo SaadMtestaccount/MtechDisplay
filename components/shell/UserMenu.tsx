@@ -45,12 +45,12 @@ export function UserMenu() {
           <button
             type="button"
             aria-label="Your account"
-            className="inline-flex rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="pressable inline-flex rounded-full outline-none focus-visible:ring-2 focus-visible:ring-ring"
           />
         }
       >
-        <Avatar>
-          <AvatarFallback className="bg-primary text-xs font-semibold text-primary-foreground">
+        <Avatar className="size-9 shadow-primary after:border-white/30">
+          <AvatarFallback className="bg-gradient-to-br from-primary to-primary-deep text-[13px] font-bold text-primary-foreground">
             {initials(profile.full_name ?? user.email)}
           </AvatarFallback>
         </Avatar>

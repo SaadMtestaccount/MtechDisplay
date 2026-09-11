@@ -1,0 +1,7 @@
+# mobile/ is its own pnpm project, separate from the Next app at the repo root (docs/CONTRACTS.md §24).
+# This file makes pnpm stop here instead of walking up to the root workspace, and holds the settings
+# pnpm ≥10 no longer reads from the "pnpm" field in package.json.
+allowBuilds:
+  sharp: true
+overrides:
+  sharp: ^0.34.0

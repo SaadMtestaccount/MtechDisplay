@@ -47,6 +47,11 @@
   --color-offline-soft: var(--offline-soft);
   --color-warning: var(--warning);
   --color-warning-soft: var(--warning-soft);
+  /* Premium surfaces: layered shadows (shadow-card / shadow-float / shadow-primary). */
+  --color-primary-deep: var(--primary-deep);
+  --shadow-card: var(--card-shadow);
+  --shadow-float: var(--float-shadow);
+  --shadow-primary: var(--primary-shadow);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -63,14 +68,18 @@
    slate-dark variant powers the theme toggle.
    ============================================================ */
 :root {
-  --background: #f5f6fa;
-  --foreground: #111827;
+  --background: #f3f4f9;
+  --foreground: #0f172a;
   --card: #ffffff;
-  --card-foreground: #111827;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #111827;
+  --popover-foreground: #0f172a;
   --primary: #5b57e8;
+  --primary-deep: #4a46dc;
   --primary-foreground: #ffffff;
+  --card-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 12px 32px -16px rgba(15, 23, 42, 0.14);
+  --float-shadow: 0 2px 6px rgba(15, 23, 42, 0.06), 0 18px 48px -18px rgba(15, 23, 42, 0.28);
+  --primary-shadow: 0 10px 24px -10px rgba(91, 87, 232, 0.55);
   --secondary: #eef0f6;
   --secondary-foreground: #111827;
   --muted: #f1f3f8;
@@ -78,15 +87,15 @@
   --accent: #eeeffc;
   --accent-foreground: #111827;
   --destructive: #e5484d;
-  --border: #e5e7ef;
-  --input: #e5e7ef;
+  --border: #e4e6ef;
+  --input: #dfe2ec;
   --ring: #5b57e8;
   --chart-1: #5b57e8;
   --chart-2: #16a34a;
   --chart-3: #d97706;
   --chart-4: #6b7280;
   --chart-5: #c7cad6;
-  --radius: 0.75rem;
+  --radius: 0.875rem;
   --sidebar: #ffffff;
   --sidebar-foreground: #111827;
   --sidebar-primary: #5b57e8;
@@ -111,7 +120,11 @@
   --popover: #161922;
   --popover-foreground: #e6e8ef;
   --primary: #7b78f2;
+  --primary-deep: #6360e8;
   --primary-foreground: #ffffff;
+  --card-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 12px 32px -16px rgba(0, 0, 0, 0.6);
+  --float-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), 0 18px 48px -18px rgba(0, 0, 0, 0.7);
+  --primary-shadow: 0 10px 24px -10px rgba(123, 120, 242, 0.5);
   --secondary: #1f2330;
   --secondary-foreground: #e6e8ef;
   --muted: #1b1f2a;
@@ -161,14 +174,64 @@
   h5,
   h6 {
     font-weight: 700;
-    letter-spacing: -0.015em;
-    line-height: 1.2;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
   }
+  /* Ambient glow behind the console (fixed, behind content). Old TV browsers drop the rule
+     (no :has), and the player is excluded explicitly, so it never reaches a TV (§20). */
+  body:not(:has(.pl-root))::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(70rem 34rem at 12% -12rem, rgba(91, 87, 232, 0.14), transparent 62%),
+      radial-gradient(48rem 28rem at 108% 6rem, rgba(91, 87, 232, 0.07), transparent 60%);
+  }
+  .dark body:not(:has(.pl-root))::before {
+    background:
+      radial-gradient(70rem 34rem at 12% -12rem, rgba(123, 120, 242, 0.18), transparent 62%),
+      radial-gradient(48rem 28rem at 108% 6rem, rgba(123, 120, 242, 0.08), transparent 60%);
+  }
+  /* Native app: the console fills the screen edge to edge; iOS text auto-zoom and rubber-band
+     over-scroll would make it feel like a web page. */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
+/* Online dot: a slow, calm pulse (never on the player). */
+@keyframes status-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.9; transform: scale(1.9); }
 }
 
 /* The TV player's styles live in app/player.css (plain CSS for old TV browsers, §20). */
 
 @layer components {
+  /* Frosted surface for bars that float over content (top bar, phone tab bar). */
+  .glass {
+    background-color: color-mix(in oklab, var(--card) 82%, transparent);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+  /* The console's card surface: white, soft layered shadow, hairline ring instead of a hard border. */
+  .surface {
+    @apply rounded-[22px] bg-card shadow-card ring-1 ring-black/[0.04];
+  }
+  .dark .surface {
+    @apply ring-white/[0.06];
+  }
+  /* Tap feedback for cards and big buttons — reads as native on a phone. */
+  .pressable {
+    transition: transform 160ms ease, box-shadow 200ms ease, background-color 200ms ease;
+  }
+  .pressable:active {
+    transform: scale(0.985);
+  }
   /* Micro-label: the small uppercase caption used on headers, table heads and data captions. */
   .eyebrow {
     font-family: var(--font-sans);

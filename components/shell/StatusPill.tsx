@@ -33,13 +33,21 @@ export function StatusPill({
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1.5 rounded-full font-medium',
+        'inline-flex shrink-0 items-center gap-1.5 rounded-full font-semibold ring-1 ring-black/[0.04] ring-inset',
         STYLES[status],
         size === 'sm' ? 'h-5 px-2 text-[11px]' : 'h-6 px-2.5 text-xs',
         className,
       )}
     >
-      <span className={cn('size-1.5 rounded-full', DOTS[status])} />
+      <span className="relative flex size-1.5">
+        {status === 'online' ? (
+          <span
+            className="absolute inset-0 rounded-full bg-online motion-safe:animate-[status-pulse_2.4s_ease-in-out_infinite]"
+            aria-hidden
+          />
+        ) : null}
+        <span className={cn('relative size-1.5 rounded-full', DOTS[status])} />
+      </span>
       {LABELS[status]}
     </span>
   )

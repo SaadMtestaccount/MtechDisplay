@@ -120,7 +120,7 @@ export function TvPage({ id }: { id: string }) {
       </div>
 
       {status === 'offline' ? (
-        <div className="flex flex-col gap-2 rounded-2xl border border-offline/30 bg-offline-soft p-4 text-offline sm:flex-row sm:items-center">
+        <div className="flex flex-col gap-2 rounded-[22px] bg-offline-soft p-4 text-offline ring-1 ring-offline/20 ring-inset sm:flex-row sm:items-center">
           <span className="flex-1 text-[15px] font-semibold">This TV is off. What you pick here plays as soon as it comes back.</span>
           <Button variant="outline" size="lg" className="border-offline/40 text-offline" onClick={() => setHelpOpen(true)}>
             How to fix this
@@ -146,7 +146,7 @@ export function TvPage({ id }: { id: string }) {
             </TvFrame>
           </div>
 
-          <div className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-4">
+          <div className="surface flex flex-col gap-3 p-4">
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-lg font-bold">
                 {showing.kind === 'nothing' ? 'Showing nothing yet' : `Now showing: ${showing.name}`}
@@ -198,7 +198,7 @@ export function TvPage({ id }: { id: string }) {
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-4">
+          <div className="surface flex flex-col gap-2.5 p-4">
             <h2 className="text-lg font-bold">Show something else</h2>
             <Button size="xl" className="justify-start" onClick={() => setPicker('menu')}>
               <ListIcon /> Show a menu

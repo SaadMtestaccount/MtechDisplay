@@ -38,11 +38,11 @@ export function HelpPage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="text-3xl font-extrabold tracking-tight">Help</h1>
-        <p className="text-base text-muted-foreground">Short answers to the things people ask most. Anything else, call or email MTech.</p>
+        <h1 className="text-[30px] font-extrabold tracking-[-0.03em]">Help</h1>
+        <p className="text-[15px] text-muted-foreground">Short answers to the things people ask most. Anything else, call or email MTech.</p>
       </div>
 
-      <div className="flex flex-col gap-3 rounded-2xl bg-primary p-5 text-white sm:flex-row sm:items-center">
+      <div className="flex flex-col gap-3 rounded-[22px] bg-gradient-to-br from-primary to-primary-deep p-5 text-white shadow-primary ring-1 ring-white/15 ring-inset sm:flex-row sm:items-center">
         <div className="flex-1">
           <div className="text-xl font-extrabold">Talk to a person at MTech</div>
           <div className="text-[15px] text-white/85">We set up your TVs and can fix most things over the phone.</div>
@@ -63,17 +63,17 @@ export function HelpPage() {
         {TOPICS.map((topic) => {
           const Icon = topic.icon
           return (
-            <div key={topic.title} className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5">
+            <div key={topic.title} className="surface flex flex-col gap-3 p-5">
               <div className="flex items-center gap-3">
-                <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                <span className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/15 to-primary/5 text-primary">
                   <Icon className="size-6" />
                 </span>
-                <h2 className="text-lg font-bold">{topic.title}</h2>
+                <h2 className="text-[17px] font-extrabold tracking-[-0.01em]">{topic.title}</h2>
               </div>
               <ol className="flex flex-col gap-2 pl-1">
                 {topic.steps.map((step, i) => (
                   <li key={step} className="flex gap-3 text-[15px]">
-                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
+                    <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-[13px] font-bold text-primary">
                       {i + 1}
                     </span>
                     <span>{step}</span>

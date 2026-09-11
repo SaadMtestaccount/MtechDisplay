@@ -90,8 +90,8 @@ export function PhotosPage() {
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
-            <h1 className="text-3xl font-extrabold tracking-tight">Photos &amp; videos</h1>
-            <p className="text-base text-muted-foreground">Everything you have uploaded. Put any of them on a TV or into a menu.</p>
+            <h1 className="text-[30px] font-extrabold tracking-[-0.03em]">Photos &amp; videos</h1>
+            <p className="text-[15px] text-muted-foreground">Everything you have uploaded. Put any of them on a TV or into a menu.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="lg" render={<Link href="/websites" />}>
@@ -108,9 +108,9 @@ export function PhotosPage() {
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-primary bg-primary/5 px-4 py-7 text-center outline-none transition-colors hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:justify-center sm:gap-5 sm:text-left"
+          className="pressable flex flex-col items-center gap-3 rounded-[22px] border-2 border-dashed border-primary/60 bg-primary/[0.06] px-4 py-7 text-center outline-none transition-colors hover:bg-primary/10 focus-visible:ring-3 focus-visible:ring-ring/50 sm:flex-row sm:justify-center sm:gap-5 sm:text-left"
         >
-          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-white">
+          <span className="flex size-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-deep text-white shadow-primary">
             <UploadIcon className="size-7" />
           </span>
           <span className="flex flex-col gap-1">
@@ -140,8 +140,8 @@ export function PhotosPage() {
               type="button"
               onClick={() => setFilter(chip.key)}
               className={cn(
-                'h-10 rounded-full border px-4 text-[15px] font-semibold transition-colors',
-                filter === chip.key ? 'border-foreground bg-foreground text-background' : 'border-border bg-card text-foreground hover:bg-muted',
+                'pressable h-10 rounded-full border px-4 text-[15px] font-semibold transition-colors',
+                filter === chip.key ? 'border-foreground bg-foreground text-background shadow-float' : 'border-border bg-card text-foreground shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:bg-muted',
               )}
             >
               {chip.label}

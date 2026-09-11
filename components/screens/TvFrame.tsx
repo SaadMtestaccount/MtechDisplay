@@ -35,8 +35,8 @@ export function TvFrame({
       : 'absolute inset-0'
 
   return (
-    <div className="rounded-xl border border-border bg-zinc-900 p-1.5 shadow-sm">
-      <div className="relative aspect-video overflow-hidden rounded-lg bg-zinc-950">
+    <div className="rounded-[18px] bg-gradient-to-b from-zinc-700 via-zinc-900 to-zinc-950 p-[7px] shadow-[0_14px_34px_-14px_rgba(15,23,42,0.55)] ring-1 ring-black/60">
+      <div className="relative aspect-video overflow-hidden rounded-[11px] bg-black after:pointer-events-none after:absolute after:inset-0 after:z-[5] after:rounded-[11px] after:bg-gradient-to-b after:from-white/[0.07] after:to-transparent after:to-40%">
         <div className={stageClass}>
           {thumbUrl ? (
             <img src={thumbUrl} alt="" className="absolute inset-0 size-full object-cover" style={mediaStyle} />

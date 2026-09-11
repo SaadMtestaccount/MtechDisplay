@@ -63,8 +63,8 @@ export function MenusPage() {
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h1 className="text-3xl font-extrabold tracking-tight">Menus</h1>
-          <p className="max-w-2xl text-base text-muted-foreground">
+          <h1 className="text-[30px] font-extrabold tracking-[-0.03em]">Menus</h1>
+          <p className="max-w-2xl text-[15px] text-muted-foreground">
             A menu is a set of photos or videos that play one after another. Tap one to change it or put it on a TV.
           </p>
         </div>

@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, type ReactNode } from 'react'
+import { NativeStatusBar } from '@/components/shell/NativeStatusBar'
 import { RealtimeBridge } from '@/components/shell/RealtimeBridge'
 import { Toaster } from '@/components/ui/sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -32,6 +33,7 @@ export function AppProvider({ value, children }: { value: AppBootstrap; children
     <QueryClientProvider client={queryClient}>
       <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
         <TooltipProvider>
+          <NativeStatusBar />
           <AppContext.Provider value={contextValue}>
             <RealtimeBridge>{children}</RealtimeBridge>
           </AppContext.Provider>

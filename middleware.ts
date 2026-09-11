@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
 const PUBLIC_PREFIXES = ['/player', '/api/device/', '/api/cron/', '/auth/confirm', '/_next/']
-const PUBLIC_PATHS = new Set(['/login', '/auth/confirm', '/player', '/favicon.ico'])
+const PUBLIC_PATHS = new Set(['/login', '/auth/confirm', '/player', '/privacy', '/favicon.ico', '/manifest.webmanifest'])
 
 function isPublicPath(pathname: string): boolean {
   if (PUBLIC_PATHS.has(pathname)) return true
